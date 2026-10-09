@@ -1,0 +1,25 @@
+# Core Agent & LangChain Ecosystem
+langgraph>=0.2.0
+langchain>=0.3.0
+langchain-core>=0.3.0
+langchain-community>=0.3.0
+
+# Web Search & Tool-use
+duckduckgo-search>=6.0.0
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+
+# Document & Visualization Generation
+matplotlib>=3.8.0
+python-docx>=1.1.0
+pillow>=10.0.0
+
+# Database & Data Validation
+sqlalchemy>=2.0.0
+pydantic>=2.7.0
+
+# User Interface & API
+streamlit>=1.35.0
+fastapi>=0.110.0
+uvicorn>=0.29.0
+python-dotenv>=1.0.0

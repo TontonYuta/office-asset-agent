@@ -1,0 +1,254 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{vietnam}
+\usepackage{amsmath,amssymb}
+\usepackage{geometry}
+\geometry{top=1.35cm,bottom=1.35cm,left=1.65cm,right=1.65cm}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{float}
+\usepackage{titlesec}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, calc}
+\usepackage{hyperref}
+
+% Cấu hình hyperlink bấm được
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue!75!black,
+    citecolor=blue!75!black,
+    urlcolor=blue!85!black
+}
+
+% Căn chỉnh khoảng cách văn bản gọn gàng
+\setlength{\parskip}{1.8pt plus 0.8pt minus 0.8pt}
+\linespread{1.04}
+\setlist[itemize]{leftmargin=1.2em, itemsep=0.8pt, topsep=0.8pt, parsep=0pt}
+\setlist[enumerate]{leftmargin=1.2em, itemsep=0.8pt, topsep=0.8pt, parsep=0pt}
+
+% Định dạng tiêu đề
+\titleformat{\section}{\large\bfseries\color{blue!80!black}}{\thesection.}{0.5em}{}
+\titleformat{\subsection}{\normalsize\bfseries\color{black}}{\thesubsection.}{0.5em}{}
+\titlespacing*{\section}{0pt}{7pt plus 1pt minus 1pt}{3pt plus 1pt minus 1pt}
+\titlespacing*{\subsection}{0pt}{5pt plus 1pt minus 1pt}{2pt plus 1pt minus 1pt}
+
+\title{\vspace{-2.0cm}\textbf{\Large BÁO CÁO BÀI TOÁN NGHIÊN CỨU VÀ KHẢO SÁT KỸ THUẬT\\[0.3em]
+\large Đề tài: Xây dựng Hệ thống Agent Hỗ trợ Tra cứu Thống kê và Tự động hóa Quản lý Vật tư - Thiết bị tại Phòng ban Doanh nghiệp}}
+\author{\textbf{Sinh viên thực hiện:} Trần Huy Hoàng \quad $\vert$ \quad \textbf{MSSV:} 20237337}
+\date{\small Tháng 10, Năm 2026}
+
+\begin{document}
+
+\maketitle
+\vspace{-0.85cm}
+
+\begin{abstract}
+Báo cáo trình bày bài toán xây dựng trợ lý AI (Agent) quản lý vật tư và thiết bị tại một phòng ban doanh nghiệp (như Phòng Hành chính -- Quản trị), sử dụng dữ liệu thực tế do đơn vị cung cấp. Hệ thống giải quyết hai vấn đề tốn nhiều thời gian nhất: nhập kho thủ công từ giấy tờ giao hàng và hỗ trợ kỹ thuật thiết bị (tự động tìm kiếm tài liệu trên mạng theo mã sản phẩm/model để tổng hợp HDSD, chẩn đoán sửa lỗi kẹt giấy, mất tín hiệu), kết hợp tự động báo cáo. Dựa trên các nghiên cứu mới nhất đầu năm 2026 trên arXiv về việc hạn chế lỗi tính toán sai của AI và đảm bảo an toàn vận hành, đồ án đề xuất giải pháp kết hợp mô hình ngôn ngữ lớn, mô hình thị giác AI đọc ảnh chứng từ (\textit{Qwen2.5-VL / Docling}), module tìm kiếm web và tính toán bằng code Python/SQL. Sản phẩm hỗ trợ tra cứu thông tin (tồn kho, HDSD \& sửa lỗi thiết bị theo model), tự động hóa (nhập kho bằng ảnh, lập phiếu mượn/báo hỏng), có phân quyền sử dụng và sẵn sàng để cán bộ phòng ban dùng thử trực tiếp.
+\end{abstract}
+
+\section{Đặt Vấn Đề và Bài Toán Thực Tế}
+
+\subsection{Bối cảnh tại phòng ban doanh nghiệp}
+Đề tài tập trung giải quyết công việc thực tế tại \textbf{Phòng Hành chính -- Quản trị} (hoặc bộ phận cơ sở vật chất) của doanh nghiệp, nơi quản lý hai nhóm đồ dùng chính:
+\begin{itemize}
+    \item \textbf{Vật tư tiêu hao:} Giấy in, mực in, bút, sổ, văn phòng phẩm, linh kiện máy tính thay thế.
+    \item \textbf{Thiết bị dùng chung:} Máy chiếu phòng họp, laptop dự phòng cho nhân viên mượn, micro, màn hình phụ.
+\end{itemize}
+
+Hiện nay, cán bộ chủ yếu theo dõi bằng sổ ghi chép hoặc file Excel tự lập, dẫn đến nhiều bất cập khi số lượng mặt hàng ngày càng tăng.
+
+\subsection{Những khó khăn thực tế trong công việc}
+\begin{enumerate}
+    \item \textbf{Nhập kho thủ công từ giấy tờ:} Hàng giao đến luôn kèm hóa đơn giấy, cán bộ phải gõ tay từng dòng vào Excel, tốn nhiều thời gian và rất dễ nhầm số lượng, tên hàng.
+    \item \textbf{Mất thời gian tra cứu và hỗ trợ kỹ thuật:} Cán bộ không có thời gian gõ cẩm nang cho từng dòng máy. Nhân viên liên tục hỏi tồn kho hoặc nhờ sửa máy in (kẹt giấy, offline), máy chiếu (không nhận hình, mất tiếng), gây gián đoạn công việc cán bộ.
+    \item \textbf{Báo cáo thủ công \& Tên gọi không đồng nhất:} Cuối tháng phải cộng trừ Excel nhiều ngày; người hỏi dùng từ đời thường (\textit{''mực máy in phòng sếp''}) không khớp mã kho (\texttt{INK-CN-2900}).
+\end{enumerate}
+
+\subsection{Mục tiêu sản phẩm của đồ án}
+Xây dựng một \textbf{Agent thông minh qua giao diện chat} với cơ chế \textbf{phân quyền 2 nhóm tài khoản}:
+\begin{itemize}
+    \item \textbf{Phân quyền vai trò (RBAC):} Nhân viên (tra cứu kho, hỏi cách dùng và sửa lỗi thiết bị, gửi đơn mượn/báo hỏng); Cán bộ quản lý (xem chi phí tổng, chụp ảnh hóa đơn nhập kho, duyệt đơn cấp phát và sửa chữa).
+    \item \textbf{Hỗ trợ thông tin \& Tự làm giàu tri thức:} Quản lý thiết bị theo mã sản phẩm/Model; Agent tự tìm kiếm tài liệu trên mạng để tổng hợp HDSD và bảng mã lỗi chính hãng; chẩn đoán sửa lỗi theo dòng máy cụ thể; tra cứu tồn kho chính xác và tự vẽ biểu đồ thống kê.
+    \item \textbf{Tự động hóa công việc:} Nhập kho bằng ảnh chụp hóa đơn ($\rightarrow$ Agent đọc bảng, tạo phiếu nhập kho); tự điền file Word/PDF mẫu công ty (phiếu mượn, đề xuất mua sắm, báo hỏng); có bước cán bộ duyệt (Human-in-the-Loop) mới cập nhật CSDL.
+\end{itemize}
+
+\section{Các Nghiên Cứu Mới Nhất (2026) và Hạn Chế Cần Khắc Phục}
+
+Khảo sát các bài báo nghiên cứu mới nhất công bố vào tháng 2/2026 trên arXiv chỉ ra 3 điểm yếu lớn của các hệ thống AI quản lý kho hiện nay:
+
+\subsection{Hạn chế 1: AI hay tính nhẩm sai số học (Hallucination Tax)}
+Nghiên cứu \textit{''AI Agents for Inventory Control: Human-LLM-OR Complementarity''} (\href{https://arxiv.org/abs/2602.12631}{arXiv:2602.12631}, tháng 2/2026) chỉ ra rằng:
+\begin{itemize}
+    \item Khi để AI tự tính toán cộng trừ tồn kho, mô hình ngôn ngữ lớn (LLM) rất hay bị ảo giác và tính sai số liệu.
+    \item \textbf{Cách khắc phục:} Không để AI tự tính nhẩm. AI chỉ làm nhiệm vụ hiểu câu hỏi của người dùng, còn việc tính toán cộng trừ số lượng và nhân chia thành tiền được giao cho code Python và SQL thực hiện, đảm bảo kết quả chính xác 100\%.
+\end{itemize}
+
+\subsection{Hạn chế 2: Thiếu tính ổn định khi ra quyết định}
+Bài báo \textit{''AI Agent Systems for Supply Chains: Structured Decision Prompts and Memory Retrieval''} (\href{https://arxiv.org/abs/2602.05524}{arXiv:2602.05524}, tháng 2/2026) chứng minh rằng Agent dễ đưa ra quyết định thất thường nếu không nhớ lịch sử cấp phát trước đó.
+\begin{itemize}
+    \item \textbf{Cách khắc phục:} Cung cấp bộ nhớ tra cứu lịch sử và thiết lập quy trình duyệt cấp phát theo đúng định mức quy định của công ty.
+\end{itemize}
+
+\subsection{Hạn chế 3: Nguy cơ sai sót nếu tự động hóa hoàn toàn}
+Các nghiên cứu về rủi ro tự hành của Agent (2026) khẳng định rằng việc để AI tự động sửa đổi cơ sở dữ liệu kho mà không có con người kiểm tra rất dễ dẫn đến sai sót nghiêm trọng.
+\begin{itemize}
+    \item \textbf{Cách khắc phục:} Bắt buộc có bước duyệt của con người (\textbf{Human-in-the-Loop}). Agent chỉ chuẩn bị sẵn số liệu và tạo sẵn file; cán bộ phòng ban phải bấm nút \textbf{[Duyệt]} thì dữ liệu mới được lưu.
+\end{itemize}
+
+\section{Kiến Trúc Hệ Thống Đề Xuất}
+
+Hệ thống được thiết kế theo các khối chức năng rõ ràng, kết hợp giữa đọc hiểu văn bản, xử lý ảnh và tính toán bằng code:
+
+\begin{center}
+\vspace{-0.2cm}
+\resizebox{0.90\textwidth}{!}{%
+\begin{tikzpicture}[
+    font=\sffamily\small,
+    node distance=0.35cm and 0.22cm,
+    umlbox/.style={rectangle, draw=blue!80!black, fill=blue!6, rounded corners=3pt, minimum width=3.0cm, minimum height=0.78cm, align=center, thick},
+    widebox/.style={rectangle, draw=teal!80!black, fill=teal!8, rounded corners=3pt, minimum width=9.8cm, minimum height=0.62cm, align=center, thick},
+    secbox/.style={rectangle, draw=red!75!black, fill=red!6, rounded corners=3pt, minimum width=9.8cm, minimum height=0.60cm, align=center, thick},
+    dbbox/.style={cylinder, draw=gray!80!black, fill=gray!12, shape border rotate=90, aspect=0.25, minimum width=2.7cm, minimum height=0.72cm, align=center, thick, font=\footnotesize},
+    arr/.style={thick, -{Latex[length=2.5mm]}, draw=blue!80!black},
+    darr/.style={dashed, thick, -{Latex[length=2.5mm]}, draw=gray!80!black},
+    looparr/.style={dashed, thick, -{Latex[length=2.5mm]}, draw=purple!80!black}
+]
+
+% 1. Người dùng
+\node (user_ui) [draw=blue!80!black, fill=yellow!20, rounded corners=3pt, font=\bfseries, align=center, minimum width=9.8cm, minimum height=0.52cm] {Cán bộ Quản lý (Admin) $\bullet$ Nhân viên Công ty (User)};
+
+% 2. Cổng tiếp nhận
+\node (gateway) [secbox, below=0.28cm of user_ui] {\textbf{Cổng Tiếp Nhận: Phân Quyền Vai Trò + Tin Nhắn Chat + Ảnh Phiếu Giao Hàng}};
+
+% 3. Bộ điều phối trung tâm LangGraph
+\node (orchestrator) [widebox, below=0.28cm of gateway] {\textbf{Bộ Điều Phối Trung Tâm (LangGraph Workflow Controller)}};
+
+% 4. Ba khối chức năng
+\node (mod_vis) [umlbox, below=0.38cm of orchestrator] {\textbf{Khối Đọc Ảnh AI}\\\footnotesize(Qwen2.5-VL / Docling)\\\scriptsize Đọc ảnh phiếu giao hàng};
+\node (mod_calc) [umlbox, left=0.30cm of mod_vis] {\textbf{Khối Tri Thức \& Web}\\\footnotesize(RAG / DuckDuckGo / SQL)\\\scriptsize Tìm HDSD mạng \& Tính kho};
+\node (mod_doc) [umlbox, right=0.30cm of mod_vis] {\textbf{Khối Tạo Văn Bản}\\\footnotesize(python-docx / Matplotlib)\\\scriptsize Xuất file Word/PDF \& vẽ chart};
+
+% 5. Cơ sở dữ liệu của phòng ban
+\node (db_sql) [dbbox, below=0.42cm of mod_vis] {\textbf{CSDL Kho Vật tư}\\(PostgreSQL / SQLite)};
+\node (db_vec) [dbbox, left=0.65cm of db_sql] {\textbf{Cẩm Nang Kỹ Thuật}\\(Lưu từ web theo Model)};
+\node (db_files) [dbbox, right=0.65cm of db_sql] {\textbf{Mẫu Phiếu Công ty}\\(File Word mẫu sẵn)};
+
+% Đường nối
+\draw [arr] (user_ui.south) -- (gateway.north);
+\draw [arr] (gateway.south) -- (orchestrator.north);
+
+\draw [arr] (orchestrator.south -| mod_calc.north) -- (mod_calc.north);
+\draw [arr] (orchestrator.south) -- (mod_vis.north);
+\draw [arr] (orchestrator.south -| mod_doc.north) -- (mod_doc.north);
+
+\draw [darr] (mod_calc.south) -- (db_vec.north);
+\draw [darr] (mod_vis.south) -- (db_sql.north);
+\draw [darr] (mod_doc.south) -- (db_files.north);
+
+% Luồng duyệt
+\draw [looparr] (mod_doc.east) -- ++(0.35,0) coordinate (t1) -- (t1 |- orchestrator.east) node[midway, right=2pt, font=\scriptsize, align=left, text=purple!80!black] {Bản nháp phiếu xuất/nhập /\\Cán bộ duyệt mới lưu CSDL} -- (orchestrator.east);
+
+\end{tikzpicture}%
+}
+\vspace{-0.2cm}
+\end{center}
+
+\subsection{Các chức năng cụ thể của hệ thống}
+\begin{enumerate}
+    \item \textbf{Phân quyền vai trò an toàn:} Nhận diện quyền hạn (Nhân viên: tra cứu, hỏi sửa lỗi, xin cấp; Cán bộ: duyệt đơn, nhập kho, xem chi phí).
+    \item \textbf{Tự tìm kiếm tri thức theo mã thiết bị:} Nhập mã sản phẩm/Model (hoặc chụp tem máy) $\rightarrow$ Agent tự tìm trên mạng tài liệu HDSD và bảng mã lỗi chính hãng, lưu vào CSDL nội bộ.
+    \item \textbf{Hướng dẫn sử dụng \& sửa lỗi thiết bị:} Tra cứu tài liệu theo đúng dòng máy để chỉ dẫn gỡ kẹt giấy, xử lý máy chiếu mất tín hiệu; tự tạo phiếu báo hỏng nếu không tự sửa được.
+    \item \textbf{Nhập kho bằng ảnh chứng từ:} Chụp ảnh phiếu giao hàng $\rightarrow$ Mô hình \texttt{Qwen2.5-VL} và \texttt{Docling} bóc tách bảng và tạo phiếu nhập kho tự động.
+    \item \textbf{Hiểu tên gọi đời thường:} Tự động nhận diện câu hỏi thông dụng (như \textit{''bút dạ bảng xanh''}) tương ứng mã kho nào (\texttt{VT-BUT-01}).
+    \item \textbf{Tính toán chính xác bằng code:} Code Python/SQL tính kho và tiền, loại bỏ hoàn toàn lỗi tính nhẩm của AI.
+    \item \textbf{Tự động vẽ biểu đồ \& tạo file:} Dùng \texttt{Matplotlib} vẽ biểu đồ thống kê; dùng \texttt{python-docx} xuất phiếu Word/PDF chuẩn mẫu công ty.
+    \item \textbf{Có bước xác nhận của cán bộ:} Mọi thay đổi kho đều yêu cầu cán bộ bấm nút đồng ý (Human-in-the-Loop).
+\end{enumerate}
+
+\section{Danh Mục Các Mã Nguồn Mở Tích Hợp (Kèm Đường Dẫn)}
+
+Hệ thống sử dụng các thư viện mã nguồn mở phổ biến và ổn định, kèm đường dẫn truy cập trực tiếp:
+
+\begin{table}[H]
+\centering
+\small
+\renewcommand{\arraystretch}{1.15}
+\begin{tabularx}{\textwidth}{l c c >{\raggedright\arraybackslash}X}
+\toprule
+\textbf{Repository Gốc} & \textbf{Đơn vị phát triển} & \textbf{Số Sao} & \textbf{Nhiệm vụ trong Hệ thống} \\
+\midrule
+\href{https://github.com/docling-project/docling}{\textbf{docling-project/docling}} & IBM Research & $\sim$68.5k & Đọc và tách bảng biểu từ ảnh scan/chụp phiếu giao hàng sang dữ liệu bảng có cấu trúc. \\
+\href{https://github.com/langchain-ai/langgraph}{\textbf{langchain-ai/langgraph}} & LangChain Inc. & $\sim$42.3k & Quản lý các bước xử lý của Agent và tạo luồng chờ con người bấm duyệt (Human-in-the-Loop). \\
+\href{https://github.com/QwenLM/Qwen2.5-VL}{\textbf{QwenLM/Qwen2.5-VL}} & Alibaba Cloud & $\sim$20.5k & Mô hình thị giác AI; đọc hiểu chữ in và chữ viết tay trên ảnh chụp chứng từ thực tế. \\
+\href{https://github.com/vanna-ai/vanna}{\textbf{vanna-ai/vanna}} & Vanna AI & $\sim$23.8k & Hỗ trợ dịch câu hỏi tiếng Việt của người dùng thành câu lệnh truy vấn CSDL kho an toàn. \\
+\href{https://github.com/deedy5/duckduckgo_search}{\textbf{duckduckgo\_search}} & Community & $\sim$6.5k & Cho phép Agent tự động tìm kiếm trên mạng tài liệu HDSD và bảng mã lỗi theo Model máy. \\
+\href{https://github.com/matplotlib/matplotlib}{\textbf{matplotlib/matplotlib}} & Matplotlib Team & $\sim$21.5k & Thư viện vẽ biểu đồ; Agent tự tạo biểu đồ thống kê biến động kho và gửi vào khung chat. \\
+\href{https://github.com/python-openxml/python-docx}{\textbf{python-openxml/python-docx}} & Python-docx Team & $\sim$4.8k & Tự động điền dữ liệu vào file Word mẫu phiếu mượn thiết bị và đề xuất mua sắm. \\
+\bottomrule
+\end{tabularx}
+\caption{Danh mục các kho mã nguồn mở chuẩn công nghiệp được tích hợp vào đồ án.}
+\end{table}
+
+\section{Kế Hoạch Dữ Liệu Thực Tế và Thử Nghiệm Tại Phòng Ban}
+
+Đề tài sử dụng dữ liệu thực tế do chính phòng ban doanh nghiệp cung cấp để thử nghiệm:
+
+\subsection{Các dữ liệu tiếp nhận từ phòng ban}
+\begin{itemize}
+    \item \textbf{Danh mục vật tư \& thiết bị (Excel):} Khoảng 200--500 mặt hàng, ghi rõ \textbf{Mã sản phẩm / Model} (như \texttt{Canon LBP 2900}, \texttt{Epson EB-X06}) và số lượng tồn kho đầu kỳ.
+    \item \textbf{Tập ảnh chụp chứng từ \& tem máy:} 20--30 ảnh chụp hóa đơn giao hàng thật và ảnh chụp tem thông số kỹ thuật trên thân máy.
+    \item \textbf{File mẫu phiếu nội bộ công ty:} Mẫu Word \textit{Phiếu đề xuất mua sắm}, \textit{Phiếu mượn thiết bị} và \textit{Phiếu báo hỏng thiết bị}.
+    \item \textbf{CSDL cẩm nang đã làm giàu:} Kho tài liệu HDSD và bảng mã lỗi chính hãng do Agent tự tìm kiếm trên mạng theo Model và lưu trữ nội bộ.
+\end{itemize}
+
+\subsection{Các tình huống thử nghiệm với cán bộ phòng ban}
+Cán bộ tại phòng ban sẽ trực tiếp dùng thử hệ thống qua giao diện chat trên Web theo 4 tình huống:
+\begin{enumerate}
+    \item \textbf{Tình huống 1 -- Thử nghiệm phân quyền:} Dùng tài khoản Nhân viên gửi yêu cầu xin cấp/mượn đồ (thử nhập kho $\rightarrow$ Agent từ chối hợp lệ); dùng tài khoản Cán bộ để thực hiện duyệt.
+    \item \textbf{Tình huống 2 -- Nhập kho bằng ảnh phiếu thật:} Cán bộ chụp ảnh 1 phiếu giao hàng mới $\rightarrow$ Xem Agent đọc đúng tên hàng, số lượng và tạo phiếu nhập kho tự động.
+    \item \textbf{Tình huống 3 -- Tra cứu số lượng tồn kho:} Cán bộ gõ câu hỏi bằng tiếng Việt $\rightarrow$ Đối chiếu câu trả lời của Agent với file Excel xem có chuẩn xác không.
+    \item \textbf{Tình huống 4 -- Tự tìm tri thức mạng \& Sửa lỗi thiết bị:} Nhập mã Model mới $\rightarrow$ Agent tự tìm tài liệu trên mạng; nhân viên hỏi lỗi $\rightarrow$ Xem Agent hướng dẫn đúng dòng máy và tự lập phiếu báo hỏng gửi cán bộ duyệt.
+\end{enumerate}
+
+\subsection{Kết quả nghiệm thu dự kiến}
+\begin{itemize}
+    \item Đọc đúng các thông tin trên ảnh phiếu giao hàng đạt trên 92\%.
+    \item Trả lời đúng số lượng tồn kho đạt trên 98\% (không bị tính sai số học).
+    \item Giảm thời gian làm báo cáo và tạo phiếu từ 15--20 phút (thủ công) xuống dưới 10 giây.
+    \item Có \textbf{Biên bản xác nhận kết quả thử nghiệm thực tế} có chữ ký và nhận xét của cán bộ phòng ban.
+\end{itemize}
+
+\section{Trợ Lý Hướng Dẫn Sử Dụng và Khắc Phục Sự Cố Thiết Bị}
+
+\subsection{Cơ chế tự động làm giàu tri thức theo mã Model (Auto-Enrichment)}
+Mỗi thiết bị trong kho đều được định danh bằng \textbf{Mã sản phẩm / Model} (như \texttt{Canon LBP 2900}, \texttt{Epson EB-X06}, \texttt{HP LaserJet M404dn}). Thay vì cán bộ phải gõ cẩm nang thủ công:
+\begin{itemize}
+    \item \textbf{Tìm kiếm tự động trên mạng:} Khi tiếp nhận mã sản phẩm (qua văn bản hoặc ảnh chụp tem máy), Agent kích hoạt công cụ tìm kiếm trên internet (\texttt{duckduckgo\_search}) để tra cứu tài liệu HDSD và bảng mã lỗi chính hãng.
+    \item \textbf{Tổng hợp \& Lưu trữ CSDL nội bộ:} Agent tự động trích xuất các lỗi hay gặp, cách khắc phục và lưu cố định vào CSDL tri thức nội bộ để phản hồi tức thì mà không cần tìm lại.
+\end{itemize}
+
+\subsection{Chẩn đoán và khắc phục sự cố trực tuyến (Device Support Assistant)}
+Khi nhân viên gặp sự cố, Agent đối chiếu đúng mã máy để hướng dẫn xử lý cụ thể:
+\begin{enumerate}
+    \item \textbf{Máy chiếu phòng họp (Projector):} Báo \textit{''No Signal''} $\rightarrow$ Agent hướng dẫn: (1) Nhấn \texttt{Windows + P} trên laptop chọn \textbf{Duplicate}; (2) Bấm phím \textbf{Source/Input} trên điều khiển chọn đúng cổng \textbf{HDMI 1}; (3) Cắm chặt lại jack cáp nối.
+    \item \textbf{Máy in văn phòng (Canon/HP Printer):} Báo kẹt giấy (\textit{Paper Jam}) hoặc \textit{Offline} $\rightarrow$ Agent hướng dẫn tắt nguồn, tháo hộp mực và kéo nhẹ giấy kẹt theo chiều thoát giấy; tra đúng mã lỗi đèn nháy của dòng máy.
+    \item \textbf{Âm thanh phòng họp \& Micro:} Micro mất tiếng hoặc bị hú rít $\rightarrow$ Kiểm tra đèn pin thân mic (đèn đỏ $\rightarrow$ thay pin AA); hạ âm lượng treble, đứng cách xa loa tối thiểu 2 mét.
+    \item \textbf{Tự động lập Phiếu báo hỏng (Maintenance Ticket):} Nếu người dùng làm theo hướng dẫn mà thiết bị vẫn hỏng $\rightarrow$ Agent tự điền thông tin vào \textbf{Phiếu yêu cầu sửa chữa thiết bị} gửi cán bộ quản lý phê duyệt gọi bảo hành.
+\end{enumerate}
+
+\section{Kết Luận}
+Đề tài \textbf{Xây dựng Hệ thống Agent Hỗ trợ Tra cứu Thống kê và Tự động hóa Quản lý Vật tư - Thiết bị tại Phòng ban Doanh nghiệp} giải quyết đúng nhu cầu thực tế hàng ngày, không mang tính lý thuyết xa rời. Việc tích hợp đồng thời quản lý tồn kho và trợ lý kỹ thuật sửa lỗi thiết bị văn phòng, kết hợp thử nghiệm trực tiếp với cán bộ phòng ban giúp đồ án vừa có tính ứng dụng cao, vừa hoàn toàn khả thi để bảo vệ tốt nghiệp.
+
+\begin{thebibliography}{99}
+\small
+\setlength{\itemsep}{0.2pt}
+\setlength{\parskip}{0pt}
+\bibitem{inventorybench2026} ``AI Agents for Inventory Control: Human-LLM-OR Complementarity,'' \textit{arXiv preprint}, arXiv:2602.12631, 2026. \url{https://arxiv.org/abs/2602.12631}
+\bibitem{supplychain2026} ``AI Agent Systems for Supply Chains: Structured Decision Prompts and Memory Retrieval,'' \textit{arXiv preprint}, arXiv:2602.05524, 2026. \url{https://arxiv.org/abs/2602.05524}
+\bibitem{qwen25vl2026} Alibaba Cloud Qwen Team, ``Qwen2.5-VL Technical Report: Most Capable Open-Source Vision-Language Model,'' \textit{arXiv:2502.13923}, 2026. \url{https://arxiv.org/abs/2502.13923}
+\bibitem{docling2026} IBM Research, ``Docling: Document Conversion and Layout Parsing for Generative AI Applications,'' 2026. \url{https://github.com/docling-project/docling}
+\bibitem{langgraph2026} LangChain Team, ``LangGraph: Multi-Agent Workflows and Stateful Human-in-the-Loop Orchestration,'' 2026. \url{https://github.com/langchain-ai/langgraph}
+\end{thebibliography}
+
+\end{document}
