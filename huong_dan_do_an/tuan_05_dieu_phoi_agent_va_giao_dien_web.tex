@@ -1,0 +1,200 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{vietnam}
+\usepackage{amsmath,amssymb}
+\usepackage{geometry}
+\geometry{top=2.0cm,bottom=2.0cm,left=2.2cm,right=2.2cm}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{float}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+\usepackage{listings}
+
+% Cấu hình hiển thị code Python đẹp mắt
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.97,0.97,0.97}
+
+\lstdefinestyle{pythonstyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen}\itshape,
+    keywordstyle=\color{blue}\bfseries,
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=6pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=4,
+    frame=single,
+    framerule=0.4pt,
+    rulecolor=\color{gray!40}
+}
+\lstset{style=pythonstyle}
+
+% Cấu hình liên kết
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue!75!black,
+    citecolor=blue!75!black,
+    urlcolor=blue!85!black
+}
+
+% Cấu hình Header và Footer
+\pagestyle{fancy}
+\setlength{\headheight}{14.5pt}
+\fancyhf{}
+\rhead{\small \textit{Đồ án 2: Office Asset Agent}}
+\lhead{\small \textit{Tài liệu Hướng dẫn Hàng tuần — GVHD}}
+\cfoot{\thepage}
+
+% Khoảng cách văn bản chuẩn học thuật
+\setlength{\parskip}{5pt plus 1pt minus 1pt}
+\setlength{\parindent}{0pt}
+\linespread{1.15}
+\setlist[itemize]{leftmargin=1.5em, itemsep=3pt, topsep=2pt}
+\setlist[enumerate]{leftmargin=1.5em, itemsep=3pt, topsep=2pt}
+
+% Định dạng tiêu đề
+\titleformat{\section}{\large\bfseries\color{blue!80!black}}{\thesection.}{0.5em}{}
+\titleformat{\subsection}{\normalsize\bfseries\color{black}}{\thesubsection.}{0.5em}{}
+\titlespacing*{\section}{0pt}{10pt plus 2pt minus 2pt}{4pt plus 1pt minus 1pt}
+\titlespacing*{\subsection}{0pt}{8pt plus 2pt minus 2pt}{3pt plus 1pt minus 1pt}
+
+\begin{document}
+
+\begin{center}
+    {\large \textbf{TRƯỜNG CÔNG NGHỆ THÔNG TIN VÀ TRUYỀN THÔNG}}\\[0.2em]
+    {\normalsize \textbf{BỘ MÔN KHOA HỌC MÁY TÍNH \& HỆ THỐNG THÔNG TIN}}\\[1.0em]
+    
+    {\Large \bfseries \color{blue!85!black} SỔ TAY HƯỚNG DẪN THỰC HIỆN ĐỒ ÁN 2}\\[0.3em]
+    {\large \textbf{Đề tài: Hệ Thống AI Agent Hỗ Trợ Tra Cứu và Quản Lý Vật Tư - Thiết Bị Phòng Ban}}\\[0.8em]
+    
+    \rule{0.8\textwidth}{0.6pt}\\[0.6em]
+    
+    {\bfseries CHUYÊN ĐỀ TUẦN 05}\\[0.3em]
+    {\large \bfseries ĐÁP ÁN MẪU TUẦN 4 \& GHÉP NỐI ĐA TÁC TỬ, PHÂN QUYỀN RBAC VÀ GIAO DIỆN WEB STREAMLIT}\\[0.8em]
+    
+    \small
+    \textbf{Sinh viên thực hiện:} Trần Huy Hoàng \quad $\vert$ \quad \textbf{MSSV:} 20237337\\
+    \textbf{Đơn vị áp dụng:} Phòng Hành chính -- Quản trị (Ban Quản lý Cơ sở vật chất)\\
+    \textbf{Thời gian thực hiện:} Tuần 5 (Tích hợp Hệ Thống \& Phát triển Giao diện Người Dùng)
+\end{center}
+
+\vspace{0.2cm}
+\hrule
+\vspace{0.3cm}
+
+\section{Đáp Án Mẫu \& Đánh Giá Chi Tiết Bài Tập Tuần 04}
+
+Thầy đánh giá phần bài tập thực hành các Tool ở Tuần 4 của em:
+
+\subsection{Đáp án Bài tập 1: Tự động sinh file Word Phiếu Báo Hỏng}
+Khi chạy lệnh Python gọi hàm \texttt{generate\_maintenance\_ticket\_docx}, hệ thống sinh ra file Word \texttt{Phieu\_Bao\_Hong\_TEST-TUAN4.docx}.
+\begin{itemize}
+    \item \textbf{Cấu trúc file sinh ra:} Tuân thủ chuẩn Nghị định 30/2020/NĐ-CP về thể thức văn bản hành chính Việt Nam: Có Quốc hiệu, Tiêu ngữ, Tiêu đề chính in hoa đậm xanh navy, bảng kẻ chi tiết sự cố và bảng 3 chữ ký trang trọng (\textit{Người báo hỏng $\vert$ Cán bộ cơ sở vật chất $\vert$ Lãnh đạo phòng ban}).
+    \item \textbf{Lợi ích thực tế:} Giúp cán bộ phòng ban không phải ngồi mở mẫu Word gõ tay từng chữ, tiết kiệm từ 15 phút xuống dưới 1 giây.
+\end{itemize}
+
+\subsection{Đáp án Bài tập 2: Vẽ biểu đồ kho bằng Matplotlib}
+File ảnh \texttt{data/bieu\_do\_ton\_kho.png} được vẽ tự động gồm 2 biểu đồ trực quan:
+\begin{enumerate}
+    \item \textbf{Biểu đồ cột bên trái:} Số lượng tồn kho thực tế của các vật tư tiêu hao (Giấy A4: 85 ram, Bút dạ: 42 chiếc, Mực 12A: 6 hộp, Pin AA: 24 viên), có nhãn số lượng hiển thị rõ ràng trên từng đỉnh cột.
+    \item \textbf{Biểu đồ tròn bên phải:} Cơ cấu chủng loại tài sản phòng ban (Vật tư tiêu hao chiếm 44.4\%, Thiết bị dùng chung chiếm 55.6\%).
+\end{enumerate}
+
+\subsection{Đáp án Bài tập 3: Tại sao phải Caching trước khi cào web DuckDuckGo?}
+Trong hàm \texttt{enrich\_and\_cache\_knowledge}, việc kiểm tra CSDL SQLite trước mang lại 3 giá trị sống còn:
+\begin{enumerate}
+    \item \textbf{Tốc độ phản hồi tức thì:} Truy vấn CSDL nội bộ chỉ mất $< 2$ mili-giây, trong khi cào web mất $2 - 5$ giây.
+    \item \textbf{Khả năng hoạt động Offline:} Khi công ty bị mất mạng internet, hệ thống vẫn trả lời đầy đủ cẩm nang cho tất cả các dòng máy đã nạp trước đó.
+    \item \textbf{Chống bị chặn IP (Rate limit):} Nếu 50 nhân viên trong công ty cùng hỏi về máy in Canon 2900 trong một ngày, hệ thống chỉ cào web đúng 1 lần đầu tiên, tránh việc bị DuckDuckGo chặn yêu cầu tìm kiếm.
+\end{enumerate}
+
+\section{Mục Tiêu Trọng Tâm Tuần 05: Ghép Nối Hệ Thống \& Làm Giao Diện Web}
+
+Trong tuần này, em sẽ ghép tất cả các mảnh ghép rời rạc (Database, Tools, Agent) thành một ứng dụng Web hoàn chỉnh chạy được trên trình duyệt:
+\begin{enumerate}
+    \item Hiểu cách thức hoạt động của thư viện làm giao diện Web hiện đại **Streamlit**.
+    \item Quản lý lịch sử hội thoại nhiều lượt bằng \texttt{st.session\_state}.
+    \item Cài đặt cơ chế chuyển đổi vai trò phân quyền động (**RBAC Switch**) giữa *Nhân viên (User)* và *Cán bộ Quản lý (Admin)*.
+    \item Thiết kế luồng duyệt **Human-in-the-Loop** tương tác trực quan ngay trên giao diện Web.
+\end{enumerate}
+
+\section{Kiến Trúc Giao Diện Web Streamlit (\texttt{src/ui/app.py})}
+
+Streamlit là công cụ chuẩn công nghiệp hiện nay để xây dựng giao diện AI/Data Science nhờ tính trực quan và khả năng phản hồi thời gian thực. Giao diện của chúng ta được chia thành 4 Tab chức năng rõ ràng:
+
+\begin{table}[H]
+\centering
+\small
+\renewcommand{\arraystretch}{1.25}
+\begin{tabularx}{\textwidth}{l l X}
+\toprule
+\textbf{Tên Phân Vùng} & \textbf{Quyền Truy Cập} & \textbf{Chức Năng Nghiệp Vụ} \\
+\midrule
+\textbf{Sidebar} & User / Admin & Chuyển đổi vai trò đăng nhập, xem thông tin sinh viên đề tài và nút reset chat. \\
+\textbf{Tab 1: Chatbot} & User / Admin & Khung chat tương tác chính, nút gợi ý hỏi nhanh, tải ảnh hóa đơn, tải file Word và biểu đồ. \\
+\textbf{Tab 2: Kho Vật Tư} & User: Xem $\vert$ Admin: Sửa & Bảng CSDL trực tiếp, xem tổng định giá tài sản, form xuất/nhập kho thủ công (Admin). \\
+\textbf{Tab 3: Phiếu Báo Hỏng} & User: Xem $\vert$ Admin: Duyệt & Danh sách các phiếu sự cố đã lập, nút tải file Word và nút \textbf{[Duyệt sửa chữa]}. \\
+\textbf{Tab 4: Sổ Tay Tri Thức} & User / Admin & Xem cẩm nang mã lỗi theo model và form cào web tự động cho model máy mới. \\
+\bottomrule
+\end{tabularx}
+\caption{Bố cục 4 Tab chức năng của Giao diện Streamlit.}
+\end{table}
+
+\section{Hai Kỹ Thuật Đắt Giá Trong Giao Diện Web}
+
+\subsection{1. Quản lý bộ nhớ hội thoại (\texttt{st.session\_state})}
+Streamlit chạy lại toàn bộ file script mỗi khi người dùng bấm nút. Để tin nhắn không bị biến mất, ta lưu vào \texttt{st.session\_state}:
+\begin{lstlisting}[language=Python]
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+
+# Khi co tin nhan moi, them vao danh sach de luu giu bo nho
+st.session_state.messages.append({"role": "user", "content": user_input})
+\end{lstlisting}
+
+\subsection{2. Tương tác Người duyệt (Human-in-the-Loop) trong Tab Chat}
+Khi cán bộ gửi ảnh hóa đơn:
+\begin{enumerate}
+    \item Vision AI đọc ảnh và hiển thị bản nháp danh mục hàng lên màn hình chat.
+    \item Hệ thống hiển thị nút bấm: \textbf{[Duyệt Cập Nhật Vào CSDL Kho]}.
+
+    \item Chỉ khi cán bộ nhấp chuột vào nút này, hàm \texttt{commit\_stock\_transaction} mới được gọi để cộng dồn vào CSDL thật!
+\end{enumerate}
+
+\section{Bài Tập Thực Hành Tuần 05 (Dành Riêng Cho Em)}
+
+Em hãy mở Terminal, chạy ứng dụng bằng lệnh:
+\begin{lstlisting}[language=bash]
+streamlit run src/ui/app.py
+\end{lstlisting}
+Sau đó thực hiện 3 bài tập rèn luyện sau:
+
+\subsection{Bài tập 1: Thử nghiệm chuyển đổi vai trò (RBAC)}
+Trên thanh Sidebar, em chọn vai trò \textbf{Nhân viên (User)}, sau đó gõ câu: \textit{''Tổng giá trị kho hiện tại là bao nhiêu?''}. Em hãy ghi lại câu trả lời của Agent. Sau đó em đổi sang vai trò \textbf{Cán bộ Quản lý (Admin)} và hỏi lại câu tương tự để so sánh sự khác biệt.
+
+\subsection{Bài tập 2: Thử nghiệm kịch bản tạo phiếu báo hỏng}
+Tại Tab 1, em bấm nút hỏi nhanh: \textit{''Máy chiếu No Signal?''}. Sau khi Agent hướng dẫn, em gõ: \textit{''Tôi đã làm theo mà vẫn không lên, dây cáp bị đứt rồi''}. Em hãy bấm vào nút \textbf{[Tải biểu mẫu]} và kiểm tra xem mã phiếu có trùng khớp với bản ghi trong Tab 3 không.
+
+
+\subsection{Bài tập 3: Thử nghiệm nạp model máy mới}
+Vào Tab 4, nhập vào ô tìm kiếm: \texttt{"Canon LBP 3300"} rồi bấm nút tìm kiếm. Quan sát xem cẩm nang kỹ thuật của máy mới có xuất hiện trong danh sách hay không.
+
+\vspace{0.4cm}
+\begin{center}
+    \textit{--- Hết Tài Liệu Tuần 05. Chúc em hoàn thành xuất sắc giai đoạn tích hợp! ---}
+\end{center}
+
+\end{document}

@@ -1,0 +1,221 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{vietnam}
+\usepackage{amsmath,amssymb}
+\usepackage{geometry}
+\geometry{top=2.0cm,bottom=2.0cm,left=2.2cm,right=2.2cm}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{float}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+\usepackage{listings}
+
+% Cấu hình hiển thị code Python đẹp mắt
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.97,0.97,0.97}
+
+\lstdefinestyle{pythonstyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen}\itshape,
+    keywordstyle=\color{blue}\bfseries,
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=6pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=4,
+    frame=single,
+    framerule=0.4pt,
+    rulecolor=\color{gray!40}
+}
+\lstset{style=pythonstyle}
+
+% Cấu hình liên kết
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue!75!black,
+    citecolor=blue!75!black,
+    urlcolor=blue!85!black
+}
+
+% Cấu hình Header và Footer
+\pagestyle{fancy}
+\setlength{\headheight}{14.5pt}
+\fancyhf{}
+\rhead{\small \textit{Đồ án 2: Office Asset Agent}}
+\lhead{\small \textit{Tài liệu Hướng dẫn Hàng tuần — GVHD}}
+\cfoot{\thepage}
+
+% Khoảng cách văn bản chuẩn học thuật
+\setlength{\parskip}{5pt plus 1pt minus 1pt}
+\setlength{\parindent}{0pt}
+\linespread{1.15}
+\setlist[itemize]{leftmargin=1.5em, itemsep=3pt, topsep=2pt}
+\setlist[enumerate]{leftmargin=1.5em, itemsep=3pt, topsep=2pt}
+
+% Định dạng tiêu đề
+\titleformat{\section}{\large\bfseries\color{blue!80!black}}{\thesection.}{0.5em}{}
+\titleformat{\subsection}{\normalsize\bfseries\color{black}}{\thesubsection.}{0.5em}{}
+\titlespacing*{\section}{0pt}{10pt plus 2pt minus 2pt}{4pt plus 1pt minus 1pt}
+\titlespacing*{\subsection}{0pt}{8pt plus 2pt minus 2pt}{3pt plus 1pt minus 1pt}
+
+\begin{document}
+
+\begin{center}
+    {\large \textbf{TRƯỜNG CÔNG NGHỆ THÔNG TIN VÀ TRUYỀN THÔNG}}\\[0.2em]
+    {\normalsize \textbf{BỘ MÔN KHOA HỌC MÁY TÍNH \& HỆ THỐNG THÔNG TIN}}\\[1.0em]
+    
+    {\Large \bfseries \color{blue!85!black} SỔ TAY HƯỚNG DẪN THỰC HIỆN ĐỒ ÁN 2}\\[0.3em]
+    {\large \textbf{Đề tài: Hệ Thống AI Agent Hỗ Trợ Tra Cứu và Quản Lý Vật Tư - Thiết Bị Phòng Ban}}\\[0.8em]
+    
+    \rule{0.8\textwidth}{0.6pt}\\[0.6em]
+    
+    {\bfseries CHUYÊN ĐỀ TUẦN 03}\\[0.3em]
+    {\large \bfseries ĐÁP ÁN MẪU TUẦN 2 \& BẢN CHẤT CỦA AI AGENT: KHẮC PHỤC ẢO GIÁC TÍNH TOÁN \& NHẬP MÔN LANGGRAPH}\\[0.8em]
+    
+    \small
+    \textbf{Sinh viên thực hiện:} Trần Huy Hoàng \quad $\vert$ \quad \textbf{MSSV:} 20237337\\
+    \textbf{Đơn vị áp dụng:} Phòng Hành chính -- Quản trị (Ban Quản lý Cơ sở vật chất)\\
+    \textbf{Thời gian thực hiện:} Tuần 3 (Kiến trúc Agent \& Điều phối Đồ thị LangGraph)
+\end{center}
+
+\vspace{0.2cm}
+\hrule
+\vspace{0.3cm}
+
+\section{Đáp Án Mẫu \& Đánh Giá Chi Tiết Bài Tập Tuần 02}
+
+Trước khi bước vào kiến trúc AI Agent, thầy phân tích chi tiết đáp án của 3 bài tập Tuần 2:
+
+\subsection{Đáp án Bài tập 1: Giải thích đoạn code truy vấn ORM}
+\begin{lstlisting}[language=Python]
+low_stock = db.query(Asset).filter(
+    Asset.category == "Vat tu tieu hao",
+    Asset.quantity <= 10
+).all()
+\end{lstlisting}
+\begin{itemize}
+    \item \textbf{Ý nghĩa kỹ thuật:} Câu lệnh này truy vấn trong bảng \texttt{assets}, lọc ra danh sách tất cả các bản ghi có phân loại là \textit{Vật tư tiêu hao} VÀ có số lượng tồn kho $\le 10$.
+    \item \textbf{Ý nghĩa nghiệp vụ quản trị kho:} Con số $\le 10$ đại diện cho \textbf{Ngưỡng an toàn tồn kho (Reorder Point)}. Trong thực tế, khi giấy in hay mực in chạm mức này, cán bộ phòng ban phải chủ động liên hệ nhà cung cấp đặt mua bổ sung, tránh để kho cạn kiệt đột ngột làm tê liệt hoạt động in ấn của toàn công ty.
+\end{itemize}
+
+\subsection{Đáp án Bài tập 2: Kết quả chạy lệnh kiểm tra kho thực tế}
+Khi chạy lệnh trên Terminal, Python trả về kết quả số liệu thực tế được tính toán chuẩn xác từ CSDL SQLite:
+\begin{lstlisting}[language=bash]
+{'total_items': 9, 'consumables_count': 4, 'devices_count': 5, 
+ 'total_valuation_vnd': 86526000, 'total_valuation_str': '86,526,000 VND', 
+ 'low_stock_items': [{'code': 'VT-MUC-2900', 'name': 'Hop muc may in Cartridge 12A', 'quantity': 6, 'unit': 'Hop'}]}
+\end{lstlisting}
+Em thấy rằng tổng tài sản kho phòng ban là \textbf{86.526.000 VNĐ}, và hệ thống tự động phát hiện mặt hàng \textbf{Hộp mực Cartridge 12A} chỉ còn 6 hộp (cần nhập kho thêm).
+
+\subsection{Đáp án Bài tập 3: Tại sao chọn SQLite thay vì MySQL hay MongoDB?}
+Nếu thầy cô Hội đồng hỏi câu này, em hãy trả lời theo 3 luận điểm thuyết phục sau:
+\begin{enumerate}
+    \item \textbf{Phù hợp quy mô phòng ban:} Hệ thống quản lý cho một phòng ban có khoảng vài trăm đến vài nghìn mặt hàng. SQLite là CSDL dạng tệp nhúng cục bộ (Serverless), tốc độ đọc/ghi cực nhanh, tiêu tốn ít RAM và không cần cài dịch vụ ngầm phức tạp.
+    \item \textbf{Tính tiện lợi và đóng gói (Zero-Configuration):} Đồ án có thể chạy ngay trên máy tính của cán bộ hoặc mang lên laptop trình chiếu trước Hội đồng mà không cần cài đặt cấu hình server MySQL, không lo lỗi cổng mạng hay mất mật khẩu root.
+    \item \textbf{Kiến trúc ORM linh hoạt:} Vì chúng ta sử dụng SQLAlchemy, nên nếu sau này mở rộng quy mô toàn doanh nghiệp với PostgreSQL, ta chỉ cần thay đổi 1 dòng chuỗi kết nối trong \texttt{config.py} mà không cần sửa bất kỳ dòng code nghiệp vụ nào.
+\end{enumerate}
+
+\section{Mục Tiêu Trọng Tâm Tuần 03: Bản Chất Của AI Agent}
+
+Trong tuần này, em sẽ bước vào phần "linh hồn" của đề tài:
+\begin{enumerate}
+    \item Phân biệt rõ sự khác nhau giữa **ChatGPT thông thường** và **AI Agent**.
+    \item Hiểu nguyên nhân và cách khắc phục lỗi **Ảo giác tính nhẩm (Hallucination Tax)** được công bố trong bài báo khoa học *arXiv:2602.12631 (tháng 2/2026)*.
+    \item Làm quen với khung điều phối đồ thị trạng thái **LangGraph (StateGraph)**.
+\end{enumerate}
+
+\section{AI Agent Là Gì? Khác Gì So Với ChatGPT Thường?}
+
+Nhiều người lầm tưởng cài ChatGPT vào một khung chat là thành Agent. Thực tế, sự khác biệt nằm ở công thức:
+\begin{align*}
+\text{\textbf{AI Agent}} &= \text{\textbf{LLM}} \ (\text{Bộ não suy luận}) + \text{\textbf{Tools}} \ (\text{Cánh tay thao tác}) \\
+&\quad + \text{\textbf{Memory}} \ (\text{Bộ nhớ}) + \text{\textbf{Planning}} \ (\text{Kế hoạch})
+\end{align*}
+
+
+\begin{table}[H]
+\centering
+\small
+\renewcommand{\arraystretch}{1.25}
+\begin{tabularx}{\textwidth}{l X X}
+\toprule
+\textbf{Đặc Điểm So Sánh} & \textbf{LLM Thông Thường (ChatGPT / Gemini)} & \textbf{AI Agent (Hệ Thống Của Đồ Án)} \\
+\midrule
+\textbf{Khả năng tương tác} & Chỉ biết sinh văn bản, không tương tác được với hệ thống bên ngoài. & Biết gọi các công cụ (Tools): Đọc CSDL, cào tài liệu từ internet, xuất file Word. \\
+\textbf{Tri thức thực tế} & Không biết kho của công ty còn bao nhiêu ram giấy, máy chiếu phòng nào đang hỏng. & Kết nối trực tiếp với CSDL thực của phòng ban (\texttt{office\_assets.db}). \\
+\textbf{Độ tin cậy số học} & Dễ bị ảo giác tính nhẩm, cộng trừ tiền thường xuyên bị sai. & Không bao giờ tính nhẩm; giao toàn bộ phép toán cho code Python/SQL chạy. \\
+\textbf{Quy trình hành động} & Trả lời một lượt rồi dừng lại. & Có quy trình nhiều bước: Hỏi lỗi $\rightarrow$ Hướng dẫn $\rightarrow$ Không được thì tự xuất file Word. \\
+\bottomrule
+\end{tabularx}
+\caption{So sánh giữa LLM thuần túy và Hệ thống AI Agent.}
+\end{table}
+
+\section{Hiện Tượng "Ảo Giác Tính Nhẩm" (Hallucination Tax)}
+
+Nghiên cứu \textit{''AI Agents for Inventory Control: Human-LLM-OR Complementarity''} (\href{https://arxiv.org/abs/2602.12631}{arXiv:2602.12631}, 2026) chỉ ra rằng:
+\begin{itemize}
+    \item Mô hình ngôn ngữ lớn (LLM) bản chất là mô hình xác suất đoán từ tiếp theo (\textit{Next-token prediction}), nó không có mạch tính toán logic số học trong nhân xử lý.
+    \item Khi để LLM tự tính: \textit{''Kho có 85 ram, xuất 15 ram, nhập thêm 30 ram, hỏi còn bao nhiêu?''}, nếu văn cảnh phức tạp hoặc số liệu lớn, LLM rất hay đoán mò ra con số sai lệch.
+    \item \textbf{Giải pháp của đồ án (Deterministic Code Execution):} LLM chỉ làm nhiệm vụ đọc hiểu câu hỏi tiếng Việt của người dùng; khi cần tính toán, Agent tự động gọi hàm Python \texttt{commit\_stock\_transaction} để CPU máy tính tính toán với độ chính xác tuyệt đối 100\%.
+\end{itemize}
+
+\section{Nhập Môn LangGraph: Điều Phối Luồng Bằng Đồ Thị Trạng Thái}
+
+Thay vì dùng các lệnh \texttt{if...else} rối rắm, đồ án sử dụng thư viện **LangGraph** để xây dựng một đồ thị luồng xử lý:
+\begin{itemize}
+    \item \textbf{State (Trạng thái):} Một đối tượng lưu giữ toàn bộ thông tin của phiên hội thoại (tin nhắn, quyền hạn người dùng, file ảnh, kết quả phản hồi).
+    \item \textbf{Node (Nút xử lý):} Mỗi nút là một chuyên viên AI xử lý một việc cụ thể:
+    \begin{itemize}
+        \item \texttt{classify\_and\_auth}: Phân loại câu hỏi và kiểm tra quyền RBAC.
+        \item \texttt{inventory\_node}: Chuyên viên tra cứu kho và số liệu.
+        \item \texttt{support\_node}: Chuyên viên hướng dẫn sửa lỗi và lập phiếu báo hỏng.
+        \item \texttt{enrich\_node}: Chuyên viên cào tài liệu từ mạng theo model.
+        \item \texttt{ocr\_node}: Chuyên viên đọc ảnh hóa đơn.
+    \end{itemize}
+    \item \textbf{Conditional Edges (Cạnh rẽ nhánh):} Quyết định câu hỏi sẽ được chuyển đến nút nào dựa trên kết quả phân tích của nút phân loại.
+\end{itemize}
+
+\begin{lstlisting}[language=Python]
+# Doan code khoi tao LangGraph trong src/agents/orchestrator.py
+builder = StateGraph(AgentState)
+builder.add_node("classify_and_auth", classify_and_auth)
+builder.add_node("inventory_node", run_inventory_node)
+builder.add_node("support_node", run_support_node)
+
+builder.add_edge(START, "classify_and_auth")
+builder.add_conditional_edges("classify_and_auth", route_intent)
+\end{lstlisting}
+
+\section{Bài Tập Thực Hành Tuần 03 (Dành Riêng Cho Em)}
+
+Em hãy đọc kỹ tài liệu và trả lời 3 câu hỏi sau:
+
+\subsection{Bài tập 1: Giải thích cơ chế điều phối}
+Khi một nhân viên gõ câu: \textit{''Máy in ở phòng hành chính bị kẹt giấy thì gỡ thế nào?''}, theo em luồng xử lý của LangGraph trong file \texttt{src/agents/orchestrator.py} sẽ kích hoạt Node nào đầu tiên và sau đó rẽ nhánh tới Node nào?
+
+\subsection{Bài tập 2: Tư duy học thuật trước Hội đồng}
+Em hãy giải thích bằng lời ngắn gọn: Tại sao bài báo khoa học *arXiv:2602.12631* lại coi việc AI tính nhẩm là một "khoản thuế ảo giác" (*Hallucination Tax*) đối với doanh nghiệp? Đồ án của em đã triệt tiêu khoản thuế này như thế nào?
+
+\subsection{Bài tập 3: Thực hành quan sát}
+Em hãy mở file \texttt{src/agents/orchestrator.py}, tìm hàm \texttt{classify\_and\_auth} và chỉ ra: Nếu một tài khoản quyền \texttt{user} gửi yêu cầu nhập kho bằng ảnh hóa đơn thì hệ thống sẽ xử lý ra sao?
+
+
+\vspace{0.4cm}
+\begin{center}
+    \textit{--- Hết Tài Liệu Tuần 03. Chúc em tiếp tục học tập và làm chủ kiến thức vững vàng! ---}
+\end{center}
+
+\end{document}

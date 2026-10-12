@@ -1,0 +1,190 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{vietnam}
+\usepackage{amsmath,amssymb}
+\usepackage{geometry}
+\geometry{top=2.0cm,bottom=2.0cm,left=2.2cm,right=2.2cm}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{float}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+
+% Cấu hình liên kết
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue!75!black,
+    citecolor=blue!75!black,
+    urlcolor=blue!85!black
+}
+
+% Cấu hình Header và Footer
+\pagestyle{fancy}
+\setlength{\headheight}{14.5pt}
+\fancyhf{}
+
+\rhead{\small \textit{Đồ án 2: Office Asset Agent}}
+\lhead{\small \textit{Tài liệu Hướng dẫn Hàng tuần — GVHD}}
+\cfoot{\thepage}
+
+% Khoảng cách văn bản chuẩn học thuật
+\setlength{\parskip}{5pt plus 1pt minus 1pt}
+\setlength{\parindent}{0pt}
+\linespread{1.15}
+\setlist[itemize]{leftmargin=1.5em, itemsep=3pt, topsep=2pt}
+\setlist[enumerate]{leftmargin=1.5em, itemsep=3pt, topsep=2pt}
+
+% Định dạng tiêu đề
+\titleformat{\section}{\large\bfseries\color{blue!80!black}}{\thesection.}{0.5em}{}
+\titleformat{\subsection}{\normalsize\bfseries\color{black}}{\thesubsection.}{0.5em}{}
+\titlespacing*{\section}{0pt}{10pt plus 2pt minus 2pt}{4pt plus 1pt minus 1pt}
+\titlespacing*{\subsection}{0pt}{8pt plus 2pt minus 2pt}{3pt plus 1pt minus 1pt}
+
+\begin{document}
+
+\begin{center}
+    {\large \textbf{TRƯỜNG CÔNG NGHỆ THÔNG TIN VÀ TRUYỀN THÔNG}}\\[0.2em]
+    {\normalsize \textbf{BỘ MÔN KHOA HỌC MÁY TÍNH \& HỆ THỐNG THÔNG TIN}}\\[1.0em]
+    
+    {\Large \bfseries \color{blue!85!black} SỔ TAY HƯỚNG DẪN THỰC HIỆN ĐỒ ÁN 2}\\[0.3em]
+    {\large \textbf{Đề tài: Hệ Thống AI Agent Hỗ Trợ Tra Cứu và Quản Lý Vật Tư - Thiết Bị Phòng Ban}}\\[0.8em]
+    
+    \rule{0.8\textwidth}{0.6pt}\\[0.6em]
+    
+    {\bfseries CHUYÊN ĐỀ TUẦN 01}\\[0.3em]
+    {\large \bfseries KHẢO SÁT NGHIỆP VỤ THỰC TẾ VÀ THIẾT KẾ CƠ SỞ DỮ LIỆU}\\[0.8em]
+    
+    \small
+    \textbf{Sinh viên thực hiện:} Trần Huy Hoàng \quad $\vert$ \quad \textbf{MSSV:} 20237337\\
+    \textbf{Đơn vị áp dụng:} Phòng Hành chính -- Quản trị (Ban Quản lý Cơ sở vật chất)\\
+    \textbf{Thời gian thực hiện:} Tuần 1 (Giai đoạn Khởi động \& Thiết kế Nền tảng)
+\end{center}
+
+\vspace{0.3cm}
+\hrule
+\vspace{0.4cm}
+
+\section{Mục Tiêu Học Tập và Yêu Cầu Cần Đạt (Tuần 1)}
+
+Chào em, tuần đầu tiên là bước quan trọng nhất của đồ án. Rất nhiều sinh viên thất bại vì vội vàng lao vào code AI hoặc làm giao diện trước khi hiểu bài toán. Mục tiêu của tuần này là em phải nắm vững bản chất từ con số 0:
+\begin{enumerate}
+    \item \textbf{Hiểu tường tận bài toán thực tế:} Nắm rõ một phòng ban doanh nghiệp quản lý những gì, ai dùng, ai duyệt và nỗi đau thực sự của cán bộ quản lý là gì.
+    \item \textbf{Tư duy phân loại tài sản:} Phân biệt rạch ròi giữa \textit{Vật tư tiêu hao (Consumables)} và \textit{Thiết bị dùng chung (Assets/Devices)}.
+    \item \textbf{Tự tay thiết kế Cơ sở dữ liệu (CSDL):} Xây dựng được các bảng dữ liệu bằng SQLite/SQLAlchemy có khả năng hỗ trợ AI truy vấn ngôn ngữ tự nhiên mà không bị nhầm lẫn.
+\end{enumerate}
+
+\section{Bối Cảnh Bài Toán Nghiệp Vụ Tại Doanh Nghiệp}
+
+Tại bất kỳ cơ quan hay doanh nghiệp nào, \textbf{Phòng Hành chính -- Quản trị} (hoặc Bộ phận Quản trị Cơ sở vật chất) luôn là đơn vị chịu trách nhiệm mua sắm, lưu kho và bảo trì toàn bộ đồ dùng phục vụ công việc của hàng trăm nhân viên.
+
+\subsection{Hai nhóm đồ dùng cốt lõi}
+Em cần phân biệt rõ hai nhóm này vì cách máy tính quản lý chúng hoàn toàn khác nhau:
+\begin{itemize}
+    \item \textbf{Nhóm 1: Vật tư tiêu hao (Consumables)}
+    \begin{itemize}
+        \item \textit{Đại diện:} Giấy in A4 Double A, bút dạ viết bảng Thiên Long, hộp mực in Cartridge 12A, pin tiểu AA cho micro.
+        \item \textit{Bản chất:} Dùng là hết. Đơn vị tính: Ram, chiếc, hộp, vỉ.
+        \item \textit{Nghiệp vụ quản lý:} Quản lý theo \textbf{số lượng tồn kho}. Khi nhập thêm hàng $\rightarrow$ cộng dồn tồn kho. Khi phòng ban xin cấp phát $\rightarrow$ trừ số lượng tồn kho. Có ngưỡng cảnh báo tồn kho thấp (ví dụ dưới 10 ram giấy là phải lập kế hoạch mua thêm).
+    \end{itemize}
+    \item \textbf{Nhóm 2: Thiết bị dùng chung (Assets / Equipment)}
+    \begin{itemize}
+        \item \textit{Đại diện:} Máy in Laser Canon LBP 2900, máy chiếu hội trường Epson EB-X06, bộ micro không dây Takstar, dây cáp HDMI 5m.
+        \item \textit{Bản chất:} Dùng không mất đi, tài sản có giá trị cao, được dùng chung giữa các phòng ban.
+        \item \textit{Nghiệp vụ quản lý:} Quản lý theo \textbf{Mã sản phẩm / Model}, \textbf{vị trí đặt máy} và \textbf{trạng thái vận hành} (\textit{Sẵn sàng}, \textit{Đang mượn}, \textit{Bảo trì/Sửa chữa}).
+    \end{itemize}
+\end{itemize}
+
+\subsection{Những bất cập đời thực khi dùng sổ tay hoặc Excel}
+Khi chưa có phần mềm Agent thông minh, cán bộ phòng ban đối mặt với 3 rắc rối lớn:
+\begin{enumerate}
+    \item \textbf{Gián đoạn công việc liên tục:} Nhân viên các phòng ban liên tục gọi điện hoặc gõ cửa hỏi: \textit{''Kho còn giấy không em?'', ''Cho anh mượn micro phòng họp 1''}.
+    \item \textbf{Hỗ trợ kỹ thuật mất thời gian:} Thiết bị dùng chung thường xuyên bị lỗi nhỏ (máy in kẹt giấy, máy chiếu báo No Signal do chưa bấm phím tắt xuất màn hình). Cán bộ không thể ngồi viết cẩm nang cho từng chiếc máy, nên mỗi lần lỗi lại phải chạy đến tận nơi sửa.
+    \item \textbf{Không đồng nhất tên gọi:} Trong file Excel ghi mã kho là \texttt{VT-MUC-2900}, nhưng nhân viên hỏi bằng ngôn ngữ tự nhiên: \textit{''Kho còn mực cho máy in phòng sếp không?''}. Excel truyền thống không thể hiểu được các câu hỏi này.
+\end{enumerate}
+
+\section{Thiết Kế Cơ Sở Dữ Liệu Thực Tế (Database Schema)}
+
+Để giải quyết bài toán trên, hệ thống của chúng ta sử dụng CSDL nhẹ, độc lập và chuẩn mực là \textbf{SQLite} (kết hợp thư viện ORM \textbf{SQLAlchemy} trong Python).
+
+\subsection{Bảng 1: Danh mục Tài sản và Vật tư (\texttt{assets})}
+Đây là bảng trung tâm lưu trữ toàn bộ đồ dùng trong kho:
+
+\begin{table}[H]
+\centering
+\small
+\renewcommand{\arraystretch}{1.25}
+\begin{tabularx}{\textwidth}{l l l X}
+\toprule
+\textbf{Tên Cột (Field)} & \textbf{Kiểu Dữ Liệu} & \textbf{Ràng Buộc} & \textbf{Ý Nghĩa Nghiệp Vụ Thực Tế} \\
+\midrule
+\texttt{id} & \texttt{INTEGER} & Khóa chính, Tự tăng & Định danh duy nhất cho từng bản ghi. \\
+\texttt{code} & \texttt{VARCHAR(50)} & Duy nhất, Index & Mã quản lý nội bộ (VD: \texttt{VT-GIAY-A4}, \texttt{TB-MAYIN-01}). \\
+\texttt{name} & \texttt{VARCHAR(200)} & Bắt buộc & Tên hiển thị đầy đủ của vật tư/thiết bị. \\
+\texttt{category} & \texttt{VARCHAR(50)} & Bắt buộc & \textit{Vật tư tiêu hao} hoặc \textit{Thiết bị dùng chung}. \\
+\texttt{model} & \texttt{VARCHAR(100)} & Index & Mã Model chính hãng (VD: \texttt{Canon LBP 2900}, \texttt{Epson EB-X06}). \\
+\texttt{quantity} & \texttt{INTEGER} & Mặc định: 0 & Số lượng thực tế hiện còn trong kho. \\
+\texttt{unit} & \texttt{VARCHAR(20)} & Bắt buộc & Đơn vị tính: Ram, Hộp, Chiếc, Bộ, Sợi. \\
+\texttt{unit\_price} & \texttt{INTEGER} & Mặc định: 0 & Đơn giá mua (VNĐ), phục vụ tính tổng tài sản. \\
+\texttt{location} & \texttt{VARCHAR(100)} & Mặc định: Kho & Vị trí đặt: \textit{Kho Tầng 1}, \textit{Phòng họp 3}, \textit{Phòng Giám đốc}. \\
+\texttt{status} & \texttt{VARCHAR(50)} & Mặc định: Sẵn sàng & Tình trạng: \textit{Sẵn sàng}, \textit{Đang mượn}, \textit{Đang sửa}. \\
+\texttt{aliases} & \texttt{VARCHAR(255)} & Cho phép Null & \textbf{Bí danh đời thường:} Phục vụ AI ánh xạ từ khóa. \\
+\texttt{specs} & \texttt{VARCHAR(500)} & Cho phép Null & Thông số kỹ thuật tóm tắt. \\
+\bottomrule
+\end{tabularx}
+\caption{Cấu trúc bảng CSDL \texttt{assets} quản lý vật tư và thiết bị.}
+\end{table}
+
+\subsection{Tại sao trường \texttt{aliases} lại là ''vũ khí bí mật'' của AI Agent?}
+Khi nhân viên hỏi: \textit{''Kho còn mực phòng sếp không?''} hoặc \textit{''Còn bút dạ xanh không?''}:
+\begin{itemize}
+    \item Nếu dùng SQL truyền thống tìm theo cột \texttt{name}, hệ thống sẽ báo không tìm thấy vì tên thật là \textit{Hộp mực máy in Cartridge 12A}.
+    \item Bằng cách thêm cột \texttt{aliases = "mực máy in, mực canon 2900, cartridge 12a, mực phòng sếp"}, Agent sẽ tìm kiếm thông minh qua cột này để liên kết chính xác câu hỏi đời thường với mã kho thực tế.
+\end{itemize}
+
+\subsection{Bảng 2: Cẩm nang kỹ thuật theo Model (\texttt{knowledge\_docs})}
+Bảng này lưu trữ tài liệu hướng dẫn và bảng mã lỗi của từng dòng máy:
+\begin{itemize}
+    \item \texttt{model\_name}: Tên model (VD: \texttt{Epson EB-X06}).
+    \item \texttt{device\_type}: Loại thiết bị (\textit{Máy chiếu}, \textit{Máy in}, \textit{Micro}).
+    \item \texttt{manual\_text}: Hướng dẫn bật tắt an toàn, cách kết nối cáp.
+    \item \texttt{troubleshooting\_guide}: Bảng các mã lỗi hay gặp (VD: Lỗi \texttt{CH-01} No Signal, Lỗi \texttt{IN-01} Kẹt giấy) và quy trình xử lý từng bước.
+    \item \texttt{source\_url}: Nguồn tài liệu (Từ cào web DuckDuckGo hoặc tài liệu chính hãng).
+\end{itemize}
+
+\subsection{Bảng 3: Phiếu Báo Hỏng Thiết Bị (\texttt{maintenance\_tickets})}
+Khi nhân viên tự sửa theo hướng dẫn của AI mà không được, Agent tự tạo bản ghi vào bảng này:
+\begin{itemize}
+    \item \texttt{ticket\_code}: Mã phiếu (VD: \texttt{SC-202610-001}).
+    \item \texttt{requester\_name}, \texttt{department}: Người báo và phòng ban.
+    \item \texttt{device\_name}, \texttt{location}: Tên thiết bị và nơi đặt.
+    \item \texttt{symptom}: Hiện tượng hư hỏng (VD: \textit{Báo No Signal, cáp HDMI âm sàn không nhận}).
+    \item \texttt{proposed\_solution}: Đề xuất hướng xử lý (\textit{Kiểm tra thay cáp mới / Gọi hãng bảo hành}).
+    \item \texttt{status}: Trạng thái (\texttt{PENDING\_APPROVAL} $\rightarrow$ Cán bộ bấm duyệt $\rightarrow$ \texttt{APPROVED}).
+    \item \texttt{docx\_path}: Đường dẫn file Word mẫu công ty do Agent tự động điền sẵn.
+\end{itemize}
+
+\section{Bài Tập Thực Hành Tuần 1 (Dành Riêng Cho Em)}
+
+Thầy giao cho em 3 bài tập tư duy nghiệp vụ. Em hãy suy nghĩ và trả lời trong buổi trao đổi tiếp theo:
+
+\subsection{Bài tập 1: Tự điền dữ liệu cho một thiết bị thực tế}
+Giả sử công ty em vừa mua về 01 chiếc \textbf{Máy chiếu Sony VPL-EX435} đặt tại \textit{Phòng họp lớn tầng 4}, giá mua 16.500.000 VNĐ.
+\begin{itemize}
+    \item Em hãy viết ra các giá trị tương ứng để điền vào 1 dòng của bảng \texttt{assets} (\texttt{code}, \texttt{name}, \texttt{category}, \texttt{model}, \texttt{quantity}, \texttt{unit}, \texttt{unit\_price}, \texttt{location}, \texttt{status}, \texttt{aliases}).
+    \item Em hãy nghĩ ra ít nhất 3 từ khóa bí danh (\texttt{aliases}) mà nhân viên công ty có thể dùng khi hỏi về chiếc máy chiếu này.
+\end{itemize}
+
+\subsection{Bài tập 2: Tư duy logic về lịch sử xuất nhập kho}
+Tại sao chúng ta không nên chỉ đơn giản là sửa trực tiếp con số ở cột \texttt{quantity} trong bảng \texttt{assets}, mà bắt buộc phải có một bảng riêng là \texttt{stock\_transactions} (Lịch sử giao dịch)? Điều này giúp ích gì cho cán bộ khi kiểm toán cuối năm?
+
+\subsection{Bài tập 3: Tư duy về an toàn dữ liệu (Human-in-the-Loop)}
+Theo em, nếu chúng ta để AI tự động cộng trừ kho ngay khi đọc xong ảnh hóa đơn (mà không cần cán bộ bấm nút \textbf{[Duyệt]}), điều tồi tệ gì có thể xảy ra trong thực tế?
+
+\vspace{0.4cm}
+\begin{center}
+    \textit{--- Hết Tài Liệu Tuần 01. Chúc em học tập và hoàn thành tốt nhiệm vụ! ---}
+\end{center}
+
+\end{document}

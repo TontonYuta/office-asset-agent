@@ -1,0 +1,188 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{vietnam}
+\usepackage{amsmath,amssymb}
+\usepackage{geometry}
+\geometry{top=2.0cm,bottom=2.0cm,left=2.2cm,right=2.2cm}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{float}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+\usepackage{listings}
+
+% Cấu hình hiển thị code Python đẹp mắt
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.97,0.97,0.97}
+
+\lstdefinestyle{pythonstyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen}\itshape,
+    keywordstyle=\color{blue}\bfseries,
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=6pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=4,
+    frame=single,
+    framerule=0.4pt,
+    rulecolor=\color{gray!40}
+}
+\lstset{style=pythonstyle}
+
+% Cấu hình liên kết
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue!75!black,
+    citecolor=blue!75!black,
+    urlcolor=blue!85!black
+}
+
+% Cấu hình Header và Footer
+\pagestyle{fancy}
+\setlength{\headheight}{14.5pt}
+\fancyhf{}
+\rhead{\small \textit{Đồ án 2: Office Asset Agent}}
+\lhead{\small \textit{Tài liệu Hướng dẫn Hàng tuần — GVHD}}
+\cfoot{\thepage}
+
+% Khoảng cách văn bản chuẩn học thuật
+\setlength{\parskip}{5pt plus 1pt minus 1pt}
+\setlength{\parindent}{0pt}
+\linespread{1.15}
+\setlist[itemize]{leftmargin=1.5em, itemsep=3pt, topsep=2pt}
+\setlist[enumerate]{leftmargin=1.5em, itemsep=3pt, topsep=2pt}
+
+% Định dạng tiêu đề
+\titleformat{\section}{\large\bfseries\color{blue!80!black}}{\thesection.}{0.5em}{}
+\titleformat{\subsection}{\normalsize\bfseries\color{black}}{\thesubsection.}{0.5em}{}
+\titlespacing*{\section}{0pt}{10pt plus 2pt minus 2pt}{4pt plus 1pt minus 1pt}
+\titlespacing*{\subsection}{0pt}{8pt plus 2pt minus 2pt}{3pt plus 1pt minus 1pt}
+
+\begin{document}
+
+\begin{center}
+    {\large \textbf{TRƯỜNG CÔNG NGHỆ THÔNG TIN VÀ TRUYỀN THÔNG}}\\[0.2em]
+    {\normalsize \textbf{BỘ MÔN KHOA HỌC MÁY TÍNH \& HỆ THỐNG THÔNG TIN}}\\[1.0em]
+    
+    {\Large \bfseries \color{blue!85!black} SỔ TAY HƯỚNG DẪN THỰC HIỆN ĐỒ ÁN 2}\\[0.3em]
+    {\large \textbf{Đề tài: Hệ Thống AI Agent Hỗ Trợ Tra Cứu và Quản Lý Vật Tư - Thiết Bị Phòng Ban}}\\[0.8em]
+    
+    \rule{0.8\textwidth}{0.6pt}\\[0.6em]
+    
+    {\bfseries CHUYÊN ĐỀ TUẦN 06 (CHUYÊN ĐỀ TỔNG KẾT)}\\[0.3em]
+    {\large \bfseries THỬ NGHIỆM THỰC TẾ, BIÊN SOẠN BÁO CÁO VÀ BỘ CÂU HỎI VẤN ĐÁP HỘI ĐỒNG}\\[0.8em]
+    
+    \small
+    \textbf{Sinh viên thực hiện:} Trần Huy Hoàng \quad $\vert$ \quad \textbf{MSSV:} 20237337\\
+    \textbf{Đơn vị áp dụng:} Phòng Hành chính -- Quản trị (Ban Quản lý Cơ sở vật chất)\\
+    \textbf{Thời gian thực hiện:} Tuần 6 (Nghiệm Thu, Viết Báo Cáo \& Bảo Vệ Đồ Án)
+\end{center}
+
+\vspace{0.2cm}
+\hrule
+\vspace{0.3cm}
+
+\section{Đáp Án Mẫu \& Đánh Giá Chi Tiết Bài Tập Tuần 05}
+
+Chúc mừng em đã hoàn thành tích hợp toàn bộ hệ thống! Dưới đây là phân tích kết quả thử nghiệm Tuần 5:
+
+\subsection{Đáp án Bài tập 1: Sự khác biệt khi chuyển đổi vai trò RBAC}
+\begin{itemize}
+    \item \textbf{Khi ở vai trò User:} Khi hỏi \textit{''Tổng giá trị kho hiện tại là bao nhiêu?''}, Agent từ chối lịch sự: \textit{''Thông tin tổng giá trị tài chính kho chỉ dành cho Cán bộ Quản lý (Admin)''}.
+    \item \textbf{Khi ở vai trò Admin:} Agent lập tức kích hoạt bộ tính toán và trả về báo cáo tài chính đầy đủ: Tổng giá trị hiện tại là \textbf{86.526.000 VNĐ}, tổng số lượng 9 danh mục, cảnh báo hộp mực in gần hết.
+\end{itemize}
+
+\subsection{Đáp án Bài tập 2: Quy trình tự động hóa lập Phiếu Báo Hỏng}
+Khi người dùng báo: \textit{''Tôi đã làm theo mà vẫn không lên, dây cáp bị đứt rồi''}:
+\begin{enumerate}
+    \item Agent nhận diện được ý định chuyển cấp (\textit{Escalation}): Thiết bị không thể tự sửa được bằng mẹo thông thường.
+    \item Tự động trích xuất ngữ cảnh (Máy chiếu Epson, phòng họp 3, đứt cáp HDMI âm sàn) và tạo mã phiếu ngẫu nhiên có quy tắc (VD: \texttt{SC-CEFC83}).
+    \item Tự động sinh file Word \texttt{Phieu\_Bao\_Hong\_SC-CEFC83.docx} và đẩy thông báo vào hàng đợi duyệt của Admin tại Tab 3.
+\end{enumerate}
+
+\section{Kế Hoạch Thử Nghiệm Thực Tế Tại Phòng Ban (Case Studies)}
+
+Khi viết báo cáo hoặc thuyết trình, em hãy đưa 4 kịch bản thử nghiệm thực tế này vào để chứng minh tính khả thi của đồ án:
+
+\begin{table}[H]
+\centering
+\small
+\renewcommand{\arraystretch}{1.25}
+\begin{tabularx}{\textwidth}{l X X}
+\toprule
+\textbf{Kịch Bản Thử Nghiệm} & \textbf{Thao Tác Của Cán Bộ / Nhân Viên} & \textbf{Kết Quả Đạt Được} \\
+\midrule
+\textbf{Kịch bản 1: Phân quyền} & Dùng User hỏi chi phí và thử nhập kho; dùng Admin để duyệt. & Hệ thống chặn đúng quyền 100\%, không rò rỉ dữ liệu tài chính. \\
+\textbf{Kịch bản 2: Nhập kho ảnh} & Cán bộ chụp ảnh phiếu giao hàng của công ty giấy Hải Tiến tải lên. & Đọc đúng bảng hàng, số lượng và tổng tiền; cán bộ bấm [Duyệt] mới lưu kho. \\
+\textbf{Kịch bản 3: Tra cứu kho} & Nhân viên gõ: \textit{''Kho còn mực phòng sếp không?''}. & Khớp đúng mã \texttt{VT-MUC-2900} và báo số lượng 6 hộp chính xác. \\
+\textbf{Kịch bản 4: Tự tìm tri thức} & Nhập model \texttt{"Canon LBP 3300"} chưa từng có trong kho. & Agent tự cào web DuckDuckGo, lưu cẩm nang vào SQLite sau 3 giây. \\
+\bottomrule
+\end{tabularx}
+\caption{Bốn kịch bản thử nghiệm thực tế tại Phòng Hành chính -- Quản trị.}
+\end{table}
+
+\section{Cấu Trúc Báo Cáo Tốt Nghiệp Chuẩn Bách Khoa (5 Chương)}
+
+Một cuốn báo cáo Đồ án tốt nghiệp / Đồ án 2 chuẩn mực cần được bố cục thành 5 chương chặt chẽ:
+\begin{itemize}
+    \item \textbf{Chương 1: Giới thiệu và Đặt bài toán} (Bối cảnh phòng ban, các bất cập của Excel, mục tiêu sản phẩm).
+    \item \textbf{Chương 2: Cơ sở lý thuyết và Các nghiên cứu liên quan} (Mô hình LLM, AI Agent, LangGraph, bài báo *arXiv:2602.12631* về Hallucination Tax, thị giác AI Qwen2.5-VL / Docling).
+    \item \textbf{Chương 3: Thiết kế Kiến trúc Hệ thống} (Sơ đồ luồng dữ liệu DFD, lược đồ CSDL SQLite, ma trận phân quyền RBAC, sơ đồ đồ thị LangGraph StateGraph).
+    \item \textbf{Chương 4: Hiện thực hóa và Thử nghiệm Thực tế} (Cài đặt các Tool, giao diện Web Streamlit, kết quả đo lường tại phòng ban).
+    \item \textbf{Chương 5: Kết luận và Hướng phát triển} (Đánh giá ưu nhược điểm, khả năng triển khai diện rộng).
+\end{itemize}
+
+\section{Bộ 10 Câu Hỏi Vấn Đáp "Sát Thủ" Của Hội Đồng (Q\&A Master)}
+
+Thầy tổng hợp 10 câu hỏi mà các thầy cô phản biện hay hỏi nhất và cách trả lời chuẩn điểm 10:
+
+\begin{enumerate}
+    \item \textbf{Hội đồng hỏi:} \textit{''Đề tài của em khác gì so với việc nhân viên dùng ChatGPT có sẵn?''}
+    \begin{itemize}
+        \item \textbf{Em trả lời:} Dạ thưa thầy cô, ChatGPT chỉ là mô hình sinh ngôn ngữ độc lập, không biết phòng ban mình đang dùng máy gì, trong kho còn cáp thay thế hay không. Hệ thống của em kết nối trực tiếp với CSDL kho nội bộ, nhớ đúng thiết bị từng phòng và đặc biệt là có khả năng tự động điền file Word Phiếu Báo Hỏng chuẩn thể thức để gửi cán bộ duyệt.
+    \end{itemize}
+    
+    \item \textbf{Hội đồng hỏi:} \textit{''Làm sao em bảo đảm AI không cộng trừ nhầm số lượng tồn kho?''}
+    \begin{itemize}
+        \item \textbf{Em trả lời:} Em áp dụng nguyên lý Toán học tất định (Deterministic Code Execution) từ bài báo arXiv:2602.12631. AI chỉ phân tích câu hỏi tiếng Việt; toàn bộ việc tính toán kho được giao 100\% cho code Python và lệnh SQL thực thi, đảm bảo kho không bao giờ bị âm và kết quả chính xác tuyệt đối.
+    \end{itemize}
+
+    \item \textbf{Hội đồng hỏi:} \textit{''Nếu công ty mất kết nối internet thì hệ thống có chạy được không?''}
+    \begin{itemize}
+        \item \textbf{Em trả lời:} Dạ hoàn toàn chạy bình thường ạ. Toàn bộ CSDL kho, phân quyền và cẩm nang sửa lỗi của các máy đã nạp đều lưu trữ offline trong SQLite nội bộ. Web Search chỉ kích hoạt khi có model máy hoàn toàn mới chưa từng xuất hiện.
+    \end{itemize}
+
+    \item \textbf{Hội đồng hỏi:} \textit{''Tại sao em không để AI tự động cộng kho sau khi đọc ảnh hóa đơn luôn?''}
+    \begin{itemize}
+        \item \textbf{Em trả lời:} Vì nguyên tắc an toàn dữ liệu và Human-in-the-Loop. Ảnh chụp thực tế có thể bị mờ hoặc gửi trùng lặp. AI chỉ soạn sẵn bản nháp; bắt buộc cán bộ có thẩm quyền kiểm tra và bấm nút [Duyệt] thì dữ liệu mới được ghi vào CSDL.
+    \end{itemize}
+
+    \item \textbf{Hội đồng hỏi:} \textit{''Bí danh đời thường (aliases) trong bảng CSDL giúp ích gì?''}
+    \begin{itemize}
+        \item \textbf{Em trả lời:} Nhân viên thường hỏi từ ngữ tự nhiên như \textit{''mực phòng sếp''} thay vì mã kho \texttt{VT-MUC-2900}. Trường \texttt{aliases} là cầu nối ngữ nghĩa giúp thuật toán tìm kiếm so khớp chính xác câu hỏi đời thường với mã quản lý.
+    \end{itemize}
+\end{enumerate}
+
+\section{Lời Dặn Của Thầy Trước Ngày Bảo Vệ}
+
+Thầy chúc mừng em đã hoàn thành xuất sắc toàn bộ 6 tuần huấn luyện! Em đã nắm vững từ bản chất CSDL, lập trình Python, bản chất AI Agent cho đến giao diện người dùng. Hãy tự tin bước ra trước Hội đồng: **Em là người hiểu rõ từng dòng lệnh của đồ án này nhất!**
+
+\vspace{0.4cm}
+\begin{center}
+    \textit{--- Chúc em bảo vệ Đồ án đạt điểm số Xuất sắc và vững bước trên con đường Kỹ sư! ---}
+\end{center}
+
+\end{document}

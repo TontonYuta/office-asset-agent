@@ -50,7 +50,12 @@ docs/*.synctex.gz
 
 # Data & Cache
 *.sqlite3-journal
+*.db
+data/*.png
+data/templates/*.docx
+.pytest_cache/
 data/uploads/*
 !data/uploads/.gitkeep
 data/exports/*
 !data/exports/.gitkeep
+
