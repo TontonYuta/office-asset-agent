@@ -2,7 +2,7 @@
 \usepackage[utf8]{vietnam}
 \usepackage{amsmath,amssymb}
 \usepackage{geometry}
-\geometry{top=2.0cm,bottom=2.0cm,left=2.2cm,right=2.2cm}
+\geometry{top=2.0cm,bottom=2.0cm,left=2.0cm,right=2.0cm}
 \usepackage{booktabs}
 \usepackage{tabularx}
 \usepackage{float}
@@ -12,37 +12,62 @@
 \usepackage{fancyhdr}
 \usepackage{hyperref}
 \usepackage{listings}
+\usepackage{tcolorbox}
 
-% Cấu hình hiển thị code Python đẹp mắt
+\tcbuselibrary{skins,breakable}
+\newtcolorbox{notebox}[1][]{
+    colback=blue!5!white,
+    colframe=blue!75!black,
+    fonttitle=\bfseries,
+    title=#1,
+    arc=3mm,
+    boxrule=0.8pt,
+    left=6pt,right=6pt,top=6pt,bottom=6pt,
+    breakable
+}
+\newtcolorbox{warnbox}[1][]{
+    colback=orange!5!white,
+    colframe=orange!85!black,
+    fonttitle=\bfseries,
+    title=#1,
+    arc=3mm,
+    boxrule=0.8pt,
+    left=6pt,right=6pt,top=6pt,bottom=6pt,
+    breakable
+}
+\newtcolorbox{codebox}[1][]{
+    colback=gray!5!white,
+    colframe=gray!75!black,
+    fonttitle=\bfseries,
+    title=#1,
+    arc=2mm,
+    boxrule=0.6pt,
+    left=5pt,right=5pt,top=5pt,bottom=5pt,
+    breakable
+}
+
 \definecolor{codegreen}{rgb}{0,0.6,0}
 \definecolor{codegray}{rgb}{0.5,0.5,0.5}
 \definecolor{codepurple}{rgb}{0.58,0,0.82}
 \definecolor{backcolour}{rgb}{0.97,0.97,0.97}
 
-\lstdefinestyle{pythonstyle}{
+\lstdefinestyle{pystyle}{
     backgroundcolor=\color{backcolour},   
     commentstyle=\color{codegreen}\itshape,
     keywordstyle=\color{blue}\bfseries,
     numberstyle=\tiny\color{codegray},
     stringstyle=\color{codepurple},
     basicstyle=\ttfamily\footnotesize,
-    breakatwhitespace=false,         
     breaklines=true,                 
-    captionpos=b,                    
-    keepspaces=true,                 
     numbers=left,                    
     numbersep=6pt,                  
-    showspaces=false,                
-    showstringspaces=false,
-    showtabs=false,                  
     tabsize=4,
     frame=single,
     framerule=0.4pt,
     rulecolor=\color{gray!40}
 }
-\lstset{style=pythonstyle}
+\lstset{style=pystyle}
 
-% Cấu hình liên kết
 \hypersetup{
     colorlinks=true,
     linkcolor=blue!75!black,
@@ -50,23 +75,20 @@
     urlcolor=blue!85!black
 }
 
-% Cấu hình Header và Footer
 \pagestyle{fancy}
 \setlength{\headheight}{14.5pt}
 \fancyhf{}
 \rhead{\small \textit{Đồ án 2: Office Asset Agent}}
-\lhead{\small \textit{Tài liệu Hướng dẫn Hàng tuần — GVHD}}
+\lhead{\small \textit{Cẩm Nang Hướng Dẫn Chi Tiết — Tuần 03}}
 \cfoot{\thepage}
 
-% Khoảng cách văn bản chuẩn học thuật
 \setlength{\parskip}{5pt plus 1pt minus 1pt}
 \setlength{\parindent}{0pt}
 \linespread{1.15}
 \setlist[itemize]{leftmargin=1.5em, itemsep=3pt, topsep=2pt}
 \setlist[enumerate]{leftmargin=1.5em, itemsep=3pt, topsep=2pt}
 
-% Định dạng tiêu đề
-\titleformat{\section}{\large\bfseries\color{blue!80!black}}{\thesection.}{0.5em}{}
+\titleformat{\section}{\large\bfseries\color{blue!85!black}}{\thesection.}{0.5em}{}
 \titleformat{\subsection}{\normalsize\bfseries\color{black}}{\thesubsection.}{0.5em}{}
 \titlespacing*{\section}{0pt}{10pt plus 2pt minus 2pt}{4pt plus 1pt minus 1pt}
 \titlespacing*{\subsection}{0pt}{8pt plus 2pt minus 2pt}{3pt plus 1pt minus 1pt}
@@ -74,148 +96,141 @@
 \begin{document}
 
 \begin{center}
-    {\large \textbf{TRƯỜNG CÔNG NGHỆ THÔNG TIN VÀ TRUYỀN THÔNG}}\\[0.2em]
+    {\large \textbf{TRƯỜNG CÔNG NGHỆ THÔNG TIN VÀ TRUYỀN THÔNG -- ĐHBK HÀ NỘI}}\\[0.2em]
     {\normalsize \textbf{BỘ MÔN KHOA HỌC MÁY TÍNH \& HỆ THỐNG THÔNG TIN}}\\[1.0em]
     
-    {\Large \bfseries \color{blue!85!black} SỔ TAY HƯỚNG DẪN THỰC HIỆN ĐỒ ÁN 2}\\[0.3em]
+    {\Large \bfseries \color{blue!85!black} CẨM NANG HƯỚNG DẪN THỰC HIỆN ĐỒ ÁN 2}\\[0.3em]
     {\large \textbf{Đề tài: Hệ Thống AI Agent Hỗ Trợ Tra Cứu và Quản Lý Vật Tư - Thiết Bị Phòng Ban}}\\[0.8em]
     
-    \rule{0.8\textwidth}{0.6pt}\\[0.6em]
+    \rule{0.85\textwidth}{0.8pt}\\[0.6em]
     
-    {\bfseries CHUYÊN ĐỀ TUẦN 03}\\[0.3em]
-    {\large \bfseries ĐÁP ÁN MẪU TUẦN 2 \& BẢN CHẤT CỦA AI AGENT: KHẮC PHỤC ẢO GIÁC TÍNH TOÁN \& NHẬP MÔN LANGGRAPH}\\[0.8em]
+    {\bfseries CHUYÊN ĐỀ TUẦN 03 (DÀNH CHO NGƯỜI MỚI BẮT ĐẦU TỪ CON SỐ 0)}\\[0.3em]
+    {\large \bfseries BẢN CHẤT AI AGENT, CHỐNG ẢO GIÁC SỐ HỌC \& NHẬP MÔN LANGGRAPH}\\[0.8em]
     
     \small
     \textbf{Sinh viên thực hiện:} Trần Huy Hoàng \quad $\vert$ \quad \textbf{MSSV:} 20237337\\
-    \textbf{Đơn vị áp dụng:} Phòng Hành chính -- Quản trị (Ban Quản lý Cơ sở vật chất)\\
-    \textbf{Thời gian thực hiện:} Tuần 3 (Kiến trúc Agent \& Điều phối Đồ thị LangGraph)
+    \textbf{Đơn vị áp dụng thử nghiệm:} Phòng Hành chính -- Quản trị (Ban Quản lý Cơ sở vật chất)\\
+    \textbf{Thời gian học tập:} Tuần 3 (Khám Phá Não Bộ Điều Phối AI Agent \& LangGraph)
 \end{center}
 
 \vspace{0.2cm}
 \hrule
 \vspace{0.3cm}
 
-\section{Đáp Án Mẫu \& Đánh Giá Chi Tiết Bài Tập Tuần 02}
+\section{Mục Tiêu Tuần 03: Vượt Qua Sự Nhầm Lẫn Giữa Chatbot \& Agent}
 
-Trước khi bước vào kiến trúc AI Agent, thầy phân tích chi tiết đáp án của 3 bài tập Tuần 2:
+Chào Hoàng, sau khi hoàn thành 2 tuần đầu, em đã có một nền tảng dữ liệu SQLite rất tốt. Tuy nhiên, khi nói chuyện với các bạn sinh viên khác, thầy thấy đa số các em đều nhầm lẫn: \textit{"Ủa, em thấy hệ thống này cũng có một khung chat gõ câu hỏi vào rồi nó trả lời, vậy nó khác gì con ChatGPT hay mấy con bot trả lời tự động trên Fanpage Facebook?"}
 
-\subsection{Đáp án Bài tập 1: Giải thích đoạn code truy vấn ORM}
-\begin{lstlisting}[language=Python]
-low_stock = db.query(Asset).filter(
-    Asset.category == "Vat tu tieu hao",
-    Asset.quantity <= 10
-).all()
-\end{lstlisting}
-\begin{itemize}
-    \item \textbf{Ý nghĩa kỹ thuật:} Câu lệnh này truy vấn trong bảng \texttt{assets}, lọc ra danh sách tất cả các bản ghi có phân loại là \textit{Vật tư tiêu hao} VÀ có số lượng tồn kho $\le 10$.
-    \item \textbf{Ý nghĩa nghiệp vụ quản trị kho:} Con số $\le 10$ đại diện cho \textbf{Ngưỡng an toàn tồn kho (Reorder Point)}. Trong thực tế, khi giấy in hay mực in chạm mức này, cán bộ phòng ban phải chủ động liên hệ nhà cung cấp đặt mua bổ sung, tránh để kho cạn kiệt đột ngột làm tê liệt hoạt động in ấn của toàn công ty.
-\end{itemize}
-
-\subsection{Đáp án Bài tập 2: Kết quả chạy lệnh kiểm tra kho thực tế}
-Khi chạy lệnh trên Terminal, Python trả về kết quả số liệu thực tế được tính toán chuẩn xác từ CSDL SQLite:
-\begin{lstlisting}[language=bash]
-{'total_items': 9, 'consumables_count': 4, 'devices_count': 5, 
- 'total_valuation_vnd': 86526000, 'total_valuation_str': '86,526,000 VND', 
- 'low_stock_items': [{'code': 'VT-MUC-2900', 'name': 'Hop muc may in Cartridge 12A', 'quantity': 6, 'unit': 'Hop'}]}
-\end{lstlisting}
-Em thấy rằng tổng tài sản kho phòng ban là \textbf{86.526.000 VNĐ}, và hệ thống tự động phát hiện mặt hàng \textbf{Hộp mực Cartridge 12A} chỉ còn 6 hộp (cần nhập kho thêm).
-
-\subsection{Đáp án Bài tập 3: Tại sao chọn SQLite thay vì MySQL hay MongoDB?}
-Nếu thầy cô Hội đồng hỏi câu này, em hãy trả lời theo 3 luận điểm thuyết phục sau:
+Đây là câu hỏi mà \textbf{100\% các thầy cô trong Hội đồng chấm thi sẽ hỏi em}. Nếu không trả lời sắc bén, đồ án sẽ bị đánh giá là tầm thường. Vì vậy, mục tiêu của Tuần 03 là:
 \begin{enumerate}
-    \item \textbf{Phù hợp quy mô phòng ban:} Hệ thống quản lý cho một phòng ban có khoảng vài trăm đến vài nghìn mặt hàng. SQLite là CSDL dạng tệp nhúng cục bộ (Serverless), tốc độ đọc/ghi cực nhanh, tiêu tốn ít RAM và không cần cài dịch vụ ngầm phức tạp.
-    \item \textbf{Tính tiện lợi và đóng gói (Zero-Configuration):} Đồ án có thể chạy ngay trên máy tính của cán bộ hoặc mang lên laptop trình chiếu trước Hội đồng mà không cần cài đặt cấu hình server MySQL, không lo lỗi cổng mạng hay mất mật khẩu root.
-    \item \textbf{Kiến trúc ORM linh hoạt:} Vì chúng ta sử dụng SQLAlchemy, nên nếu sau này mở rộng quy mô toàn doanh nghiệp với PostgreSQL, ta chỉ cần thay đổi 1 dòng chuỗi kết nối trong \texttt{config.py} mà không cần sửa bất kỳ dòng code nghiệp vụ nào.
+    \item Phân biệt bản chất 3 thế hệ công nghệ: Chatbot cũ $\rightarrow$ LLM thông thường $\rightarrow$ AI Agent.
+    \item Hiểu tại sao các mô hình AI lớn lại dốt toán và bài báo khoa học quốc tế \textbf{arXiv:2602.12631 (2026)} giải quyết hiện tượng \textbf{Ảo giác tính toán (Hallucination Tax)} như thế nào.
+    \item Nhập môn framework điều phối hiện đại nhất hiện nay: \textbf{LangGraph} dưới lăng kính mạng lưới tàu điện ngầm.
 \end{enumerate}
 
-\section{Mục Tiêu Trọng Tâm Tuần 03: Bản Chất Của AI Agent}
+\section{Ba Cấp Độ Tiến Hóa Của Giao Diện Hội Thoại}
 
-Trong tuần này, em sẽ bước vào phần "linh hồn" của đề tài:
-\begin{enumerate}
-    \item Phân biệt rõ sự khác nhau giữa **ChatGPT thông thường** và **AI Agent**.
-    \item Hiểu nguyên nhân và cách khắc phục lỗi **Ảo giác tính nhẩm (Hallucination Tax)** được công bố trong bài báo khoa học *arXiv:2602.12631 (tháng 2/2026)*.
-    \item Làm quen với khung điều phối đồ thị trạng thái **LangGraph (StateGraph)**.
-\end{enumerate}
-
-\section{AI Agent Là Gì? Khác Gì So Với ChatGPT Thường?}
-
-Nhiều người lầm tưởng cài ChatGPT vào một khung chat là thành Agent. Thực tế, sự khác biệt nằm ở công thức:
-\begin{align*}
-\text{\textbf{AI Agent}} &= \text{\textbf{LLM}} \ (\text{Bộ não suy luận}) + \text{\textbf{Tools}} \ (\text{Cánh tay thao tác}) \\
-&\quad + \text{\textbf{Memory}} \ (\text{Bộ nhớ}) + \text{\textbf{Planning}} \ (\text{Kế hoạch})
-\end{align*}
-
+Để hiểu AI Agent, em hãy so sánh 3 thế hệ công nghệ sau:
 
 \begin{table}[H]
 \centering
 \small
-\renewcommand{\arraystretch}{1.25}
-\begin{tabularx}{\textwidth}{l X X}
+\begin{tabularx}{\textwidth}{l X X X}
 \toprule
-\textbf{Đặc Điểm So Sánh} & \textbf{LLM Thông Thường (ChatGPT / Gemini)} & \textbf{AI Agent (Hệ Thống Của Đồ Án)} \\
+\textbf{Đặc Điểm} & \textbf{Cấp Độ 1: Chatbot Cũ} & \textbf{Cấp Độ 2: ChatGPT Thường} & \textbf{Cấp Độ 3: AI Agent (Đề Tài Này)} \\
 \midrule
-\textbf{Khả năng tương tác} & Chỉ biết sinh văn bản, không tương tác được với hệ thống bên ngoài. & Biết gọi các công cụ (Tools): Đọc CSDL, cào tài liệu từ internet, xuất file Word. \\
-\textbf{Tri thức thực tế} & Không biết kho của công ty còn bao nhiêu ram giấy, máy chiếu phòng nào đang hỏng. & Kết nối trực tiếp với CSDL thực của phòng ban (\texttt{office\_assets.db}). \\
-\textbf{Độ tin cậy số học} & Dễ bị ảo giác tính nhẩm, cộng trừ tiền thường xuyên bị sai. & Không bao giờ tính nhẩm; giao toàn bộ phép toán cho code Python/SQL chạy. \\
-\textbf{Quy trình hành động} & Trả lời một lượt rồi dừng lại. & Có quy trình nhiều bước: Hỏi lỗi $\rightarrow$ Hướng dẫn $\rightarrow$ Không được thì tự xuất file Word. \\
+\textbf{Cơ chế} & Dựa trên từ khóa cứng hoặc cây \texttt{if/else} cố định. & Mô hình ngôn ngữ lớn (LLM). Dự đoán từ ngữ tiếp theo. & Mô hình trạng thái kết hợp công cụ tác vụ (Stateful Tools). \\
+\textbf{Khả năng hành động} & Không thể làm gì ngoài các câu thoại viết sẵn. & Chỉ sinh văn bản (text) trên màn hình, không chạm được vào máy tính. & \textbf{Tự động thực thi hành động:} Truy vấn DB, cào web, sinh file Word, vẽ biểu đồ. \\
+\textbf{Xử lý bài toán} & Hỏi lệch 1 chữ là "Xin lỗi tôi không hiểu". & Hỏi 1 câu trả lời 1 lần (Single-turn prompt). & \textbf{Lập kế hoạch đa bước:} Hiểu ý định $\rightarrow$ Soát vé $\rightarrow$ Chọn tool $\rightarrow$ Cập nhật CSDL. \\
 \bottomrule
 \end{tabularx}
-\caption{So sánh giữa LLM thuần túy và Hệ thống AI Agent.}
+\caption{So sánh 3 cấp độ từ Chatbot đến AI Agent}
 \end{table}
 
-\section{Hiện Tượng "Ảo Giác Tính Nhẩm" (Hallucination Tax)}
-
-Nghiên cứu \textit{''AI Agents for Inventory Control: Human-LLM-OR Complementarity''} (\href{https://arxiv.org/abs/2602.12631}{arXiv:2602.12631}, 2026) chỉ ra rằng:
+\begin{notebox}[Ví dụ đời thường giúp em trả lời tự tin trước Hội đồng]
+Giả sử có nhân viên nói: \textit{"Máy in tầng 2 bị kẹt giấy, hãy lập phiếu báo hỏng giúp tôi"}.
 \begin{itemize}
-    \item Mô hình ngôn ngữ lớn (LLM) bản chất là mô hình xác suất đoán từ tiếp theo (\textit{Next-token prediction}), nó không có mạch tính toán logic số học trong nhân xử lý.
-    \item Khi để LLM tự tính: \textit{''Kho có 85 ram, xuất 15 ram, nhập thêm 30 ram, hỏi còn bao nhiêu?''}, nếu văn cảnh phức tạp hoặc số liệu lớn, LLM rất hay đoán mò ra con số sai lệch.
-    \item \textbf{Giải pháp của đồ án (Deterministic Code Execution):} LLM chỉ làm nhiệm vụ đọc hiểu câu hỏi tiếng Việt của người dùng; khi cần tính toán, Agent tự động gọi hàm Python \texttt{commit\_stock\_transaction} để CPU máy tính tính toán với độ chính xác tuyệt đối 100\%.
+    \item \textbf{ChatGPT thông thường:} Sẽ viết ra một đoạn văn bản mẫu trên màn hình và bảo người dùng: \textit{"Bạn hãy copy đoạn này rồi dán vào Microsoft Word nhé"}.
+    \item \textbf{AI Agent của em:} Tự động trích xuất tên người dùng, phòng ban, dòng máy Canon 2900 $\rightarrow$ gọi module \texttt{doc\_generator.py} $\rightarrow$ tạo ra file \texttt{Phieu\_Bao\_Hong\_SC-959E91.docx} thật sự trên ổ cứng $\rightarrow$ lưu vào bảng \texttt{maintenance\_tickets} $\rightarrow$ trả về nút tải file ngay trên khung chat!
+\end{itemize}
+\end{notebox}
+
+\section{Hiện Tượng Ảo Giác Của LLM \& Bài Báo arXiv:2602.12631 (2026)}
+
+\subsection{Tại sao mô hình ngôn ngữ lớn lại "dốt toán"?}
+Các mô hình như GPT-4 hay Gemini được huấn luyện dựa trên kiến trúc Transformer với mục tiêu: \textbf{Dự đoán token (từ ngữ) tiếp theo có xác suất xuất hiện cao nhất}. Bộ não của chúng là một mạng nơ-ron xác suất ngôn ngữ, \textbf{không phải là một chip số học ALU}.
+
+Khi người dùng hỏi: \textit{"Kho có 85 ram giấy, xuất đi 18 ram cho Marketing, xuất tiếp 23 ram cho Kế toán, rồi nhập về 40 ram, tổng cộng còn bao nhiêu?"}.
+\begin{itemize}
+    \item Đôi khi mô hình sẽ trả lời một con số sai lệch hoàn toàn vì nó đang "đoán từ" theo cảm giác ngôn ngữ.
+    \item Trong quản lý kho và tài sản doanh nghiệp, sai 1 đơn vị hàng là lệch sổ sách kế toán hàng chục triệu đồng!
 \end{itemize}
 
-\section{Nhập Môn LangGraph: Điều Phối Luồng Bằng Đồ Thị Trạng Thái}
+\subsection{Công bố khoa học arXiv:2602.12631: "Hallucination Tax"}
+Bài báo khoa học quốc tế mới nhất năm 2026 mang tên:
+\begin{quote}
+\textit{"AI Agents for Inventory Control: Human-LLM-OR Complementarity"} (\textbf{arXiv:2602.12631}, 2026)
+\end{quote}
+đã chỉ ra rằng: Nếu để LLM tự tính toán số học tồn kho, doanh nghiệp sẽ phải trả một chi phí vô cùng đắt đỏ gọi là \textbf{"Hallucination Tax" (Thuế ảo giác)}.
 
-Thay vì dùng các lệnh \texttt{if...else} rối rắm, đồ án sử dụng thư viện **LangGraph** để xây dựng một đồ thị luồng xử lý:
+\subsection{Giải pháp của đồ án: Tính toán số học tất định (Deterministic Code Execution)}
+Để triệt tiêu hoàn toàn lỗi này, hệ thống của em áp dụng phương pháp phân công lao động khoa học:
 \begin{itemize}
-    \item \textbf{State (Trạng thái):} Một đối tượng lưu giữ toàn bộ thông tin của phiên hội thoại (tin nhắn, quyền hạn người dùng, file ảnh, kết quả phản hồi).
-    \item \textbf{Node (Nút xử lý):} Mỗi nút là một chuyên viên AI xử lý một việc cụ thể:
-    \begin{itemize}
-        \item \texttt{classify\_and\_auth}: Phân loại câu hỏi và kiểm tra quyền RBAC.
-        \item \texttt{inventory\_node}: Chuyên viên tra cứu kho và số liệu.
-        \item \texttt{support\_node}: Chuyên viên hướng dẫn sửa lỗi và lập phiếu báo hỏng.
-        \item \texttt{enrich\_node}: Chuyên viên cào tài liệu từ mạng theo model.
-        \item \texttt{ocr\_node}: Chuyên viên đọc ảnh hóa đơn.
-    \end{itemize}
-    \item \textbf{Conditional Edges (Cạnh rẽ nhánh):} Quyết định câu hỏi sẽ được chuyển đến nút nào dựa trên kết quả phân tích của nút phân loại.
+    \item \textbf{AI:} Chỉ làm việc nó giỏi nhất -- đó là \textbf{Hiểu ngôn ngữ tự nhiên tiếng Việt} của nhân viên (Nhân viên đang hỏi gì? Đang cần mượn đồ hay báo hỏng?).
+    \item \textbf{Code Python \& SQL:} Đảm nhận toàn bộ việc cộng trừ tồn kho, tính tổng định giá tài sản ($85 \times 75.000 = 6.375.000$ VNĐ) và kiểm tra chặn âm kho.
+    \item \textbf{Kết quả:} Độ chính xác số học đạt \textbf{100\% tuyệt đối}, loại bỏ hoàn toàn Hallucination Tax!
 \end{itemize}
 
+\section{Nhập Môn LangGraph: Mô Hình Tuyến Tàu Điện Ngầm}
+
+Để liên kết các hành động lại với nhau, đồ án sử dụng framework \textbf{LangGraph}. Hãy hình dung LangGraph giống như một \textbf{Tuyến Tàu Điện Ngầm}:
+
+\begin{enumerate}
+    \item \textbf{AgentState (Toa tàu mang hành lý):} Là một từ điển Python (\texttt{TypedDict}) mang theo toàn bộ dữ liệu của lượt tương tác hiện tại: câu hỏi người dùng, vai trò (\texttt{user}/\texttt{admin}), ý định (\texttt{intent}), văn bản trả lời (\texttt{response}), và dữ liệu đính kèm.
+    \item \textbf{Node (Nhà ga xử lý):} Mỗi Node là một hàm Python nhận vào State, thực hiện một nhiệm vụ (tra cứu kho, hướng dẫn kỹ thuật, cào web), cập nhật thêm dữ liệu vào State rồi chuyển toa tàu đi tiếp.
+    \item \textbf{Edge (Đường ray cố định):} Đường nối thẳng từ Node A sang Node B.
+    \item \textbf{Conditional Edge (Bộ bẻ ghi đường ray có điều kiện):} Dựa trên ý định và quyền hạn của người dùng để quyết định toa tàu rẽ sang nhánh nào.
+\end{enumerate}
+
+\begin{codebox}[Định nghĩa State trung tâm trong `src/agents/orchestrator.py`]
 \begin{lstlisting}[language=Python]
-# Doan code khoi tao LangGraph trong src/agents/orchestrator.py
-builder = StateGraph(AgentState)
-builder.add_node("classify_and_auth", classify_and_auth)
-builder.add_node("inventory_node", run_inventory_node)
-builder.add_node("support_node", run_support_node)
+from typing import Dict, Any, TypedDict, Optional
 
-builder.add_edge(START, "classify_and_auth")
-builder.add_conditional_edges("classify_and_auth", route_intent)
+class AgentState(TypedDict):
+    user_message: str           # Cau hoi tieng Viet cua nguoi dung
+    user_role: str              # 'user' hoac 'admin' (RBAC)
+    user_name: str              # Ten can bo / nhan vien
+    department: str             # Phong ban
+    image_source: Optional[Any] # Anh hoa don (neu co)
+    intent: str                 # Y dinh sau phan loai
+    response: str               # Cau tra loi cuoi cung
+    data: Dict[str, Any]        # Du lieu phu tro (duong dan file Word, anh chart...)
 \end{lstlisting}
+\end{codebox}
 
-\section{Bài Tập Thực Hành Tuần 03 (Dành Riêng Cho Em)}
+\begin{codebox}[Bộ bẻ ghi rẽ nhánh có điều kiện (`route\_intent`)]
+\begin{lstlisting}[language=Python]
+from langgraph.graph import END
 
-Em hãy đọc kỹ tài liệu và trả lời 3 câu hỏi sau:
+def route_intent(state: AgentState) -> str:
+    intent = state.get("intent", "inventory")
+    if intent == "blocked":       return END               # Bi chan quyen -> Dung ngay
+    elif intent == "ocr_restock": return "ocr_node"        # Nhay sang doc anh hoa don
+    elif intent == "enrich":      return "enrich_node"     # Nhay sang cao web cam nang
+    elif intent == "support":     return "support_node"    # Nhay sang tro ly sua loi
+    else:                         return "inventory_node"  # Mac dinh tra cuu kho
+\end{lstlisting}
+\end{codebox}
 
-\subsection{Bài tập 1: Giải thích cơ chế điều phối}
-Khi một nhân viên gõ câu: \textit{''Máy in ở phòng hành chính bị kẹt giấy thì gỡ thế nào?''}, theo em luồng xử lý của LangGraph trong file \texttt{src/agents/orchestrator.py} sẽ kích hoạt Node nào đầu tiên và sau đó rẽ nhánh tới Node nào?
+\section{Bài Tập Rèn Luyện Tuần 03 Dành Cho Sinh Viên}
 
-\subsection{Bài tập 2: Tư duy học thuật trước Hội đồng}
-Em hãy giải thích bằng lời ngắn gọn: Tại sao bài báo khoa học *arXiv:2602.12631* lại coi việc AI tính nhẩm là một "khoản thuế ảo giác" (*Hallucination Tax*) đối với doanh nghiệp? Đồ án của em đã triệt tiêu khoản thuế này như thế nào?
+Hoàng hãy ghi nhớ và thực hành 2 câu hỏi trọng tâm sau:
 
-\subsection{Bài tập 3: Thực hành quan sát}
-Em hãy mở file \texttt{src/agents/orchestrator.py}, tìm hàm \texttt{classify\_and\_auth} và chỉ ra: Nếu một tài khoản quyền \texttt{user} gửi yêu cầu nhập kho bằng ảnh hóa đơn thì hệ thống sẽ xử lý ra sao?
+\begin{enumerate}
+    \item \textbf{Câu 1 (Luyện thi vấn đáp):} Khi thầy cô hỏi: \textit{"Tại sao em không dùng luôn chuỗi if/else cho gọn mà phải dùng LangGraph?"}, em sẽ trả lời thế nào? (Gợi ý: Nhắc đến khả năng mở rộng thêm các Agent con, cơ chế lưu trạng thái State, và khả năng tạm dừng luồng chờ người bấm duyệt Human-in-the-Loop).
+    \item \textbf{Câu 2 (Thực hành code):} Viết một hàm Python đơn giản nhận vào tin nhắn của người dùng và trả về \texttt{intent = "support"} nếu câu hỏi chứa các từ: \textit{"hỏng", "không lên", "kẹt giấy", "no signal"}.
+\end{enumerate}
 
-
-\vspace{0.4cm}
-\begin{center}
-    \textit{--- Hết Tài Liệu Tuần 03. Chúc em tiếp tục học tập và làm chủ kiến thức vững vàng! ---}
-\end{center}
+Thầy chúc mừng em đã hiểu được bộ não LangGraph! Sang Tuần 04, chúng ta sẽ bắt tay vào chế tạo \textbf{Bộ công cụ (Tools)}: cào web, vẽ biểu đồ và tự động sinh file Word!
 
 \end{document}

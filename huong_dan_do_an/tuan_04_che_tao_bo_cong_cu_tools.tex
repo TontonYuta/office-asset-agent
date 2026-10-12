@@ -2,7 +2,7 @@
 \usepackage[utf8]{vietnam}
 \usepackage{amsmath,amssymb}
 \usepackage{geometry}
-\geometry{top=2.0cm,bottom=2.0cm,left=2.2cm,right=2.2cm}
+\geometry{top=2.0cm,bottom=2.0cm,left=2.0cm,right=2.0cm}
 \usepackage{booktabs}
 \usepackage{tabularx}
 \usepackage{float}
@@ -12,37 +12,52 @@
 \usepackage{fancyhdr}
 \usepackage{hyperref}
 \usepackage{listings}
+\usepackage{tcolorbox}
 
-% Cấu hình hiển thị code Python đẹp mắt
+\tcbuselibrary{skins,breakable}
+\newtcolorbox{notebox}[1][]{
+    colback=blue!5!white,
+    colframe=blue!75!black,
+    fonttitle=\bfseries,
+    title=#1,
+    arc=3mm,
+    boxrule=0.8pt,
+    left=6pt,right=6pt,top=6pt,bottom=6pt,
+    breakable
+}
+\newtcolorbox{codebox}[1][]{
+    colback=gray!5!white,
+    colframe=gray!75!black,
+    fonttitle=\bfseries,
+    title=#1,
+    arc=2mm,
+    boxrule=0.6pt,
+    left=5pt,right=5pt,top=5pt,bottom=5pt,
+    breakable
+}
+
 \definecolor{codegreen}{rgb}{0,0.6,0}
 \definecolor{codegray}{rgb}{0.5,0.5,0.5}
 \definecolor{codepurple}{rgb}{0.58,0,0.82}
 \definecolor{backcolour}{rgb}{0.97,0.97,0.97}
 
-\lstdefinestyle{pythonstyle}{
+\lstdefinestyle{pystyle}{
     backgroundcolor=\color{backcolour},   
     commentstyle=\color{codegreen}\itshape,
     keywordstyle=\color{blue}\bfseries,
     numberstyle=\tiny\color{codegray},
     stringstyle=\color{codepurple},
     basicstyle=\ttfamily\footnotesize,
-    breakatwhitespace=false,         
     breaklines=true,                 
-    captionpos=b,                    
-    keepspaces=true,                 
     numbers=left,                    
     numbersep=6pt,                  
-    showspaces=false,                
-    showstringspaces=false,
-    showtabs=false,                  
     tabsize=4,
     frame=single,
     framerule=0.4pt,
     rulecolor=\color{gray!40}
 }
-\lstset{style=pythonstyle}
+\lstset{style=pystyle}
 
-% Cấu hình liên kết
 \hypersetup{
     colorlinks=true,
     linkcolor=blue!75!black,
@@ -50,23 +65,20 @@
     urlcolor=blue!85!black
 }
 
-% Cấu hình Header và Footer
 \pagestyle{fancy}
 \setlength{\headheight}{14.5pt}
 \fancyhf{}
 \rhead{\small \textit{Đồ án 2: Office Asset Agent}}
-\lhead{\small \textit{Tài liệu Hướng dẫn Hàng tuần — GVHD}}
+\lhead{\small \textit{Cẩm Nang Hướng Dẫn Chi Tiết — Tuần 04}}
 \cfoot{\thepage}
 
-% Khoảng cách văn bản chuẩn học thuật
 \setlength{\parskip}{5pt plus 1pt minus 1pt}
 \setlength{\parindent}{0pt}
 \linespread{1.15}
 \setlist[itemize]{leftmargin=1.5em, itemsep=3pt, topsep=2pt}
 \setlist[enumerate]{leftmargin=1.5em, itemsep=3pt, topsep=2pt}
 
-% Định dạng tiêu đề
-\titleformat{\section}{\large\bfseries\color{blue!80!black}}{\thesection.}{0.5em}{}
+\titleformat{\section}{\large\bfseries\color{blue!85!black}}{\thesection.}{0.5em}{}
 \titleformat{\subsection}{\normalsize\bfseries\color{black}}{\thesubsection.}{0.5em}{}
 \titlespacing*{\section}{0pt}{10pt plus 2pt minus 2pt}{4pt plus 1pt minus 1pt}
 \titlespacing*{\subsection}{0pt}{8pt plus 2pt minus 2pt}{3pt plus 1pt minus 1pt}
@@ -74,128 +86,135 @@
 \begin{document}
 
 \begin{center}
-    {\large \textbf{TRƯỜNG CÔNG NGHỆ THÔNG TIN VÀ TRUYỀN THÔNG}}\\[0.2em]
+    {\large \textbf{TRƯỜNG CÔNG NGHỆ THÔNG TIN VÀ TRUYỀN THÔNG -- ĐHBK HÀ NỘI}}\\[0.2em]
     {\normalsize \textbf{BỘ MÔN KHOA HỌC MÁY TÍNH \& HỆ THỐNG THÔNG TIN}}\\[1.0em]
     
-    {\Large \bfseries \color{blue!85!black} SỔ TAY HƯỚNG DẪN THỰC HIỆN ĐỒ ÁN 2}\\[0.3em]
+    {\Large \bfseries \color{blue!85!black} CẨM NANG HƯỚNG DẪN THỰC HIỆN ĐỒ ÁN 2}\\[0.3em]
     {\large \textbf{Đề tài: Hệ Thống AI Agent Hỗ Trợ Tra Cứu và Quản Lý Vật Tư - Thiết Bị Phòng Ban}}\\[0.8em]
     
-    \rule{0.8\textwidth}{0.6pt}\\[0.6em]
+    \rule{0.85\textwidth}{0.8pt}\\[0.6em]
     
-    {\bfseries CHUYÊN ĐỀ TUẦN 04}\\[0.3em]
-    {\large \bfseries ĐÁP ÁN MẪU TUẦN 3 \& CHẾ TẠO BỘ CÔNG CỤ (TOOLS) CHO AI AGENT}\\[0.8em]
+    {\bfseries CHUYÊN ĐỀ TUẦN 04 (DÀNH CHO NGƯỜI MỚI BẮT ĐẦU TỪ CON SỐ 0)}\\[0.3em]
+    {\large \bfseries CHẾ TẠO BỘ CÔNG CỤ (TOOLS): TÍNH TOÁN KHO, CÀO WEB \& TỰ ĐỘNG XUẤT TÀI LIỆU}\\[0.8em]
     
     \small
     \textbf{Sinh viên thực hiện:} Trần Huy Hoàng \quad $\vert$ \quad \textbf{MSSV:} 20237337\\
-    \textbf{Đơn vị áp dụng:} Phòng Hành chính -- Quản trị (Ban Quản lý Cơ sở vật chất)\\
-    \textbf{Thời gian thực hiện:} Tuần 4 (Lập trình Tầng Công Cụ / Tool-Use Layer)
+    \textbf{Đơn vị áp dụng thử nghiệm:} Phòng Hành chính -- Quản trị (Ban Quản lý Cơ sở vật chất)\\
+    \textbf{Thời gian học tập:} Tuần 4 (Trang Bị "Đôi Tay \& Đôi Chân" Cho Agent Thông Qua Tools)
 \end{center}
 
 \vspace{0.2cm}
 \hrule
 \vspace{0.3cm}
 
-\section{Đáp Án Mẫu \& Đánh Giá Chi Tiết Bài Tập Tuần 03}
+\section{Lời Dặn Của GVHD: Tại Sao Agent Phải Có "Tool"?}
 
-Em hãy cùng thầy rà soát lại đáp án của 3 câu hỏi tư duy ở Tuần 3:
+Chào Hoàng, nếu như mô hình AI chỉ là "bộ não" biết suy nghĩ, thì \textbf{Công cụ (Tool)} chính là "đôi tay và đôi chân" giúp Agent tác động ra thế giới bên ngoài. Một bộ não dù thông minh đến đâu nhưng nếu bị giam trong phòng kín không có tay chân thì không thể mở cửa hay ghi chép sổ sách được.
 
-\subsection{Đáp án Bài tập 1: Cơ chế điều phối khi hỏi kẹt giấy máy in}
-Khi nhân viên hỏi: \textit{''Máy in ở phòng hành chính bị kẹt giấy thì gỡ thế nào?''}:
+Trong thư mục \texttt{src/tools/}, em sẽ xây dựng 4 công cụ độc lập:
 \begin{enumerate}
-    \item \textbf{Node đầu tiên kích hoạt:} Luôn luôn là \texttt{classify\_and\_auth} (Cổng tiếp nhận). Node này bóc tách câu hỏi, nhận thấy có các từ khóa sự cố (\textit{máy in}, \textit{kẹt giấy}) và phân loại \texttt{intent = "support"}.
-    \item \textbf{Rẽ nhánh:} Hàm \texttt{route\_intent} đọc giá trị \texttt{"support"} và lập tức chuyển quyền điều khiển sang \texttt{support\_node}.
-    \item \textbf{Kết quả:} \texttt{support\_node} kích hoạt cẩm nang của dòng máy in Canon 2900 và hướng dẫn người dùng quy trình 4 bước: Tắt nguồn $\rightarrow$ Rút Cartridge 12A $\rightarrow$ Kéo nhẹ giấy kẹt theo chiều thoát $\rightarrow$ Bật lại máy.
+    \item \texttt{sql\_calculator.py}: Máy tính số học kho, tìm kiếm thông minh qua bí danh đời thường.
+    \item \texttt{web\_search.py}: Công cụ tự cào tài liệu hướng dẫn và bảng mã lỗi trên mạng qua DuckDuckGo.
+    \item \texttt{doc\_generator.py}: Công cụ sinh file Word (\texttt{.docx}) phiếu báo hỏng và vẽ biểu đồ (\texttt{matplotlib}).
+    \item \texttt{vision\_ocr.py}: Công cụ bóc tách bảng hóa đơn giao hàng từ ảnh chụp.
 \end{enumerate}
 
-\subsection{Đáp án Bài tập 2: "Khoản thuế ảo giác" (Hallucination Tax)}
+\section{Tool 1: Máy Tính Kho Tất Định (`sql\_calculator.py`)}
+
+Đây là công cụ hiện thực hóa giải pháp chống ảo giác của bài báo \textbf{arXiv:2602.12631}. Nó có 2 hàm trọng tâm:
+
+\subsection{1. Thuật toán tìm kiếm thông minh 4 lớp (`search\_asset\_by\_query`)}
+Khi người dùng gõ vào một câu bất kỳ, hàm này sẽ quét qua 4 tầng lọc từ chặt chẽ đến nới lỏng:
 \begin{itemize}
-    \item \textbf{Bản chất khái niệm:} Trong bài báo *arXiv:2602.12631*, các tác giả ví các lỗi tính nhẩm của LLM như một "khoản thuế" vô hình mà doanh nghiệp phải gánh chịu. Khi AI cộng trừ tồn kho hay tính tiền bị sai, doanh nghiệp phải tốn rất nhiều thời gian, nhân lực để đi rà soát và khắc phục hậu quả.
-    \item \textbf{Cách đồ án triệt tiêu khoản thuế này:} Áp dụng nguyên lý \textbf{Toán học tất định (Deterministic Code Execution)}. Toàn bộ các phép cộng trừ kho và tính tổng tiền đều được ủy quyền cho hàm Python và truy vấn SQL thuần túy, đảm bảo kết quả chính xác 100\%, không sai một đồng hay một đơn vị hàng hóa nào.
+    \item \textbf{Tầng 1 (Exact Match):} Khớp chính xác mã quản lý (\texttt{code}) hoặc model máy (ví dụ: \texttt{"VT-GIAY-A4"} hoặc \texttt{"Canon LBP 2900"}).
+    \item \textbf{Tầng 2 (Sub-string Name):} Khớp chuỗi con trong tên đầy đủ (\texttt{name}).
+    \item \textbf{Tầng 3 (Alias Matching):} Tách chuỗi bí danh trong cột \texttt{aliases} để so sánh. Ví dụ: người dùng gõ \textit{"còn mực 2900 không"} $\rightarrow$ khớp với bí danh \textit{"mực 2900"} của hộp mực Cartridge 12A.
+    \item \textbf{Tầng 4 (Token Matching):} Tách câu hỏi thành các từ đơn lẻ và đếm số từ trùng lặp với thuộc tính của vật tư (nếu trùng $\ge 2$ từ khóa thì chọn).
 \end{itemize}
 
-\subsection{Đáp án Bài tập 3: Cơ chế chặn tài khoản User gửi ảnh nhập kho}
-Trong hàm \texttt{classify\_and\_auth}:
+\subsection{2. Hàm cập nhật kho an toàn chống âm kho (`commit\_stock\_transaction`)}
 \begin{lstlisting}[language=Python]
-if has_image or "nhap kho" in msg or "hoa don" in msg:
-    if state["user_role"] != ROLE_ADMIN:
-        state["intent"] = "blocked"
-        state["response"] = "Tu choi truy cap: Yeu cau quyen Admin..."
-        return state
+def commit_stock_transaction(asset_id: int, transaction_type: str, quantity: int, provider_or_dept: str, notes: str = ""):
+    db = SessionLocal()
+    try:
+        asset = db.query(Asset).filter(Asset.id == asset_id).first()
+        if not asset:
+            return {"success": False, "message": "Khong tim thay vat tu!"}
+
+        # CHAN XUAT AM KHO
+        if transaction_type == "OUT" and asset.quantity < quantity:
+            return {
+                "success": False,
+                "message": f"Kho khong du! Hien chi con {asset.quantity} {asset.unit}, nhung yeu cau xuat {quantity}."
+            }
+
+        prev_qty = asset.quantity
+        if transaction_type == "IN":   asset.quantity += quantity
+        elif transaction_type == "OUT": asset.quantity -= quantity
+
+        # Luu lich su giao dich phuc vu kiem toan tai san
+        tx_code = f"TX-{uuid.uuid4().hex[:8].upper()}"
+        tx = StockTransaction(
+            transaction_code=tx_code, asset_id=asset.id,
+            transaction_type=transaction_type, quantity=quantity,
+            unit_price=asset.unit_price, total_amount=quantity * asset.unit_price,
+            provider_or_dept=provider_or_dept, status="APPROVED", notes=notes
+        )
+        db.add(tx); db.commit()
+        return {"success": True, "message": f"Cap nhat thanh cong: {prev_qty} -> {asset.quantity} {asset.unit}."}
+    finally:
+        db.close()
 \end{lstlisting}
-Khi tài khoản quyền \texttt{user} cố tình gửi ảnh hóa đơn nhập kho, hàm nhận thấy \texttt{user\_role != "admin"} nên gán ngay \texttt{intent = "blocked"}, và cạnh rẽ nhánh sẽ ngắt luồng tại chỗ (\texttt{return END}). Nhờ vậy, tài khoản thông thường không thể can thiệp vào kho hàng, đảm bảo tính bảo mật và toàn vẹn dữ liệu.
 
-\section{Mục Tiêu Trọng Tâm Tuần 04: Chế Tạo Bộ Công Cụ (Tools)}
+\section{Tool 2: Tự Động Cào Web Làm Giàu Tri Thức (`web\_search.py`)}
 
-Nếu LLM là "Bộ não", thì **Tools** chính là "Đôi cánh tay" giúp Agent thực hiện các hành động trong thế giới thực. Trong tuần này, em sẽ nắm vững 4 công cụ nằm trong thư mục \texttt{src/tools/}:
+Khi công ty mua một thiết bị mới, cán bộ không cần gõ cẩm nang hướng dẫn sử dụng thủ công. Agent sẽ tự động cào internet và lưu vào CSDL nội bộ.
+
+\subsection{Cơ chế hoạt động 2 tầng (Cache $\rightarrow$ Internet $\rightarrow$ Fallback)}
 \begin{enumerate}
-    \item \textbf{Tool 1: Tính toán \& Tra cứu kho (\texttt{sql\_calculator.py}):} Tìm kiếm theo bí danh và cập nhật số lượng tồn kho.
-    \item \textbf{Tool 2: Tự làm giàu tri thức từ internet (\texttt{web\_search.py}):} Dùng DuckDuckGo cào tài liệu chính hãng theo mã Model.
-    \item \textbf{Tool 3: Tự động tạo văn bản \& Biểu đồ (\texttt{doc\_generator.py}):} Xuất file Word \texttt{.docx} Phiếu Báo Hỏng và vẽ biểu đồ \texttt{Matplotlib}.
-    \item \textbf{Tool 4: Đọc ảnh hóa đơn giao hàng (\texttt{vision\_ocr.py}):} Bóc tách bảng dữ liệu chứng từ nhập kho.
+    \item \textbf{Tầng 1 (Cache hit):} Kiểm tra trong bảng \texttt{knowledge\_docs}. Nếu model này đã từng được cào về trước đó, lấy ra trả lời ngay lập tức, độ trễ 0 giây!
+    \item \textbf{Tầng 2 (Web Crawling):} Nếu chưa có, kích hoạt thư viện \texttt{duckduckgo\_search} với truy vấn:  
+    \texttt{"<model> user manual troubleshooting error codes huong dan su dung ma loi"}.  
+    Bóc tách 3 kết quả hàng đầu và lưu một bản ghi mới vào CSDL.
+    \item \textbf{Cơ chế Fallback an toàn:} Nếu máy tính mất mạng hoặc bị DuckDuckGo giới hạn tần suất, hàm tự động chuyển sang kho tri thức chuẩn hóa dự phòng, bảo đảm chương trình không bao giờ bị văng lỗi.
 \end{enumerate}
 
-\section{Phân Tích Chi Tiết 4 Công Cụ Cốt Lõi}
+\section{Tool 3: Tự Động Sinh File Word \& Vẽ Biểu Đồ (`doc\_generator.py`)}
 
-\subsection{1. Tool Tự động làm giàu tri thức (\texttt{web\_search.py})}
-Khi phòng ban mua một chiếc máy mới (VD: \textit{Canon LBP 3300}), thay vì cán bộ ngồi gõ cẩm nang, Agent tự làm theo quy trình:
-\begin{lstlisting}[language=Python]
-from duckduckgo_search import DDGS
-
-# 1. Tu dong sinh tu khoa tim kiem chinh hang
-query = f"{model_name} user manual troubleshooting error codes huong dan su dung"
-with DDGS() as ddgs:
-    results = list(ddgs.text(query, max_results=3))
-
-# 2. Trich xuat cac buoc huong dan va ma loi
-# 3. Luu truc tiep vao bang KnowledgeDoc trong CSDL de cache lai
-\end{lstlisting}
-\textit{Ý nghĩa:} Cán bộ không mất một phút nào gõ cẩm nang; hệ thống tự hoàn thiện dữ liệu kỹ thuật chỉ sau 5 giây.
-
-\subsection{2. Tool Xuất file Word Phiếu Báo Hỏng (\texttt{doc\_generator.py})}
-Dùng thư viện \texttt{python-docx} để điền tự động dữ liệu vào đúng thể thức văn bản hành chính Việt Nam:
+\subsection{1. Sinh file Word Phiếu Báo Hỏng chuẩn mẫu doanh nghiệp (`python-docx`)}
+Trong môi trường văn phòng, một câu chat trên màn hình không có giá trị pháp lý để thanh toán viện phí sửa chữa. Phải có một **tờ phiếu in ra giấy có chữ ký 3 bên**.
 \begin{itemize}
-    \item \textbf{Quốc hiệu \& Tiêu ngữ:} CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM / Độc lập -- Tự do -- Hạnh phúc.
-    \item \textbf{Bảng chi tiết sự cố:} Mã phiếu, người yêu cầu, phòng ban, thiết bị, hiện tượng hư hỏng, đề xuất kỹ thuật.
-    \item \textbf{Bảng 3 chữ ký chuẩn doanh nghiệp:} Người báo hỏng $\vert$ Cán bộ cơ sở vật chất $\vert$ Lãnh đạo phê duyệt.
+    \item Thiết lập lề chuẩn trang A4 (2cm bốn phía).
+    \item Tạo tiêu đề Quốc hiệu trang trọng màu xanh đậm (\texttt{\#003366}).
+    \item Sử dụng đối tượng bảng \texttt{Table Grid} để điền 7 trường: Mã phiếu, Người báo hỏng, Phòng ban, Tên máy, Vị trí, Triệu chứng lỗi, Phương án đề xuất.
+    \item Tạo bảng chữ ký 3 cột: \textit{Người báo hỏng}, \textit{Cán bộ cơ sở vật chất}, \textit{Lãnh đạo phòng ban}.
+    \item Lưu file vào \texttt{data/templates/Phieu\_Bao\_Hong\_<Mã>.docx} và trả đường dẫn về cho khung chat.
 \end{itemize}
 
-\subsection{3. Tool Vẽ biểu đồ kho tự động (\texttt{Matplotlib})}
-Để đưa biểu đồ vào khung chat của Streamlit mà không làm đơ ứng dụng hoặc lỗi font tiếng Việt:
-\begin{lstlisting}[language=Python]
-import matplotlib
-matplotlib.use("Agg")  # Chay backend ngam khong can cua so do hoa GUI
-import matplotlib.pyplot as plt
+\subsection{2. Tự động vẽ biểu đồ thống kê tồn kho (`matplotlib`)}
+Hàm \texttt{generate\_inventory\_chart()} truy vấn CSDL và vẽ đồ thị kép:
+\begin{itemize}
+    \item \textbf{Biểu đồ cột (Trái):} Hiển thị số lượng tồn kho từng loại vật tư tiêu hao, có ghi chú số lượng rõ ràng trên đầu mỗi cột.
+    \item \textbf{Biểu đồ tròn (Phải):} Phân tích cơ cấu danh mục tài sản giữa \textit{Vật tư tiêu hao} vs \textit{Thiết bị dùng chung}.
+    \item Cấu hình \texttt{matplotlib.use("Agg")} để vẽ đồ thị chạy ngầm không cần mở cửa sổ màn hình, tương thích hoàn hảo với Web Server.
+\end{itemize}
 
-# Ve bieu do cot so luong va bieu do tron co cau tai san
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(11, 4.8), dpi=100)
-# ... Luu file ra data/bieu_do_ton_kho.png de hien thi tren Web ...
-\end{lstlisting}
+\section{Bài Tập Thực Hành Tuần 04 Dành Cho Sinh Viên}
 
-\section{Bài Tập Thực Hành Tuần 04 (Dành Riêng Cho Em)}
+Hoàng hãy chạy thử các Tool bằng Terminal thông qua bài tập sau:
 
-Em hãy thực hiện 3 bài tập thực hành sau để kiểm tra các Tool:
-
-\subsection{Bài tập 1: Thử nghiệm tạo file Word tự động}
-Em hãy mở Terminal và chạy lệnh sau để kiểm tra xem máy tính của em có tự động sinh ra một file Word Phiếu Báo Hỏng hay không:
+\begin{enumerate}
+    \item \textbf{Thực hành 1:} Chạy lệnh sau để kiểm tra hàm sinh file Word có tạo ra file thật không:
 \begin{lstlisting}[language=bash]
-python -c "from src.tools.doc_generator import generate_maintenance_ticket_docx; path = generate_maintenance_ticket_docx({'ticket_code': 'TEST-TUAN4', 'requester_name': 'Tran Huy Hoang', 'department': 'Phong Hanh Chinh', 'device_name': 'May in Canon 2900', 'location': 'Tang 2', 'symptom': 'Ket giay cum say', 'proposed_solution': 'Bao tri cum say'}); print('File da duoc tao tai:', path)"
+PYTHONPATH=. .venv/bin/python -c "
+from src.tools.doc_generator import generate_maintenance_ticket_docx
+path = generate_maintenance_ticket_docx({'ticket_code': 'TEST-01'})
+print('File Word da duoc tao tai:', path)
+"
 \end{lstlisting}
-Em hãy mở thư mục \texttt{data/templates/} xem file Word vừa tạo có mở được bằng Microsoft Word không và nhận xét bố cục của nó.
+    \item \textbf{Thực hành 2:} Mở file Word vừa tạo trong thư mục \texttt{data/templates/} để kiểm tra định dạng bảng và chữ ký.
+\end{enumerate}
 
-\subsection{Bài tập 2: Thử nghiệm tạo biểu đồ kho}
-Chạy lệnh sau để kiểm tra Tool vẽ biểu đồ:
-\begin{lstlisting}[language=bash]
-python -c "from src.tools.doc_generator import generate_inventory_chart; print('Bieu do tao tai:', generate_inventory_chart())"
-\end{lstlisting}
-Sau đó em mở file ảnh \texttt{data/bieu\_do\_ton\_kho.png} lên xem.
-
-
-\subsection{Bài tập 3: Câu hỏi tư duy kỹ thuật}
-Tại sao trong hàm \texttt{enrich\_and\_cache\_knowledge} của file \texttt{web\_search.py}, chúng ta lại kiểm tra CSDL trước rồi mới gọi DuckDuckGo? Cơ chế Caching này mang lại lợi ích gì cho hệ thống?
-
-\vspace{0.4cm}
-\begin{center}
-    \textit{--- Hết Tài Liệu Tuần 04. Chúc em tiếp tục vững bước trên hành trình làm chủ đồ án! ---}
-\end{center}
+Thầy chúc mừng em đã hoàn thành Tuần 04! Khi các Tool đã sẵn sàng, Tuần 05 chúng ta sẽ ráp nối mọi thứ vào bộ não **LangGraph Orchestrator** và xây dựng giao diện Web **Streamlit** tuyệt đẹp!
 
 \end{document}

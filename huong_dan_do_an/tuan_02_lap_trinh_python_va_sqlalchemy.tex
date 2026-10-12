@@ -2,7 +2,7 @@
 \usepackage[utf8]{vietnam}
 \usepackage{amsmath,amssymb}
 \usepackage{geometry}
-\geometry{top=2.0cm,bottom=2.0cm,left=2.2cm,right=2.2cm}
+\geometry{top=2.0cm,bottom=2.0cm,left=2.0cm,right=2.0cm}
 \usepackage{booktabs}
 \usepackage{tabularx}
 \usepackage{float}
@@ -12,37 +12,52 @@
 \usepackage{fancyhdr}
 \usepackage{hyperref}
 \usepackage{listings}
+\usepackage{tcolorbox}
 
-% Cấu hình hiển thị code Python đẹp mắt
+\tcbuselibrary{skins,breakable}
+\newtcolorbox{notebox}[1][]{
+    colback=blue!5!white,
+    colframe=blue!75!black,
+    fonttitle=\bfseries,
+    title=#1,
+    arc=3mm,
+    boxrule=0.8pt,
+    left=6pt,right=6pt,top=6pt,bottom=6pt,
+    breakable
+}
+\newtcolorbox{codebox}[1][]{
+    colback=gray!5!white,
+    colframe=gray!75!black,
+    fonttitle=\bfseries,
+    title=#1,
+    arc=2mm,
+    boxrule=0.6pt,
+    left=5pt,right=5pt,top=5pt,bottom=5pt,
+    breakable
+}
+
 \definecolor{codegreen}{rgb}{0,0.6,0}
 \definecolor{codegray}{rgb}{0.5,0.5,0.5}
 \definecolor{codepurple}{rgb}{0.58,0,0.82}
 \definecolor{backcolour}{rgb}{0.97,0.97,0.97}
 
-\lstdefinestyle{pythonstyle}{
+\lstdefinestyle{pystyle}{
     backgroundcolor=\color{backcolour},   
     commentstyle=\color{codegreen}\itshape,
     keywordstyle=\color{blue}\bfseries,
     numberstyle=\tiny\color{codegray},
     stringstyle=\color{codepurple},
     basicstyle=\ttfamily\footnotesize,
-    breakatwhitespace=false,         
     breaklines=true,                 
-    captionpos=b,                    
-    keepspaces=true,                 
     numbers=left,                    
     numbersep=6pt,                  
-    showspaces=false,                
-    showstringspaces=false,
-    showtabs=false,                  
     tabsize=4,
     frame=single,
     framerule=0.4pt,
     rulecolor=\color{gray!40}
 }
-\lstset{style=pythonstyle}
+\lstset{style=pystyle}
 
-% Cấu hình liên kết
 \hypersetup{
     colorlinks=true,
     linkcolor=blue!75!black,
@@ -50,23 +65,20 @@
     urlcolor=blue!85!black
 }
 
-% Cấu hình Header và Footer
 \pagestyle{fancy}
 \setlength{\headheight}{14.5pt}
 \fancyhf{}
 \rhead{\small \textit{Đồ án 2: Office Asset Agent}}
-\lhead{\small \textit{Tài liệu Hướng dẫn Hàng tuần — GVHD}}
+\lhead{\small \textit{Cẩm Nang Hướng Dẫn Chi Tiết — Tuần 02}}
 \cfoot{\thepage}
 
-% Khoảng cách văn bản chuẩn học thuật
 \setlength{\parskip}{5pt plus 1pt minus 1pt}
 \setlength{\parindent}{0pt}
 \linespread{1.15}
 \setlist[itemize]{leftmargin=1.5em, itemsep=3pt, topsep=2pt}
 \setlist[enumerate]{leftmargin=1.5em, itemsep=3pt, topsep=2pt}
 
-% Định dạng tiêu đề
-\titleformat{\section}{\large\bfseries\color{blue!80!black}}{\thesection.}{0.5em}{}
+\titleformat{\section}{\large\bfseries\color{blue!85!black}}{\thesection.}{0.5em}{}
 \titleformat{\subsection}{\normalsize\bfseries\color{black}}{\thesubsection.}{0.5em}{}
 \titlespacing*{\section}{0pt}{10pt plus 2pt minus 2pt}{4pt plus 1pt minus 1pt}
 \titlespacing*{\subsection}{0pt}{8pt plus 2pt minus 2pt}{3pt plus 1pt minus 1pt}
@@ -74,157 +86,202 @@
 \begin{document}
 
 \begin{center}
-    {\large \textbf{TRƯỜNG CÔNG NGHỆ THÔNG TIN VÀ TRUYỀN THÔNG}}\\[0.2em]
+    {\large \textbf{TRƯỜNG CÔNG NGHỆ THÔNG TIN VÀ TRUYỀN THÔNG -- ĐHBK HÀ NỘI}}\\[0.2em]
     {\normalsize \textbf{BỘ MÔN KHOA HỌC MÁY TÍNH \& HỆ THỐNG THÔNG TIN}}\\[1.0em]
     
-    {\Large \bfseries \color{blue!85!black} SỔ TAY HƯỚNG DẪN THỰC HIỆN ĐỒ ÁN 2}\\[0.3em]
+    {\Large \bfseries \color{blue!85!black} CẨM NANG HƯỚNG DẪN THỰC HIỆN ĐỒ ÁN 2}\\[0.3em]
     {\large \textbf{Đề tài: Hệ Thống AI Agent Hỗ Trợ Tra Cứu và Quản Lý Vật Tư - Thiết Bị Phòng Ban}}\\[0.8em]
     
-    \rule{0.8\textwidth}{0.6pt}\\[0.6em]
+    \rule{0.85\textwidth}{0.8pt}\\[0.6em]
     
-    {\bfseries CHUYÊN ĐỀ TUẦN 02}\\[0.3em]
-    {\large \bfseries ĐÁP ÁN MẪU TUẦN 1 \& LẬP TRÌNH PYTHON TƯƠNG TÁC CSDL SQLALCHEMY}\\[0.8em]
+    {\bfseries CHUYÊN ĐỀ TUẦN 02 (DÀNH CHO NGƯỜI MỚI BẮT ĐẦU TỪ CON SỐ 0)}\\[0.3em]
+    {\large \bfseries LẬP TRÌNH PYTHON NỀN TẢNG, KẾT NỐI SQLITE \& SQLALCHEMY ORM}\\[0.8em]
     
     \small
     \textbf{Sinh viên thực hiện:} Trần Huy Hoàng \quad $\vert$ \quad \textbf{MSSV:} 20237337\\
-    \textbf{Đơn vị áp dụng:} Phòng Hành chính -- Quản trị (Ban Quản lý Cơ sở vật chất)\\
-    \textbf{Thời gian thực hiện:} Tuần 2 (Lập trình Tầng Dữ liệu \& ORM Model)
+    \textbf{Đơn vị áp dụng thử nghiệm:} Phòng Hành chính -- Quản trị (Ban Quản lý Cơ sở vật chất)\\
+    \textbf{Thời gian học tập:} Tuần 2 (Xây Dựng Tầng Dữ Liệu \& Thao Tác CSDL Bằng Code)
 \end{center}
 
 \vspace{0.2cm}
 \hrule
 \vspace{0.3cm}
 
-\section{Đáp Án Mẫu \& Đánh Giá Chi Tiết Bài Tập Tuần 01}
+\section{Mục Tiêu Tuần 02 \& Đánh Giá Bài Tập Tuần 01}
 
-Trước khi bước vào kiến thức lập trình Tuần 2, thầy cung cấp đáp án chuẩn mực cho 3 bài tập tư duy ở Tuần 1. Em hãy đối chiếu với suy nghĩ của mình để nắm vững tư duy thiết kế hệ thống:
+Chào Hoàng, thầy rất vui vì em đã nắm vững cấu trúc 4 bảng CSDL ở Tuần 01. Nhớ lại câu hỏi tuần trước: \textit{Tại sao cần tách bảng \texttt{knowledge\_docs}?}, em đã hiểu chuẩn hóa dữ liệu giúp hệ thống không bị trùng lặp thông tin cẩm nang khi công ty có nhiều chiếc máy cùng một model.
 
-\subsection{Đáp án Bài tập 1: Dòng dữ liệu thiết bị thực tế}
-Với chiếc \textbf{Máy chiếu Sony VPL-EX435} mua mới đặt tại \textit{Phòng họp lớn tầng 4}, giá 16.500.000 VNĐ, một dòng bản ghi chuẩn trong bảng \texttt{assets} sẽ như sau:
-\begin{itemize}
-    \item \texttt{code}: \texttt{"TB-MAYCHIEU-02"} (Mã định danh nội bộ có quy tắc, phân biệt với máy Epson).
-    \item \texttt{name}: \texttt{"Máy chiếu 3LCD Sony VPL-EX435"} (Tên thương mại đầy đủ).
-    \item \texttt{category}: \texttt{"Thiết bị dùng chung"} (Không bị hao hụt khi dùng).
-    \item \texttt{model}: \texttt{"Sony VPL-EX435"} (Tên model chính xác để Agent sau này cào tài liệu từ mạng).
-    \item \texttt{quantity}: \texttt{1} $\vert$ \texttt{unit}: \texttt{"Chiếc"} $\vert$ \texttt{unit\_price}: \texttt{16500000}.
-    \item \texttt{location}: \texttt{"Phòng họp lớn tầng 4"}.
-    \item \texttt{status}: \texttt{"Sẵn sàng"}.
-    \item \texttt{aliases}: \texttt{"máy chiếu sony, máy chiếu tầng 4, sony ex435, máy chiếu phòng họp lớn, may chieu sony"}.
-\end{itemize}
-\textit{Nhận xét của GVHD:} Việc dự đoán các cụm từ bí danh (\texttt{aliases}) như \textit{''máy chiếu tầng 4''} hoặc \textit{''máy chiếu sony''} là mấu chốt giúp AI khi nghe nhân viên hỏi đời thường vẫn truy vấn trúng mã thiết bị trong kho.
-
-\subsection{Đáp án Bài tập 2: Tại sao phải có bảng \texttt{stock\_transactions}?}
-Nếu chỉ cộng trừ trực tiếp vào cột \texttt{quantity} của bảng \texttt{assets}, hệ thống sẽ mắc lỗi nghiêm trọng trong quản lý tài chính doanh nghiệp:
+Mục tiêu trọng tâm của Tuần 02 là: \textbf{Biến bản vẽ thiết kế trên giấy thành các dòng code Python thực sự chạy được trên máy tính}:
 \begin{enumerate}
-    \item \textbf{Mất vết kiểm toán (Audit Trail):} Cuối năm kiểm kê kho, nếu con số bị lệch, không ai biết hàng đã xuất cho ai, vào ngày nào, vì lý do gì.
-    \item \textbf{Truy vết trách nhiệm:} Bảng giao dịch ghi rõ \textit{ai là người nhận/giao}, \textit{thuộc phòng ban nào}, kèm mã giao dịch (\texttt{TX-xxxx}).
-    \item \textbf{Cơ sở vẽ biểu đồ \& thống kê biến động:} Muốn vẽ biểu đồ lượng giấy A4 xuất qua từng tháng hay so sánh giữa các phòng ban (Marketing dùng bao nhiêu, Kế toán dùng bao nhiêu), hệ thống bắt buộc phải đọc từ lịch sử giao dịch.
+    \item Hiểu môi trường ảo (\texttt{.venv}) là gì và tại sao lập trình viên bắt buộc phải dùng nó.
+    \item Hiểu bản chất của \textbf{ORM (Object-Relational Mapping)}: Tại sao ta không viết câu lệnh SQL bằng chuỗi ký tự mà dùng Class Python.
+    \item Tự tay viết code kết nối SQLite, định nghĩa các Model và nạp dữ liệu mẫu ban đầu qua script \texttt{init\_db.py}.
 \end{enumerate}
 
-\subsection{Đáp án Bài tập 3: Nguy cơ nếu không có Human-in-the-Loop?}
-Nếu AI tự động cộng trừ kho ngay khi đọc ảnh hóa đơn mà không cần cán bộ bấm duyệt:
-\begin{enumerate}
-    \item \textbf{Sai số nhận diện ảnh (OCR Misrecognition):} Ảnh hóa đơn giấy có thể bị nhăn, mờ mực, chụp nghiêng hoặc viết tay số 1 thành số 7. Nếu AI đọc nhầm 10 ram giấy thành 70 ram giấy mà tự động lưu vào CSDL, kho sẽ bị sai lệch nghiêm trọng.
-    \item \textbf{Rủi ro trùng lặp (Duplicate Submission):} Nếu cán bộ vô tình chụp hoặc gửi lại ảnh hóa đơn 2 lần, AI sẽ cộng dồn số lượng gấp đôi.
-    \item \textbf{Nguyên tắc bảo vệ CSDL:} AI chỉ là công cụ hỗ trợ chuẩn bị dữ liệu (Drafting); con người (Cán bộ có thẩm quyền) phải là điểm kiểm soát cuối cùng (Final checkpoint).
-\end{enumerate}
+\section{Kiến Thức Căn Bản: Môi Trường Ảo (Virtual Environment)}
 
-\section{Mục Tiêu Trọng Tâm Tuần 02: Lập Trình Python \& SQLAlchemy}
+Nhiều sinh viên mới học hay mở Terminal lên và gõ ngay lệnh \texttt{pip install sqlalchemy}. Khi về nhà hoặc đổi máy tính khác, code bị lỗi tung tóe vì máy thiếu thư viện hoặc phiên bản thư viện bị xung đột.
 
-Trong tuần này, em sẽ chuyển từ bản vẽ thiết kế trên giấy sang viết mã nguồn Python thực tế:
-\begin{enumerate}
-    \item Hiểu khái niệm \textbf{ORM (Object-Relational Mapping)} là gì và tại sao chúng ta dùng \textbf{SQLAlchemy}.
-    \item Nắm vững cấu trúc kết nối CSDL SQLite trong Python.
-    \item Viết và giải thích được các thao tác \textbf{CRUD} (Thêm, Đọc, Sửa, Xóa dữ liệu).
-    \item Hiểu nguyên lý \textbf{Deterministic Math} trong file \texttt{sql\_calculator.py} để chống lỗi AI tính nhẩm sai.
-\end{enumerate}
+\begin{notebox}[Môi trường ảo (\texttt{.venv}) là gì?]
+Môi trường ảo là một \textbf{"chiếc hộp cách ly"} nằm ngay bên trong thư mục dự án của em. Khi cài đặt bất kỳ thư viện nào (như SQLAlchemy, Streamlit, LangGraph), thư viện đó chỉ nằm trong thư mục \texttt{.venv/} của đồ án này, không ảnh hưởng đến hệ điều hành và các phần mềm khác trên máy tính.
+\end{notebox}
 
-\section{Khái Niệm ORM (SQLAlchemy) — Cầu Nối Giữa Code Và CSDL}
-
-\subsection{Cách làm cũ (Raw SQL) và những nhược điểm}
-Trước đây, lập trình viên thường viết câu lệnh SQL dưới dạng chuỗi (String):
-\begin{lstlisting}[language=Python]
-# Cach cu: Viet SQL dang chuoi truyen thong
-cursor.execute("SELECT * FROM assets WHERE code = 'VT-GIAY-A4'")
-row = cursor.fetchone()
-name = row[1]  # Phai nho cot 1 la ten, rat de nham lan
+Lệnh chuẩn để khởi tạo và kích hoạt môi trường ảo:
+\begin{lstlisting}[language=bash]
+# 1. Tao moi truong ao bang Python 3.11 hoac cong cu uv
+uv venv --python 3.11 .venv
+# 2. Kich hoat moi truong ao
+source .venv/bin/activate       # Tren Linux / macOS
+.venv\Scripts\activate           # Tren Windows Command Prompt
+# 3. Cai dat thu vien tu file requirements.txt
+pip install -r requirements.txt
 \end{lstlisting}
-Cách này dễ gây lỗi chính tả tên cột và có nguy cơ bị tấn công tiêm mã độc (SQL Injection).
 
-\subsection{Cách làm hiện đại (ORM với SQLAlchemy)}
-ORM cho phép chúng ta coi mỗi bảng CSDL là một \textbf{Class (Lớp)} trong Python, và mỗi dòng dữ liệu là một \textbf{Object (Đối tượng)}:
+\section{Bản Chất Của SQLAlchemy ORM: "Thông Dịch Viên" Giữa Python \& CSDL}
+
+\subsection{Tại sao không viết câu lệnh SQL thuần túy?}
+Bình thường, nếu muốn lấy thông tin của món giấy A4, ta phải viết:
+\begin{lstlisting}[language=SQL]
+SELECT * FROM assets WHERE code = 'VT-GIAY-A4';
+\end{lstlisting}
+Cách làm này có 2 nhược điểm chết người:
+\begin{itemize}
+    \item \textbf{Dễ lỗi gõ phím:} Câu lệnh là chuỗi ký tự (String), nếu gõ sai tên cột thì chương trình chỉ báo lỗi khi đang chạy thật.
+    \item \textbf{Nguy cơ SQL Injection:} Kẻ xấu có thể nhập câu lệnh ác ý vào ô chat để phá hủy CSDL.
+\end{itemize}
+
+\subsection{ORM giải quyết bài toán này như thế nào?}
+\textbf{ORM (Object-Relational Mapping)} là một kỹ thuật biến:
+\begin{itemize}
+    \item Mỗi \textbf{Bảng dữ liệu} trong SQLite $\rightarrow$ thành một \textbf{Class (Lớp)} trong Python.
+    \item Mỗi \textbf{Cột} trong bảng $\rightarrow$ thành một \textbf{Thuộc tính (Attribute)} của Class.
+    \item Mỗi \textbf{Dòng dữ liệu} $\rightarrow$ thành một \textbf{Đối tượng (Object)} thực sự trong bộ nhớ Python.
+\end{itemize}
+
+Thay vì viết câu SQL bằng chữ, em chỉ cần viết:
 \begin{lstlisting}[language=Python]
-# Cach hien dai voi SQLAlchemy ORM
-from src.models.asset import Asset
-
-# Truy van du lieu de doc, tu nhien nhu doc code Python
 asset = db.query(Asset).filter(Asset.code == "VT-GIAY-A4").first()
-print(asset.name)      # "Giay in Double A A4 70gsm"
-print(asset.quantity)  # 85
+print(f"Ten vat tu: {asset.name}, So luong con: {asset.quantity}")
 \end{lstlisting}
 
-\section{Phân Tích Mã Nguồn Tầng Dữ Liệu Trong Đồ Án}
+\section{Mổ Xẻ Chi Tiết Mã Nguồn Tầng Dữ Liệu}
 
-Trong dự án của chúng ta, tầng dữ liệu được tổ chức tại hai vị trí quan trọng mà em cần đọc kỹ:
+\subsection{1. File `src/core/database.py` -- Cấu hình kết nối CSDL}
+Hãy mở file \texttt{src/core/database.py}, em sẽ thấy các dòng lệnh sau:
 
-\subsection{1. Cấu hình kết nối CSDL (\texttt{src/core/database.py})}
-\begin{itemize}
-    \item \texttt{create\_engine}: Khởi tạo kết nối tới tệp SQLite cục bộ (\texttt{office\_assets.db}). Tham số \texttt{check\_same\_thread=False} cho phép nhiều luồng của giao diện Web Streamlit cùng truy cập dữ liệu an toàn.
-    \item \texttt{SessionLocal}: Là "nhà máy" tạo ra các phiên làm việc (Session) mỗi khi chương trình cần đọc hoặc ghi dữ liệu.
-    \item \texttt{Base = declarative\_base()}: Là lớp cha để tất cả các bảng CSDL kế thừa.
-\end{itemize}
-
-\subsection{2. Thao tác tính toán chính xác (\texttt{src/tools/sql\_calculator.py})}
-Đây là vũ khí khắc phục lỗi \textit{Hallucination Tax} (AI tính nhẩm sai):
 \begin{lstlisting}[language=Python]
-def commit_stock_transaction(asset_id: int, transaction_type: str, 
-                             quantity: int, provider_or_dept: str):
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, declarative_base
+from src.core.config import DATABASE_URL
+
+# Khoi tao engine ket noi SQLite
+engine = create_engine(
+    DATABASE_URL,
+    connect_args={"check_same_thread": False}, # CO QUAN TRONG!
+    echo=False
+)
+
+# Factory tao phien lam viec (Session)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+# Lop cha cua toan bo cac Model
+Base = declarative_base()
+\end{lstlisting}
+
+\begin{notebox}[Tại sao tham số \texttt{check\_same\_thread=False} là bắt buộc?]
+Mặc định SQLite chỉ cho phép 1 luồng xử lý (thread) truy cập vào file CSDL. Nhưng ứng dụng Web Streamlit ở các tuần sau hoạt động theo mô hình đa luồng (multi-threaded) khi có nhiều sự kiện người dùng bấm chuột. Tham số này cho phép nhiều luồng cùng chia sẻ kết nối SQLite an toàn mà không bị lỗi \textit{"SQLite objects created in a thread can only be used in that same thread"}.
+\end{notebox}
+
+\subsection{2. File `src/models/asset.py` -- Định nghĩa bảng Vật tư \& Cẩm nang}
+Dưới đây là cách chuyển thiết kế CSDL của Tuần 1 thành Class Python:
+
+\begin{lstlisting}[language=Python]
+from datetime import datetime
+from sqlalchemy import Column, Integer, String, Text, DateTime
+from src.core.database import Base
+
+class Asset(Base):
+    __tablename__ = "assets"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    code = Column(String(50), unique=True, nullable=False, index=True)
+    name = Column(String(200), nullable=False)
+    category = Column(String(50), nullable=False)  # 'Vat tu tieu hao' / 'Thiet bi dung chung'
+    model = Column(String(100), nullable=True, index=True)
+    quantity = Column(Integer, default=0, nullable=False)
+    unit = Column(String(20), nullable=False)      # Ram, Chiec, Hop...
+    unit_price = Column(Integer, default=0)         # VND
+    location = Column(String(100), default="Kho Tang 1")
+    status = Column(String(50), default="San sang")
+    aliases = Column(String(255), nullable=True)   # Danh sach bi danh doi thuong
+    specs = Column(String(500), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f"<Asset({self.code}: {self.name} - {self.quantity} {self.unit})>"
+\end{lstlisting}
+
+\subsection{3. Thao tác CRUD (Create, Read, Update, Delete) căn bản}
+
+Để làm việc với CSDL trong code, em luôn tuân theo quy trình 3 bước:
+\begin{enumerate}
+    \item \textbf{Mở phiên (Open Session):} \texttt{db = SessionLocal()}
+    \item \textbf{Thực hiện thao tác (CRUD):} Thêm, đọc, sửa, xóa
+    \item \textbf{Lưu và đóng phiên (Commit \& Close):} \texttt{db.commit(); db.close()}
+\end{enumerate}
+
+\begin{codebox}[Ví dụ 1: Thêm một món hàng mới vào kho (Create)]
+\begin{lstlisting}[language=Python]
+db = SessionLocal()
+new_paper = Asset(
+    code="VT-GIAY-A4",
+    name="Giay in Double A A4 70gsm",
+    category="Vat tu tieu hao",
+    quantity=85,
+    unit="Ram",
+    unit_price=75000,
+    aliases="giay in, giay a4, double a, ram giay"
+)
+db.add(new_paper)
+db.commit()  # Luu chinh thuc vao o dia
+db.close()
+\end{lstlisting}
+\end{codebox}
+
+\begin{codebox}[Ví dụ 2: Xuất kho an toàn chống âm kho (Update with Business Logic)]
+\begin{lstlisting}[language=Python]
+def export_asset(asset_code: str, request_qty: int):
     db = SessionLocal()
     try:
-        asset = db.query(Asset).filter(Asset.id == asset_id).first()
+        asset = db.query(Asset).filter(Asset.code == asset_code).first()
+        if not asset:
+            return "Khong tim thay vat tu!"
         
-        # KIEM TRA LOGIC SO HOC: Tuyet doi khong de kho bi am
-        if transaction_type == "OUT" and asset.quantity < quantity:
-            return {"success": False, "message": "Kho khong du hang xuat!"}
-            
-        # TINH TOAN CHINH XAC 100% BANG PYTHON
-        if transaction_type == "IN":
-            asset.quantity += quantity
-        elif transaction_type == "OUT":
-            asset.quantity -= quantity
-            
-        db.commit() # Luu thay doi vao CSDL SQLite
-        return {"success": True, "new_quantity": asset.quantity}
+        # Kiem tra logic chan am kho
+        if asset.quantity < request_qty:
+            return f"Kho khong du! Hien chi con {asset.quantity} {asset.unit}."
+        
+        asset.quantity -= request_qty  # Tru so luong
+        db.commit()                     # Luu lai
+        return f"Xuat kho thanh cong! Con lai: {asset.quantity} {asset.unit}."
     finally:
         db.close()
 \end{lstlisting}
+\end{codebox}
 
-\section{Bài Tập Thực Hành Tuần 02 (Dành Riêng Cho Em)}
+\section{Bài Tập Thực Hành Tuần 02 Dành Cho Sinh Viên}
 
-Em hãy mở dự án trong máy tính, quan sát mã nguồn và trả lời 3 câu hỏi sau:
+Hoàng hãy mở file \texttt{tests/test\_system.py} và thử viết một hàm kiểm tra đơn giản theo 2 yêu cầu sau:
 
-\subsection{Bài tập 1: Giải thích cú pháp Python ORM}
-Em hãy đọc đoạn code sau và giải thích bằng lời: Hàm này làm nhiệm vụ gì và điều kiện lọc \texttt{Asset.quantity <= 10} mang ý nghĩa gì trong thực tế phòng ban?
-\begin{lstlisting}[language=Python]
-low_stock = db.query(Asset).filter(
-    Asset.category == "Vat tu tieu hao",
-    Asset.quantity <= 10
-).all()
-\end{lstlisting}
+\begin{enumerate}
+    \item \textbf{Bài tập 1 (Truy vấn lọc):} Viết một đoạn code Python sử dụng SQLAlchemy để tìm tất cả các mặt hàng thuộc nhóm \textit{"Vật tư tiêu hao"} có số lượng tồn kho $\le 10$ đơn vị (các mặt hàng sắp hết cần cảnh báo).
+    \item \textbf{Bài tập 2 (Xử lý Transaction):} Nếu trong lúc xuất kho, máy tính bị mất điện đột ngột giữa chừng trước khi gọi lệnh \texttt{db.commit()}, thì số lượng trong file SQLite có bị trừ mất không? Tại sao? (Gợi ý: Tìm hiểu tính chất \textbf{Atomicity (Nguyên tử)} trong giao dịch ACID).
+\end{enumerate}
 
-\subsection{Bài tập 2: Thử chạy lệnh tra cứu bằng dòng lệnh}
-Em hãy mở Terminal trên máy tính, chạy thử script kiểm tra database bằng lệnh:
-\begin{lstlisting}[language=bash]
-python -c "from src.tools.sql_calculator import calculate_inventory_metrics; print(calculate_inventory_metrics())"
-\end{lstlisting}
-Em hãy ghi lại kết quả hiển thị trên màn hình (Tổng số mặt hàng và tổng định giá tài sản hiện tại).
+\begin{notebox}[Gợi Ý Đáp Án Bài Tập 2]
+Nhờ tính chất Atomicity của giao dịch ACID trong SQLite/SQLAlchemy: Một giao dịch chỉ được ghi nhận khi nó hoàn tất trọn vẹn 100\%. Nếu mất điện trước lệnh \texttt{db.commit()}, toàn bộ thao tác trong phiên làm việc sẽ tự động bị hủy bỏ (\textbf{Rollback}) về trạng thái ban đầu, số lượng tồn kho trong file CSDL không bao giờ bị sai lệch!
+\end{notebox}
 
-\subsection{Bài tập 3: Câu hỏi tư duy logic}
-Nếu một nhân viên yêu cầu xuất 100 ram giấy A4 trong khi kho hiện tại chỉ còn 85 ram, hàm \texttt{commit\_stock\_transaction} sẽ phản hồi thế nào? Tại sao đây lại là điểm vượt trội so với việc để LLM tự quyết định xuất kho?
-
-\vspace{0.4cm}
-\begin{center}
-    \textit{--- Hết Tài Liệu Tuần 02. Chúc em tiếp tục vững bước trên hành trình làm chủ đồ án! ---}
-\end{center}
+Thầy chúc mừng em đã hoàn thành Tuần 02! Bây giờ em đã có trong tay CSDL SQLite hoạt động trơn tru. Ở Tuần 03, chúng ta sẽ bắt đầu bước vào thế giới kỳ thú của \textbf{AI Agent và LangGraph}!
 
 \end{document}
