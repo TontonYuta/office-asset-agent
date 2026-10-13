@@ -3,6 +3,7 @@ Central Multi-Agent Orchestrator using LangGraph.
 Đồ án 2: Bộ điều phối luồng trung tâm (Workflow Controller), phân quyền RBAC và Human-in-the-Loop.
 """
 
+import re
 from typing import Dict, Any, TypedDict, Optional
 from langgraph.graph import StateGraph, START, END
 
@@ -29,11 +30,12 @@ class AgentState(TypedDict):
 def classify_and_auth(state: AgentState) -> AgentState:
     """
     Phân loại ý định (Intent Classification) & Kiểm tra bảo mật phân quyền (RBAC Check).
+    Tích hợp Out-of-Scope Guardrail và phân định chính xác giữa tra cứu tồn kho vs hỗ trợ sự cố.
     """
-    msg = state["user_message"].lower()
+    msg = state["user_message"].lower().strip()
     has_image = state.get("image_source") is not None
 
-    # 1. Trường hợp gửi ảnh hóa đơn / phiếu giao hàng
+    # 1. Trường hợp gửi ảnh hóa đơn / phiếu giao hàng (Admin only)
     if has_image or "nhập kho" in msg or "hóa đơn" in msg or "phiếu giao" in msg:
         if state["user_role"] != ROLE_ADMIN:
             state["intent"] = "blocked"
@@ -45,23 +47,90 @@ def classify_and_auth(state: AgentState) -> AgentState:
         state["intent"] = "ocr_restock"
         return state
 
-    # 2. Trường hợp tự động tìm kiếm / làm giàu tri thức theo model máy
+    # 2. Trường hợp chào hỏi, giới thiệu danh tính (Greeting)
+    clean_msg = re.sub(r"[^\w\s]", " ", msg).strip()
+    greeting_keywords = [
+        "chào", "hello", "hi bot", "xin chào", "bạn là ai", "bạn tên gì", "giới thiệu",
+        "help", "trợ giúp", "hướng dẫn", "bạn có thể làm gì", "chức năng của bạn"
+    ]
+    if any(k in clean_msg for k in greeting_keywords) and len(clean_msg.split()) <= 10:
+        state["intent"] = "greeting"
+        state["response"] = (
+            "👋 Xin chào! Tôi là **Office Asset Agent** — Trợ lý AI chuyên trách hỗ trợ quản lý vật tư và thiết bị văn phòng.\n\n"
+            "Tôi có thể hỗ trợ bạn các nghiệp vụ chính sau:\n"
+            "- 📦 **Tra cứu vật tư & thiết bị:** Kiểm tra tồn kho, vị trí đặt máy móc (giấy A4, bút viết, mực in, máy in, máy chiếu...)\n"
+            "- 🛠️ **Hỗ trợ kỹ thuật:** Hướng dẫn khắc phục sự cố máy móc hoặc tự động lập Phiếu Báo Hỏng chuẩn mẫu Word\n"
+            "- 🧠 **Thẩm định cấp phát:** Kiểm tra định mức tồn kho an toàn theo mô hình AIM-RM\n"
+            "- 🌐 **Làm giàu tri thức:** Tự động tra cứu cẩm nang kỹ thuật theo model máy trên mạng\n\n"
+            "Bạn đang cần hỗ trợ vấn đề gì tại phòng ban?"
+        )
+        return state
+
+    # 3. Guardrail: Nhận diện câu hỏi ngoài phạm vi nghiệp vụ (Out-of-Scope / Chitchat)
+    out_of_scope_keywords = [
+        "ăn gì", "món ăn", "uống gì", "quán ăn", "cơm", "bún", "phở", "thời tiết", "nhiệt độ", "mưa", "nắng",
+        "kể chuyện", "đố vui", "bài thơ", "hát", "game", "phim", "bóng đá", "thể thao",
+        "lập trình", "viết code", "chứng khoán", "tiền ảo", "bitcoin", "tổng thống", "chính trị"
+    ]
+    if any(k in msg for k in out_of_scope_keywords):
+        state["intent"] = "out_of_scope"
+        state["response"] = (
+            f"🚫 **Yêu cầu ngoài phạm vi hỗ trợ:**\n\n"
+            f"Câu hỏi của bạn (*'{state['user_message']}'*) không thuộc nghiệp vụ quản lý vật tư - thiết bị văn phòng doanh nghiệp.\n\n"
+            f"Tôi là trợ lý AI chuyên biệt cho các công việc:\n"
+            f"- Tra cứu tồn kho và vị trí thiết bị phòng ban\n"
+            f"- Hướng dẫn sửa chữa sự cố thiết bị hoặc lập Phiếu Báo Hỏng\n"
+            f"- Thẩm định định mức cấp phát vật tư (AIM-RM)\n\n"
+            f"Vui lòng gửi câu hỏi liên quan đến tài sản, vật tư hoặc thiết bị văn phòng!"
+        )
+        return state
+
+    # 4. Trường hợp tự động tìm kiếm / làm giàu tri thức theo model máy
     if any(k in msg for k in ["làm giàu", "tìm tài liệu", "thêm model", "thêm thiết bị", "tra cứu model", "manual"]):
         state["intent"] = "enrich"
         return state
 
-    # 3. Trường hợp hỗ trợ kỹ thuật & xử lý sự cố thiết bị
-    support_keywords = [
-        "hỏng", "sự cố", "lỗi", "không lên", "no signal", "kẹt giấy",
-        "offline", "hú", "mất tiếng", "máy chiếu", "máy in", "micro",
-        "báo hỏng", "sửa chữa", "khắc phục", "không được"
+    # 5. Phân định: Hỗ trợ kỹ thuật & xử lý sự cố thiết bị (Support) vs Tra cứu vị trí / tồn kho (Inventory)
+    trouble_keywords = [
+        "hỏng", "sự cố", "báo lỗi", "bị lỗi", "không lên", "no signal", "kẹt giấy",
+        "offline", "hú", "mất tiếng", "báo hỏng", "sửa chữa", "khắc phục", "không được",
+        "không in được", "vệt đen", "hết pin", "thay cáp", "gọi thợ", "chập", "rách"
     ]
-    if any(k in msg for k in support_keywords) and not ("còn bao nhiêu" in msg or "còn không" in msg):
+
+    presence_inventory_keywords = [
+        "có trong phòng không", "có ở phòng", "có ở đây không", "còn bao nhiêu", "còn không",
+        "ở đâu", "phòng nào có", "đặt ở đâu", "tìm thấy ở đâu", "mượn", "xin cấp", "xuất kho", "giá trị"
+    ]
+
+    has_trouble = any(k in msg for k in trouble_keywords)
+    is_asking_presence = any(k in msg for k in presence_inventory_keywords)
+
+    if has_trouble and not is_asking_presence:
         state["intent"] = "support"
         return state
 
-    # 4. Mặc định là tra cứu tồn kho / thống kê
-    state["intent"] = "inventory"
+    # 6. Kiểm tra từ khóa nghiệp vụ kho / thiết bị / phòng ban
+    domain_keywords = [
+        "kho", "máy", "thiết bị", "vật tư", "tài sản", "giấy", "bút", "mực", "pin", "cáp",
+        "micro", "mic", "loa", "projector", "printer", "canon", "epson", "hp", "takstar",
+        "double a", "thiên long", "energizer", "ugreen", "phòng", "còn", "có", "hết",
+        "tồn", "xuất", "nhập", "cấp", "biểu đồ", "thống kê", "chi phí", "giá", "ngân sách",
+        "model", "định mức", "an toàn", "safe stock", "aim-rm"
+    ]
+    if any(k in msg for k in domain_keywords):
+        state["intent"] = "inventory"
+        return state
+
+    # 7. Fallback Out-of-Scope nếu câu hỏi không khớp bất kỳ ngữ cảnh nào
+    state["intent"] = "out_of_scope"
+    state["response"] = (
+        f"Tôi chưa hiểu rõ yêu cầu: *'{state['user_message']}'*.\n\n"
+        f"Hệ thống chỉ hỗ trợ tra cứu vật tư, kiểm tra thiết bị văn phòng, hướng dẫn khắc phục sự cố hoặc lập phiếu báo hỏng.\n"
+        f"Bạn có thể thử các câu hỏi như:\n"
+        f"- *'Kho còn bao nhiêu ram giấy in A4?'*\n"
+        f"- *'Máy in Canon 2900 đặt ở phòng nào?'*\n"
+        f"- *'Máy chiếu phòng họp báo No Signal thì làm sao?'*"
+    )
     return state
 
 
@@ -104,7 +173,7 @@ def run_ocr_node(state: AgentState) -> AgentState:
 def route_intent(state: AgentState) -> str:
     """Hàm điều hướng có điều kiện cho LangGraph."""
     intent = state.get("intent", "inventory")
-    if intent == "blocked":
+    if intent in ["blocked", "out_of_scope", "greeting"]:
         return END
     elif intent == "ocr_restock":
         return "ocr_node"

@@ -10,6 +10,7 @@ from typing import Dict, Any, Optional
 from src.core.config import ROLE_ADMIN
 from src.tools.sql_calculator import (
     search_asset_by_query,
+    search_asset_with_diagnostics,
     calculate_inventory_metrics,
     get_all_assets,
 )
@@ -119,7 +120,9 @@ def handle_inventory_query(
         }
 
     # 5. Yêu cầu tra cứu mặt hàng cụ thể (VD: "giấy a4", "bút dạ", "mực in", "máy chiếu")
-    matched_asset = search_asset_by_query(user_message)
+    diag = search_asset_with_diagnostics(user_message)
+    matched_asset = diag.get("asset")
+
     if matched_asset:
         val_vnd = matched_asset.quantity * matched_asset.unit_price
         response_text = (
@@ -144,14 +147,45 @@ def handle_inventory_query(
             "response": response_text
         }
 
-    # 6. Nếu không khớp món cụ thể, trả về danh mục tổng quát
+    # 6. Trường hợp người dùng hỏi đích danh Model mà phòng ban không có (Model Mismatch)
+    if diag.get("status") == "model_mismatch":
+        queried_model = diag.get("queried_model", "yêu cầu")
+        cat = diag.get("detected_category", "thiết bị")
+        alt_items = diag.get("alternatives", [])
+        alt_text = ""
+        if alt_items:
+            alt_lines = []
+            for a in alt_items:
+                alt_lines.append(
+                    f"- **{a.name}** (`{a.code}`):\n"
+                    f"  • Tồn kho: `{a.quantity} {a.unit}` | Tình trạng: `{a.status}`\n"
+                    f"  • Vị trí: `{a.location}`"
+                )
+            alt_text = f"\n\n📌 **Các dòng {cat} hiện có sẵn trong phòng ban:**\n" + "\n".join(alt_lines)
+
+        response_text = (
+            f"❌ **Không tìm thấy model '{queried_model}' trong danh mục {cat} của phòng ban.**"
+            f"{alt_text}\n\n"
+            f"💡 **Gợi ý xử lý:**\n"
+            f"1. Nếu phòng ban mới mua thêm dòng máy này: bạn có thể yêu cầu *'Tìm tài liệu model {queried_model}'* để Agent tự cào tài liệu lưu vào CSDL.\n"
+            f"2. Hoặc liên hệ Cán bộ Quản trị (Admin) để cập nhật model này vào danh mục quản lý kho."
+        )
+        return {
+            "status": "model_mismatch",
+            "queried_model": queried_model,
+            "response": response_text
+        }
+
+    # 7. Nếu không khớp món cụ thể, trả về danh mục tổng quát rõ ràng
     all_items = get_all_assets()
-    item_list = ", ".join([a["name"] for a in all_items[:5]])
+    item_list = ", ".join([f"**{a['name']}** (còn {a['quantity']} {a['unit']})" for a in all_items[:4]])
     return {
         "status": "not_found",
         "response": (
-            f"Tôi chưa tìm thấy vật tư khớp với yêu cầu của bạn. "
-            f"Một số mặt hàng phổ biến trong kho hiện có: {item_list}... "
-            f"Bạn có thể tra cứu theo từ khóa như: 'giấy a4', 'bút dạ', 'mực 2900', 'máy chiếu epson'."
+            f"📦 **Thông báo tra cứu kho:**\n\n"
+            f"Hệ thống hiện **chưa có** thông tin vật tư/thiết bị khớp với yêu cầu `{user_message.strip()}` "
+            f"trong danh mục quản lý kho của phòng ban.\n\n"
+            f"📋 **Một số mặt hàng phổ biến đang có sẵn:**\n- {item_list}...\n\n"
+            f"💡 Bạn có thể tra cứu theo từ khóa như: *'giấy a4'*, *'bút dạ'*, *'máy in 2900'*, *'máy chiếu epson'*."
         )
     }

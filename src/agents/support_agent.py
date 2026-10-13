@@ -3,6 +3,7 @@ Device Support & Troubleshooting Agent.
 Đồ án 2: Hướng dẫn khắc phục sự cố theo Model và tự động lập Phiếu Báo Hỏng (Word/PDF).
 """
 
+import re
 from typing import Dict, Any
 import uuid
 from src.core.database import SessionLocal
@@ -22,22 +23,34 @@ def handle_support_query(user_message: str, user_name: str = "Nguyễn Hoàng Lo
         # Trường hợp 1: Người dùng báo vẫn hỏng, yêu cầu lập phiếu sửa chữa / báo hỏng
         escalate_keywords = ["không được", "vẫn không lên", "vẫn hỏng", "lập phiếu", "báo hỏng", "sửa chữa", "thay dây", "gọi thợ", "hỏng rồi"]
         if any(kw in msg_lower for kw in escalate_keywords):
-            # Xác định loại thiết bị từ ngữ cảnh
-            device_name = "Máy chiếu Epson EB-X06 (Cáp HDMI âm sàn)"
-            location = "Phòng họp số 3"
-            symptom = "Báo No Signal màn hình xanh, đã thử thao tác Win+P và đổi cáp nhưng không nhận"
-            proposed_solution = "Kỹ thuật viên kiểm tra thay mới cáp HDMI âm sàn / Bảo hành thiết bị"
+            # Trích xuất vị trí nếu người dùng đề cập cụ thể (VD: "ở phòng kế toán", "tại phòng họp 2", "tầng 3")
+            loc_match = re.search(r"(phòng\s+[a-zA-Z0-9\s–\-]{2,20}|tầng\s+\d+|khu\s+[a-zA-Z0-9]+)", user_message, re.IGNORECASE)
+            extracted_location = loc_match.group(0).strip().title() if loc_match else None
 
+            # Xác định loại thiết bị từ ngữ cảnh
             if "máy in" in msg_lower or "printer" in msg_lower:
-                device_name = "Máy in Canon LBP 2900"
-                location = "Phòng Hành chính - Tầng 2"
-                symptom = "Kẹt giấy cụm sấy hoặc hỏng trống từ vệt đen dài"
-                proposed_solution = "Bảo trì cụm sấy và thay hộp mực Cartridge mới"
+                device_name = "Máy in Laser đơn năng Canon LBP 2900"
+                location = extracted_location or "Phòng Hành chính - Tầng 2"
+                symptom = "Kẹt giấy cụm sấy hoặc lỗi bản in theo phản ánh của nhân viên"
+                proposed_solution = "Kỹ thuật viên kiểm tra bảo trì cụm sấy, vệ sinh rulo cuốn giấy hoặc thay hộp mực"
             elif "micro" in msg_lower or "mic" in msg_lower:
                 device_name = "Bộ Micro Takstar WGV-201"
-                location = "Phòng họp số 1"
+                location = extracted_location or "Phòng họp số 1"
                 symptom = "Mất tiếng, chập chờn nguồn hoặc lệch sóng bộ thu"
                 proposed_solution = "Kiểm tra thay micro hoặc bảo dưỡng bộ thu RF"
+            else:
+                device_name = "Máy chiếu Epson EB-X06 (Cáp HDMI âm sàn)"
+                location = extracted_location or "Phòng họp số 3"
+                symptom = "Báo No Signal màn hình xanh, đã thử thao tác Win+P và đổi cáp nhưng không nhận"
+                proposed_solution = "Kỹ thuật viên kiểm tra thay mới cáp HDMI âm sàn / Bảo hành thiết bị"
+
+            # Tinh chỉnh triệu chứng nếu người dùng mô tả chi tiết
+            if any(s in msg_lower for s in ["kẹt giấy", "rách giấy", "không kéo được giấy"]):
+                symptom = "Kẹt giấy cụm sấy hoặc kẹt rulo kéo giấy"
+            elif any(s in msg_lower for s in ["no signal", "không lên tín hiệu", "màn xanh"]):
+                symptom = "Không nhận tín hiệu hình ảnh (No Signal), lỗi cổng/cáp HDMI"
+            elif any(s in msg_lower for s in ["mất tiếng", "hú", "không nghe tiếng"]):
+                symptom = "Micro mất tiếng hoặc chập chờn nguồn âm thanh"
 
             ticket_code = f"SC-{uuid.uuid4().hex[:6].upper()}"
             ticket_data = {

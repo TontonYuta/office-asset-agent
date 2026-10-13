@@ -215,3 +215,47 @@ def test_orchestrator_rbac_blocking():
     )
     assert res["intent"] == "blocked"
     assert "Từ chối truy cập" in res["response"]
+
+
+def test_model_mismatch_and_presence_query():
+    """Kiểm tra xử lý câu hỏi vị trí 'có trong phòng không' và chống nhận vơ model (Canon 3300)."""
+    # 1. Kiểm tra trực tiếp hàm search_asset_by_query không được nhận vơ Canon 3300 thành Canon 2900
+    res_asset = search_asset_by_query("máy in canon 3300")
+    assert res_asset is None
+
+    # 2. Kiểm tra điều phối qua Orchestrator
+    res = process_user_request("Máy in canon 3300 có trong phòng không")
+    assert res["intent"] == "inventory"
+    assert "Không tìm thấy model '3300'" in res["response"]
+    assert "Canon LBP 2900" in res["response"]
+
+
+def test_out_of_scope_guardrail():
+    """Kiểm tra tầng lọc câu hỏi ngoài phạm vi (Guardrail) ngăn chặn chitchat/hỏi linh tinh."""
+    res_food = process_user_request("Hôm nay ăn gì nhỉ?")
+    assert res_food["intent"] == "out_of_scope"
+    assert "ngoài phạm vi hỗ trợ" in res_food["response"]
+
+    res_weather = process_user_request("Thời tiết Hà Nội hôm nay thế nào?")
+    assert res_weather["intent"] == "out_of_scope"
+    assert "ngoài phạm vi hỗ trợ" in res_weather["response"]
+
+
+def test_greeting_intent():
+    """Kiểm tra phân loại lời chào hỏi và giới thiệu trợ lý."""
+    res = process_user_request("Xin chào, bạn là ai?")
+    assert res["intent"] == "greeting"
+    assert "Office Asset Agent" in res["response"]
+
+
+def test_dynamic_entity_extraction_ticket():
+    """Kiểm tra trích xuất thực thể động (vị trí, triệu chứng) khi lập phiếu sửa chữa."""
+    res = process_user_request(
+        "Máy in ở phòng Kế toán tầng 3 bị kẹt giấy, hãy lập phiếu sửa chữa",
+        user_name="Nguyễn Hoàng Long",
+        department="Phòng Kế toán"
+    )
+    assert res["intent"] == "support"
+    assert "Phiếu Báo Hỏng" in res["response"]
+    assert "Tầng 3" in res["response"] or "Kế Toán" in res["response"]
+
