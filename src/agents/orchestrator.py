@@ -4,8 +4,9 @@ Central Multi-Agent Orchestrator using LangGraph.
 """
 
 import re
-from typing import Dict, Any, TypedDict, Optional
+from typing import Dict, Any, TypedDict, Optional, List
 from langgraph.graph import StateGraph, START, END
+from langgraph.checkpoint.memory import MemorySaver
 
 from src.core.config import ROLE_USER, ROLE_ADMIN
 from src.core.security import check_role_access, PERMISSION_OCR_RESTOCK
@@ -25,6 +26,8 @@ class AgentState(TypedDict):
     intent: str
     response: str
     data: Dict[str, Any]
+    last_device: Optional[str]
+    last_location: Optional[str]
 
 
 def classify_and_auth(state: AgentState) -> AgentState:
@@ -214,8 +217,9 @@ builder.add_edge("support_node", END)
 builder.add_edge("enrich_node", END)
 builder.add_edge("ocr_node", END)
 
-# Biên dịch Graph
-orchestrator_graph = builder.compile()
+# Biên dịch Graph với bộ nhớ lưu vết phiên làm việc (LangGraph MemorySaver)
+checkpointer = MemorySaver()
+orchestrator_graph = builder.compile(checkpointer=checkpointer)
 
 
 def process_user_request(
@@ -223,10 +227,12 @@ def process_user_request(
     role: str = ROLE_USER,
     user_name: str = "Nguyễn Hoàng Long",
     department: str = "Phòng Marketing",
-    image_source: Optional[Any] = None
+    image_source: Optional[Any] = None,
+    thread_id: str = "default_session"
 ) -> Dict[str, Any]:
     """
     Điểm vào duy nhất (Single Entrypoint) xử lý request của người dùng thông qua LangGraph.
+    Hỗ trợ bộ nhớ phiên làm việc nhiều lượt (Multi-turn Memory Persistence qua MemorySaver).
     """
     initial_state: AgentState = {
         "user_message": message,
@@ -237,11 +243,15 @@ def process_user_request(
         "intent": "",
         "response": "",
         "data": {},
+        "last_device": None,
+        "last_location": None,
     }
 
-    final_state = orchestrator_graph.invoke(initial_state)
+    config = {"configurable": {"thread_id": thread_id}}
+    final_state = orchestrator_graph.invoke(initial_state, config=config)
     return {
         "intent": final_state["intent"],
         "response": final_state["response"],
         "data": final_state.get("data", {}),
+        "thread_id": thread_id,
     }

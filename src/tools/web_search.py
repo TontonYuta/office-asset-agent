@@ -31,8 +31,14 @@ def search_online_device_knowledge(model_name: str) -> Dict[str, Any]:
     if search_results:
         snippets = "\n".join([f"- {r.get('title')}: {r.get('body')}" for r in search_results])
         source_url = search_results[0].get("href", "DuckDuckGo Web Search")
-        manual_text = f"Tài liệu kỹ thuật tổng hợp từ internet cho thiết bị {clean_model}:\n{snippets[:400]}..."
-        troubleshooting_guide = f"Bảng chẩn đoán lỗi tìm được:\n{snippets}"
+        from src.core.llm_client import synthesize_knowledge_with_llm
+        llm_synth = synthesize_knowledge_with_llm(snippets, clean_model)
+        if llm_synth:
+            manual_text = llm_synth.get("manual_text", f"Tài liệu kỹ thuật {clean_model}")
+            troubleshooting_guide = llm_synth.get("troubleshooting_guide", snippets)
+        else:
+            manual_text = f"Tài liệu kỹ thuật tổng hợp từ internet cho thiết bị {clean_model}:\n{snippets[:400]}..."
+            troubleshooting_guide = f"Bảng chẩn đoán lỗi tìm được:\n{snippets}"
     else:
         # Tri thức chuẩn mực cho các model văn phòng phổ biến
         source_url = "Cơ sở tri thức nội bộ chuẩn hóa"

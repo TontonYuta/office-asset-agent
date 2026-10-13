@@ -102,19 +102,33 @@ def parse_delivery_receipt(image_source: Any = None) -> Dict[str, Any]:
             # Nếu đọc file ảnh gặp cảnh báo, tiếp tục với parser
             pass
 
-    # 2. Thử gọi Qwen2.5-VL qua API endpoint nếu có cấu hình
-    vlm_endpoint = os.getenv("QWEN_VL_ENDPOINT", "")
+    # 2. Thử gọi Vision VLM API nếu có endpoint hoặc Ollama Vision khả dụng
+    from src.core.llm_client import call_local_vision
     items_extracted = []
 
-    if vlm_endpoint and image_source is not None:
+    if image_source is not None and 'raw_bytes' in locals() and raw_bytes:
         try:
-            # Chuẩn bị payload tương thích OpenAI Vision format
-            # Ở đây gọi inference nếu endpoint sẵn sàng
-            pass
+            prompt = (
+                "Trích xuất danh sách mặt hàng từ hóa đơn / phiếu giao hàng này thành JSON format gồm mảng 'items': "
+                "[{\"raw_name\": ..., \"quantity\": ..., \"unit\": ..., \"unit_price\": ..., \"confidence\": ...}]. "
+                "Chỉ trả về JSON thuần túy."
+            )
+            vlm_text = call_local_vision(raw_bytes, prompt)
+            if vlm_text:
+                clean_vlm = vlm_text
+                if "```json" in clean_vlm:
+                    clean_vlm = clean_vlm.split("```json")[-1].split("```")[0].strip()
+                elif "```" in clean_vlm:
+                    clean_vlm = clean_vlm.split("```")[-1].split("```")[0].strip()
+                parsed_data = json.loads(clean_vlm)
+                if isinstance(parsed_data, dict) and "items" in parsed_data:
+                    items_extracted = parsed_data["items"]
+                elif isinstance(parsed_data, list):
+                    items_extracted = parsed_data
         except Exception:
             pass
 
-    # Nếu không có VLM endpoint ngoài, sử dụng Layout Engine của hệ thống
+    # Nếu không có VLM ngoài/Ollama, sử dụng Layout Engine của hệ thống
     if not items_extracted:
         dummy_img = Image.new("RGB", (image_width, image_height), color="white")
         items_extracted = extract_text_from_image_fallback(dummy_img)

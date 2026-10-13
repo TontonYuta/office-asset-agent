@@ -16,6 +16,7 @@ class User(Base):
     full_name = Column(String(100), nullable=False)
     department = Column(String(100), nullable=False)
     role = Column(String(20), nullable=False, default="user")  # 'user' hoặc 'admin'
+    password_hash = Column(String(128), nullable=True)  # Mật khẩu băm an toàn
     created_at = Column(DateTime, default=datetime.utcnow)
 
     def __repr__(self):

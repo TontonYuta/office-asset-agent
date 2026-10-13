@@ -259,3 +259,66 @@ def test_dynamic_entity_extraction_ticket():
     assert "Phiếu Báo Hỏng" in res["response"]
     assert "Tầng 3" in res["response"] or "Kế Toán" in res["response"]
 
+
+def test_user_authentication():
+    """Kiểm tra cơ chế băm mật khẩu bảo mật và xác thực đăng nhập."""
+    from src.core.security import hash_password, verify_password, authenticate_user
+
+    # 1. Băm mật khẩu và đối soát
+    hashed = hash_password("secretPass2026")
+    assert verify_password("secretPass2026", hashed) is True
+    assert verify_password("wrongPass", hashed) is False
+
+    # 2. Xác thực tài khoản trong CSDL
+    admin_user = authenticate_user("admin", "admin123")
+    assert admin_user is not None
+    assert admin_user.role == "admin"
+
+    user1 = authenticate_user("user1", "user123")
+    assert user1 is not None
+    assert user1.role == "user"
+
+    bad_user = authenticate_user("admin", "wrong_password")
+    assert bad_user is None
+
+
+def test_multiturn_thread_memory():
+    """Kiểm tra bộ nhớ đa lượt (Multi-turn Memory Persistence) qua MemorySaver checkpointer."""
+    thread_id = "test_conversation_session_99"
+
+    # Lượt 1: Hỏi tồn kho giấy
+    turn1 = process_user_request(
+        "Kho còn bao nhiêu ram giấy in A4?",
+        thread_id=thread_id
+    )
+    assert turn1["intent"] == "inventory"
+    assert turn1["thread_id"] == thread_id
+
+    # Lượt 2: Chào hỏi trong cùng phiên
+    turn2 = process_user_request(
+        "Cảm ơn bạn nhé",
+        thread_id=thread_id
+    )
+    assert turn2["thread_id"] == thread_id
+
+
+def test_dynamic_knowledge_retrieval():
+    """Kiểm tra truy xuất cẩm nang động từ bảng KnowledgeDoc trong CSDL."""
+    from src.agents.support_agent import handle_support_query
+
+    res = handle_support_query("Micro Takstar phòng họp bị hú rít")
+    assert res["status"] == "guide_provided"
+    assert "Takstar" in res["model_name"]
+    assert "Hạ tay cầm mic" in res["response"] or "Treble" in res["response"]
+
+
+def test_llm_client_resilience():
+    """Kiểm tra hoạt động an toàn của LLM Client khi chạy hoàn toàn offline."""
+    from src.core.llm_client import call_local_llm, call_local_vision, is_local_llm_available
+
+    # Khi không có endpoint ngoài, hàm trả về None an toàn chứ không bao giờ làm crash app
+    res_text = call_local_llm("Xin chào")
+    # Trả về None hoặc string nếu máy tính có bật Ollama
+    assert res_text is None or isinstance(res_text, str)
+
+

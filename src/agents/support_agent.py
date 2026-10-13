@@ -101,52 +101,45 @@ def handle_support_query(user_message: str, user_name: str = "Nguyễn Hoàng Lo
                 "response": reply_text
             }
 
-        # Trường hợp 2: Hướng dẫn kỹ thuật từng bước (Bước 1 của quy trình 3 bước)
-        # 2.1. Máy chiếu
-        if "máy chiếu" in msg_lower or "no signal" in msg_lower or "màn chiếu" in msg_lower or "mờ hình" in msg_lower:
-            reply_text = (
-                "🎯 **Hướng dẫn khắc phục sự cố Máy chiếu (Epson EB-X06):**\n\n"
-                "Nếu màn hình báo **'No Signal'** (xanh lè hoặc đen), bạn thao tác nhanh 3 bước sau:\n"
-                "1. **Xuất màn hình máy tính:** Nhấn tổ hợp phím **`Windows + P`** trên laptop -> Chọn chế độ **`Duplicate`**.\n"
-                "2. **Chọn cổng nguồn vào:** Cầm remote máy chiếu, bấm nút **`Source Search`** hoặc **`Input`** -> Chọn cổng **`HDMI 1`**.\n"
-                "3. **Kiểm tra dây cáp:** Rút cáp HDMI cắm chặt lại vào cổng máy tính; nếu dùng hub Type-C, thử đổi cổng USB-C khác.\n\n"
-                "*(Nếu làm đủ 3 bước mà vẫn không lên, bạn hãy nhắn lại 'Vẫn không được' để tôi tự động lập Phiếu Báo Hỏng gửi Cán bộ nhé!)*"
-            )
-            return {"status": "guide_provided", "response": reply_text}
+        # Trường hợp 2: Hướng dẫn kỹ thuật từ Cơ sở tri thức CSDL (Dynamic Knowledge Retrieval)
+        matched_doc = None
+        # Ưu tiên khớp theo tên model cụ thể
+        all_docs = db.query(KnowledgeDoc).all()
+        for doc in all_docs:
+            if doc.model_name.lower() in msg_lower:
+                matched_doc = doc
+                break
 
-        # 2.2. Máy in
-        if "máy in" in msg_lower or "kẹt giấy" in msg_lower or "offline" in msg_lower or "vệt đen" in msg_lower:
-            reply_text = (
-                "🎯 **Hướng dẫn xử lý sự cố Máy in Laser (Canon LBP 2900 / HP):**\n\n"
-                "• **Nếu bị Kẹt giấy (Lỗi IN-01):**\n"
-                "  1. Tắt công tắc nguồn máy in và rút phích điện để tránh bị bỏng cụm sấy.\n"
-                "  2. Mở nắp trên, nhấc hộp mực Cartridge 12A ra ngoài đặt lên bàn.\n"
-                "  3. Dùng 2 tay nắm đều 2 mép tờ giấy bị kẹt, kéo **từ từ theo chiều thoát giấy ra ngoài** (tránh giật mạnh làm rách vụn giấy bên trong).\n"
-                "  4. Lắp lại hộp mực đúng khớp ray, đóng nắp và bật nguồn lại.\n\n"
-                "• **Nếu báo 'Offline' (Lỗi IN-02):** Kiểm tra lại cáp USB, nhấn `Windows + R` gõ `services.msc` -> tìm **Print Spooler** bấm **Restart**."
-            )
-            return {"status": "guide_provided", "response": reply_text}
+        # Nếu chưa khớp theo model, khớp theo phân loại thiết bị & triệu chứng
+        if not matched_doc:
+            if any(k in msg_lower for k in ["máy chiếu", "no signal", "màn chiếu", "mờ hình"]):
+                matched_doc = db.query(KnowledgeDoc).filter(KnowledgeDoc.device_type.ilike("%máy chiếu%")).first()
+            elif any(k in msg_lower for k in ["máy in", "kẹt giấy", "offline", "vệt đen"]):
+                matched_doc = db.query(KnowledgeDoc).filter(KnowledgeDoc.device_type.ilike("%máy in%")).first()
+            elif any(k in msg_lower for k in ["micro", "mic", "hú", "rút rít", "mất tiếng"]):
+                matched_doc = db.query(KnowledgeDoc).filter(KnowledgeDoc.device_type.ilike("%micro%")).first()
 
-        # 2.3. Micro & Âm thanh
-        if "micro" in msg_lower or "mic" in msg_lower or "hú" in msg_lower or "rút rít" in msg_lower or "mất tiếng" in msg_lower:
+        if matched_doc:
             reply_text = (
-                "🎯 **Hướng dẫn xử lý Micro & Loa phòng họp (Takstar WGV-201):**\n\n"
-                "• **Nếu Micro mất tiếng (Lỗi AT-01):**\n"
-                "  1. Kiểm tra màn hình LED trên thân mic: Nếu đèn báo đỏ hoặc tắt ngấm -> Mở chuôi mic thay **2 viên pin AA mới**.\n"
-                "  2. Đảm bảo công tắc gạt hẳn sang nấc **ON** (không dừng ở nấc *MUTE* ở giữa).\n"
-                "  3. Đảm bảo đèn tín hiệu RF trên bộ thu (Receiver) ở tủ máy sáng xanh.\n\n"
-                "• **Nếu Loa bị hú rít chói tai (Lỗi AT-02):**\n"
-                "  1. Lập tức hạ micro xuống ngang hông và lùi ra xa loa tối thiểu 2 mét; không chĩa đầu mic về mặt loa.\n"
-                "  2. Vặn giảm núm Volume micro hoặc Treble trên amply về hướng 10 giờ."
+                f"🎯 **Cẩm nang khắc phục sự cố {matched_doc.device_type} ({matched_doc.model_name}):**\n\n"
+                f"📖 **Hướng dẫn vận hành chuẩn:**\n{matched_doc.manual_text}\n\n"
+                f"🛠️ **Bảng chẩn đoán & Cách khắc phục:**\n{matched_doc.troubleshooting_guide}\n\n"
+                f"*(Nguồn: {matched_doc.source_url} — Nếu làm đủ các bước mà vẫn không khắc phục được, "
+                f"bạn hãy nhắn lại 'Vẫn không được' để tôi tự động lập Phiếu Báo Hỏng gửi Cán bộ duyệt nhé!)*"
             )
-            return {"status": "guide_provided", "response": reply_text}
+            return {
+                "status": "guide_provided",
+                "model_name": matched_doc.model_name,
+                "response": reply_text
+            }
 
         # Mặc định: Tra cứu cẩm nang chung
-        doc = db.query(KnowledgeDoc).first()
+        available_models = ", ".join([d.model_name for d in all_docs[:4]])
         return {
             "status": "general_guide",
             "response": (
                 "Tôi có thể hỗ trợ bạn các hướng dẫn sử dụng và xử lý sự cố thiết bị văn phòng:\n"
+                f"- Các dòng máy đã có cẩm nang trong kho: {available_models}\n"
                 "- Máy chiếu phòng họp (báo No Signal, mờ nét, méo keystone)\n"
                 "- Máy in laser văn phòng (kẹt giấy, báo offline, vệt đen sọc)\n"
                 "- Hệ thống micro không dây & amply phòng họp (mất tiếng, pin yếu, hú rít)\n\n"

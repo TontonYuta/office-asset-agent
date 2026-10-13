@@ -39,6 +39,10 @@ st.set_page_config(
 init_database()
 
 # Quản lý Session State
+if "thread_id" not in st.session_state:
+    import uuid
+    st.session_state.thread_id = f"session_{uuid.uuid4().hex[:8]}"
+
 if "messages" not in st.session_state:
     st.session_state.messages = [
         {
@@ -95,7 +99,9 @@ with st.sidebar:
     )
 
     if st.button("🔄 Xóa lịch sử chat", use_container_width=True):
+        import uuid
         st.session_state.messages = [st.session_state.messages[0]]
+        st.session_state.thread_id = f"session_{uuid.uuid4().hex[:8]}"
         st.rerun()
 
 # ----------------- MAIN INTERFACE TABS -----------------
@@ -161,7 +167,8 @@ with tab_chat:
                             role=current_role,
                             user_name=user_name,
                             department=department,
-                            image_source=uploaded_img
+                            image_source=uploaded_img,
+                            thread_id=st.session_state.thread_id
                         )
                         st.success(res["response"])
                         if "items" in res.get("data", {}):
@@ -199,7 +206,8 @@ with tab_chat:
                     message=user_input,
                     role=current_role,
                     user_name=user_name,
-                    department=department
+                    department=department,
+                    thread_id=st.session_state.thread_id
                 )
 
                 st.markdown(result["response"])

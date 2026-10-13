@@ -7,6 +7,8 @@ from src.core.database import engine, Base, SessionLocal
 from src.models.user import User
 from src.models.asset import Asset, KnowledgeDoc
 from src.models.ticket import StockTransaction
+from src.core.security import hash_password
+from sqlalchemy import text
 
 
 def init_database():
@@ -15,14 +17,47 @@ def init_database():
     db = SessionLocal()
 
     try:
+        # Tự động cập nhật cột password_hash nếu database cũ chưa có
+        try:
+            with engine.connect() as conn:
+                conn.execute(text("ALTER TABLE users ADD COLUMN password_hash VARCHAR(128)"))
+                conn.commit()
+        except Exception:
+            pass
+
         # 1. Khởi tạo tài khoản mẫu (Users)
         if db.query(User).count() == 0:
             sample_users = [
-                User(username="admin", full_name="Trần Huy Hoàng", department="Phòng Hành chính – Quản trị", role="admin"),
-                User(username="user1", full_name="Nguyễn Hoàng Long", department="Phòng Marketing", role="user"),
-                User(username="user2", full_name="Lê Thị Mai", department="Phòng Kế toán", role="user"),
+                User(
+                    username="admin",
+                    full_name="Trần Huy Hoàng",
+                    department="Phòng Hành chính – Quản trị",
+                    role="admin",
+                    password_hash=hash_password("admin123")
+                ),
+                User(
+                    username="user1",
+                    full_name="Nguyễn Hoàng Long",
+                    department="Phòng Marketing",
+                    role="user",
+                    password_hash=hash_password("user123")
+                ),
+                User(
+                    username="user2",
+                    full_name="Lê Thị Mai",
+                    department="Phòng Kế toán",
+                    role="user",
+                    password_hash=hash_password("user123")
+                ),
             ]
             db.add_all(sample_users)
+            db.commit()
+        else:
+            # Cập nhật mật khẩu băm cho user cũ nếu chưa có
+            users = db.query(User).all()
+            for u in users:
+                if not u.password_hash:
+                    u.password_hash = hash_password("admin123" if u.role == "admin" else "user123")
             db.commit()
 
         # 2. Khởi tạo danh mục Vật tư & Thiết bị mẫu (Assets)

@@ -3,7 +3,7 @@ Security and Role-Based Access Control (RBAC) Module.
 Đồ án 2: Phân quyền vai trò Nhân viên (User) và Cán bộ Quản lý (Admin).
 """
 
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from src.core.config import ROLE_USER, ROLE_ADMIN
 
 # Danh mục các quyền hạn (Permissions)
@@ -51,3 +51,36 @@ def check_role_access(role: str, required_permission: str) -> Dict[str, Any]:
             f"Tài khoản hiện tại ({role.upper()}) chỉ được phép tra cứu và gửi yêu cầu."
         ),
     }
+
+
+import hashlib
+
+
+def hash_password(password: str, salt: str = "OfficeAssetSalt2026") -> str:
+    """Tạo chuỗi băm bảo mật SHA-256 kèm salt cho mật khẩu."""
+    salted = f"{salt}:{password}:{salt}"
+    return hashlib.sha256(salted.encode("utf-8")).hexdigest()
+
+
+def verify_password(password: str, hashed_password: str, salt: str = "OfficeAssetSalt2026") -> bool:
+    """Xác thực mật khẩu người dùng với mã băm trong CSDL."""
+    if not hashed_password:
+        return False
+    return hash_password(password, salt=salt) == hashed_password
+
+
+def authenticate_user(username: str, password: str) -> Optional[Any]:
+    """
+    Xác thực đăng nhập tài khoản. Trả về đối tượng User nếu hợp lệ, None nếu sai thông tin.
+    """
+    from src.core.database import SessionLocal
+    from src.models.user import User
+
+    db = SessionLocal()
+    try:
+        user = db.query(User).filter(User.username == username.strip()).first()
+        if user and verify_password(password, user.password_hash or ""):
+            return user
+        return None
+    finally:
+        db.close()
