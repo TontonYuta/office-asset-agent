@@ -1,0 +1,175 @@
+\documentclass[11pt,a4paper]{article}
+
+\input{preamble_paper.tex}
+
+\begin{document}
+
+% Tiêu Đề Bài Báo Nghiên Cứu
+\begin{center}
+    {\Large\bfseries BẢN TỔNG HỢP VÀ PHÂN TÍCH CHUYÊN SÂU PAPER}\\[0.3cm]
+    {\LARGE\bfseries Toolformer: Language Models Can Teach Themselves to Use Tools}\\[0.4cm]
+    {\normalsize\textbf{Tác giả:} Timo Schick, Jane Dwivedi-Yu, Roberto Dessì, Roberta Raileanu, Maria Lomeli,}\\
+    {\normalsize Luke Zettlemoyer, Nicola Cancedda, Thomas Scialom}\\[0.15cm]
+    {\small Meta AI Research \& Universitat Pompeu Fabra — Hội nghị \textbf{NeurIPS 2023}}\\[0.15cm]
+    {\small Mã định danh: \href{https://arxiv.org/abs/2302.04761}{\texttt{arXiv:2302.04761}} \quad | \quad Dự án: Meta AI Fundamental AI Research}
+\end{center}
+
+\vspace{0.3cm}
+\hrule height 1.2pt
+\vspace{0.6cm}
+
+---
+
+\section{Bối Cảnh \& Nghịch Lý Cốt Tử Của Mô Hình Ngôn Ngữ Lớn (LLM Paradox)}
+
+Tại thời điểm năm 2023, các mô hình ngôn ngữ lớn (như GPT-3 175B, PaLM 540B) đã chứng minh khả năng học theo ngữ cảnh (In-Context Learning) và giải quyết các bài toán phức tạp chỉ với vài ví dụ mẫu. Tuy nhiên, các tác giả tại Meta AI đã chỉ ra một \textbf{nghịch lý khôi hài (Paradox)}:
+\begin{quote}
+\textit{"Mô hình ngôn ngữ lớn có thể phân tích triết học và làm thơ một cách điêu luyện, nhưng lại bất lực trước những phép tính cộng trừ nhân chia cơ bản và thường xuyên nhớ sai các sự kiện thực tế — những tác vụ mà một chương trình máy tính nhỏ bé vài kilobyte có thể giải quyết chính xác trong 1 phần triệu giây."}
+\end{quote}
+
+\begin{coreconceptbox}[Bốn Điểm Yếu Cố Hữu Của LLM Thuần Túy]
+Schick et al. phân loại 4 khiếm khuyết nội tại mà việc tăng kích thước mô hình (Scaling Laws) không thể giải quyết triệt để:
+\begin{enumerate}[leftmargin=1.5em]
+    \item \textbf{Bất lực số học (Arithmetic Incompetence):} Bản chất biểu diễn dữ liệu theo token khiến LLM không có bộ vi xử lý logic số học; việc nhân chia các số nhiều chữ số chỉ là đoán xác suất token tiếp theo.
+    \item \textbf{Ảo giác sự kiện (Factual Hallucination):} Tri thức thực tế bị nén mờ nhạt trong hàng tỷ trọng số, dẫn đến hiện tượng mô hình nhớ mang máng và tự bịa ra thông tin giả nhưng rất tự tin.
+    \item \textbf{Mù thời gian (Temporal Blindness):} Trọng số mô hình bị đóng băng sau khi huấn luyện; LLM hoàn toàn không biết ngày hôm nay là thứ mấy, bây giờ là năm nào nếu không có ngữ cảnh bên ngoài.
+    \item \textbf{Hạn chế ngôn ngữ hiếm (Low-resource Language Deficiency):} Khả năng dịch thuật và hiểu ngôn ngữ thiểu số kém xa các công cụ dịch thuật chuyên biệt.
+\end{enumerate}
+\end{coreconceptbox}
+
+---
+
+\section{Đột Phá Phương Pháp Luận: Tự Dạy Mình Gọi API (Self-Supervised Tool Learning)}
+
+Trước Toolformer, việc dạy mô hình dùng công cụ đòi hỏi hàng chục nghìn mẫu dữ liệu do con người gán nhãn thủ công (Human Annotations), rất tốn kém và khó mở rộng. \textbf{Đột phá của Toolformer là cơ chế tự học phi giám sát (Self-Supervised)}: Mô hình tự sinh ra các lệnh gọi API, tự chạy thử nghiệm, và tự đánh giá xem việc gọi API có thực sự giúp giảm độ mất mát (Loss) khi đoán các từ tiếp theo hay không.
+
+\subsection{Cấu Trúc Cú Pháp Lệnh Gọi API (API Call Syntax)}
+Mỗi lệnh gọi công cụ được biểu diễn thành một chuỗi token có cấu trúc đặc biệt:
+\begin{equation}
+    c = \langle\text{API}\rangle \quad a(p_i) \quad \langle/\text{API}\rangle \quad \rightarrow \quad r
+\end{equation}
+trong đó:
+\begin{itemize}[leftmargin=1.5em]
+    \item $a$: Tên của công cụ API (ví dụ: \texttt{Calculator}, \texttt{WikiSearch}, \texttt{Calendar}).
+    \item $p_i$: Các tham số truyền vào hàm.
+    \item $r$: Kết quả thực thi trả về từ môi trường bên ngoài.
+\end{itemize}
+
+\subsection{Quy Trình 3 Bước Tự Sinh Dữ Liệu \& Tinh Chỉnh (The 3-Step Pipeline)}
+
+\begin{formulationbox}[Quy Trình Tự Đào Tạo Của Toolformer]
+\begin{enumerate}[leftmargin=1.5em]
+    \item \textbf{Bước 1: Lấy mẫu ứng viên API (Sampling Candidate Calls):}\\
+    Cho văn bản gốc $x = (x_1, \dots, x_n)$. Mô hình được nhắc bằng một vài ví dụ (In-context demonstrations). Tại mỗi vị trí $i$, mô hình tính xác suất xem có nên chèn lệnh gọi API hay không:
+    \begin{equation}
+        p_M(\langle\text{API}\rangle \mid x_{1:i}) > \tau_s
+    \end{equation}
+    Nếu vượt ngưỡng, mô hình sẽ sinh ra tên API và tham số $c = a(p_i)$.
+    
+    \item \textbf{Bước 2: Thực thi API ngoại vi (Executing API Calls):}\\
+    Các lệnh gọi API được gửi đến các công cụ bên ngoài (máy tính, Google/Wikipedia search, lịch hệ thống) để thu về kết quả thực tế $r$.
+    
+    \item \textbf{Bước 3: Lọc bằng tiêu chí giảm hàm mất mát (Loss-Filtering Criterion):}\\
+    Đây là \textbf{trái tim toán học của Toolformer}. Một lệnh gọi API chỉ được giữ lại nếu kết quả của nó giúp mô hình đoán các từ tiếp theo $x_{i:n}$ dễ dàng hơn một cách đáng kể:
+    \begin{equation}
+        L_i(e) - \min(L_i(\varepsilon), L_i(e^-)) > \tau_f
+    \end{equation}
+    trong đó:
+    \begin{itemize}
+        \item $L_i(e)$: Hàm mất mát Cross-Entropy khi có cả lệnh gọi API và kết quả $r$.
+        \item $L_i(\varepsilon)$: Hàm mất mát khi \textbf{không gọi} bất kỳ API nào.
+        \item $L_i(e^-)$: Hàm mất mát khi có gọi API nhưng \textbf{không có} kết quả trả về.
+    \end{itemize}
+    Nếu việc có thêm kết quả $r$ giúp giảm loss vượt ngưỡng $\tau_f$, mẫu dữ liệu đó được xác nhận là \textbf{hữu ích} và được đưa vào tập dữ liệu tinh chỉnh!
+\end{enumerate}
+\end{formulationbox}
+
+---
+
+\section{Năm Công Cụ Ngoại Vi Được Tích Hợp Trong Toolformer}
+
+Bài báo đã tích hợp 5 công cụ ngoại vi phục vụ 5 mục đích thực tế:
+\begin{table}[H]
+\centering
+\small
+\begin{tabularx}{\textwidth}{lXX}
+\toprule
+\textbf{Công Cụ (API)} & \textbf{Cơ Chế \& Công Nghệ} & \textbf{Ví Dụ Chèn Vào Văn Bản} \\
+\midrule
+\textbf{Calculator} & Máy tính Python \texttt{eval()} chuẩn xác & \texttt{"Tổng diện tích là [Calculator(45 * 12) -> 540] m2."} \\
+\textbf{Wikipedia Search} & Bộ máy tìm kiếm BM25 trên dump Wiki & \texttt{"Thủ đô của Úc là [WikiSearch("Australia capital") -> Canberra]."} \\
+\textbf{Calendar} & Trả về ngày tháng năm thời gian thực & \texttt{"Hôm nay là [Calendar() -> 13/10/2026], ngày mai sẽ..."} \\
+\textbf{QA System} & Mô hình Atlas 11B chuyên trả lời sự kiện & \texttt{"Tác giả của cuốn sách là [QA("Who wrote X?") -> Y]."} \\
+\textbf{Machine Translation} & Mô hình NLLB 600M dịch đa ngôn ngữ & \texttt{"Từ này trong tiếng Pháp là [MT("apple", "fr") -> pomme]."} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+---
+
+\section{Kết Quả Thực Nghiệm Đột Phá}
+
+Các tác giả sử dụng mô hình cơ sở \textbf{GPT-J (6.7 tỷ tham số)} và tinh chỉnh theo phương pháp Toolformer. Kết quả thử nghiệm trên hàng loạt tập benchmark chuẩn mang lại những con số kinh ngạc:
+
+\begin{benchmarkbox}[1. Lập Luận Số Học (ASDiv, SVAMP, MAWPS)]
+Trên các tập bài toán đố số học phổ thông:
+\begin{itemize}[leftmargin=1.5em]
+    \item \textbf{Mô hình gốc GPT-J 6.7B:} Độ chính xác chỉ đạt \textbf{16.9\%} trên ASDiv và \textbf{19.3\%} trên SVAMP (do liên tục tính nhẩm sai).
+    \item \textbf{Mô hình khổng lồ GPT-3 (175 tỷ tham số):} Đạt khoảng \textbf{40.3\%} trên ASDiv.
+    \item \textbf{Toolformer (chỉ 6.7 tỷ tham số):} Bứt phá ngoạn mục lên \textbf{59.7\%} (ASDiv) và \textbf{67.8\%} (SVAMP), vượt xa mô hình gấp 25 lần kích thước của nó nhờ biết gọi công cụ \texttt{Calculator}!
+\end{itemize}
+\end{benchmarkbox}
+
+\begin{benchmarkbox}[2. Tra Cứu Sự Kiện Thực Tế \& Nhận Thức Thời Gian (LAMA \& TempLAMA)]
+\begin{itemize}[leftmargin=1.5em]
+    \item Trên benchmark LAMA (kiểm tra tri thức thực tế): Toolformer cải thiện độ chính xác từ \textbf{24.1\% lên 43.8\%} nhờ công cụ \texttt{WikiSearch}.
+    \item Trên benchmark TempLAMA (các sự kiện thay đổi theo thời gian): Điểm số tăng vọt từ \textbf{12.3\% lên 47.9\%} nhờ kết hợp \texttt{Calendar} và tìm kiếm cập nhật.
+    \item \textbf{Bảo toàn năng lực ngôn ngữ cốt lõi (No Catastrophic Forgetting):} Độ đo Perplexity trên WikiText và CCNet hoàn toàn không bị suy giảm sau khi học cách gọi Tool.
+\end{itemize}
+\end{benchmarkbox}
+
+---
+
+\section{Ánh Xạ Vào Kiến Trúc Dự Án Office Asset Agent}
+
+Nghiên cứu Toolformer chính là \textbf{kim chỉ nam kiến trúc} cho toàn bộ các module trong thư mục \texttt{src/tools/} của dự án \texttt{office-asset-agent}:
+
+\begin{lstlisting}[language=Python]
+# TRIET LY TOOLFORMER TRONG OFFICE ASSET AGENT:
+# Khi can tinh tong gia tri tai san may tinh trong phong ban:
+# Thay vi de LLM doc JSON va cong don gia:
+# purchase_price_1 + purchase_price_2 + ... (Se bi sai sot tram trong)
+
+# AGENT GOI TOOL TAT DINH (DETERMINISTIC SQL CALCULATOR):
+def query_inventory_stats(session, category="Laptop", department="Warehouse"):
+    """Tool dong vai tro tuong tu nhu [Calculator(SQL_QUERY) -> EXACT_RESULT]"""
+    result = session.query(
+        func.count(Asset.id).label("total"),
+        func.sum(Asset.purchase_price).label("valuation")
+    ).filter(
+        Asset.category == category,
+        Asset.department == department
+    ).first()
+    
+    # SQLite tra ve con so chinh xac 100% tuyet doi:
+    return {"total_count": result.total, "valuation_vnd": result.valuation}
+\end{lstlisting}
+
+---
+
+\section{Bộ Câu Hỏi Phản Biện Chuyên Sâu Của Hội Đồng (Defense Insights)}
+
+\begin{deepdivebox}[3 Câu Hỏi Đắt Giá Nhất Về Toolformer Mà Hội Đồng Sẽ Hỏi Bạn]
+\begin{enumerate}[leftmargin=1.5em]
+    \item \textbf{Hội đồng hỏi:} *"Tại sao trong Toolformer, tác giả lại cần điều kiện lọc hàm mất mát $L_i(e) - \min(L_i(\varepsilon), L_i(e^-)) > \tau_f$ mà không lưu lại mọi lệnh gọi API?"*\\
+    \textit{Đáp án chuẩn:} Nếu lưu mọi lệnh gọi, mô hình sẽ học thói quen xấu là \textbf{"nghiện gọi Tool bừa bãi"} ngay cả với những từ ngữ thông thường, làm tăng độ trễ và chi phí. Điều kiện lọc loss bắt buộc đảm bảo rằng: Lệnh gọi API chỉ được chấp nhận khi kết quả của nó thực sự cung cấp thông tin mới giúp mô hình giải quyết bài toán tốt hơn hẳn so với việc không gọi.
+    
+    \item \textbf{Hội đồng hỏi:} *"Giữa phương pháp In-Context Tool Use (như LangChain/ReAct prompt) và Fine-Tuning Toolformer, đồ án của em chọn cách nào và tại sao?"*\\
+    \textit{Đáp án chuẩn:} Toolformer đòi hỏi phải can thiệp và fine-tuning lại trọng số của mô hình nền (Model Weights), việc này tốn kém chi phí GPU và mỗi khi thêm 1 tool mới vào cơ quan lại phải huấn luyện lại. Trong đồ án \texttt{office-asset-agent}, em kế thừa tư tưởng dùng công cụ của Toolformer nhưng triển khai qua cơ chế \textbf{In-Context Function Calling (ReAct + LangGraph)}: Tách rời trọng số LLM và danh mục Tool động trong Python, giúp hệ thống dễ dàng mở rộng thêm Tool mới (như OCR, cào Web) chỉ sau vài giây cấu hình mà không cần đào tạo lại mô hình.
+
+    \item \textbf{Hội đồng hỏi:} *"Các công cụ trong Toolformer đều là Read-only (chỉ đọc thông tin). Nếu áp dụng cho công cụ có tính biến đổi trạng thái dữ liệu (State-mutating tools như tạo phiếu, xóa tài sản), bài toán sẽ phát sinh rủi ro gì?"*\\
+    \textit{Đáp án chuẩn:} Với công cụ có side-effect (ghi/xóa CSDL), việc tự động gọi như Toolformer có thể dẫn đến hậu quả nghiêm trọng nếu mô hình thử sai (Trial and error). Do đó, trong đồ án của em, các công cụ ghi dữ liệu bắt buộc phải được bọc trong \textbf{Giao dịch ACID có Rollback} (Tuần 2) và lớp bảo vệ \textbf{RBAC kết hợp Human-in-the-Loop} (Tuần 11) — chỉ được thực thi khi người dùng có thẩm quyền duyệt.
+\end{enumerate}
+\end{deepdivebox}
+
+\end{document}

@@ -22,6 +22,11 @@ from src.tools.sql_calculator import (
 from src.tools.doc_generator import generate_maintenance_ticket_docx, generate_inventory_chart
 from src.tools.web_search import enrich_and_cache_knowledge
 from src.tools.vision_ocr import parse_delivery_receipt
+from src.tools.inventory_memory import (
+    compute_dynamic_safe_stock,
+    retrieve_similar_episodes,
+    evaluate_allocation_request
+)
 from src.agents.orchestrator import process_user_request
 
 
@@ -107,11 +112,58 @@ def test_web_search_enrichment():
 
 
 def test_vision_ocr():
-    """Kiểm tra bóc tách hóa đơn giao hàng."""
+    """Kiểm tra bóc tách hóa đơn giao hàng, kiểm tra Bounding Box và đối soát CSDL thật."""
     ocr_res = parse_delivery_receipt(None)
     assert ocr_res["status"] == "success"
     assert len(ocr_res["items"]) >= 3
     assert ocr_res["total_amount"] > 0
+    # Kiểm tra Bounding Box chuẩn hóa và đối soát CSDL
+    for item in ocr_res["items"]:
+        assert "target_id" in item
+        assert item["target_id"] is not None
+        assert len(item["bbox"]) == 4
+        assert item["confidence"] >= 0.90
+
+
+def test_aim_rm_safe_stock_and_memory():
+    """Kiểm tra mô hình AIM-RM: Safe-Stock toán học và Episodic Memory Retrieval."""
+    # 1. Kiểm tra công thức Safe-Stock: S_safe = z * sigma * sqrt(L+1)
+    # Với z=1.645, sigma=10, L=1 => sqrt(2) approx 1.414 => 1.645 * 10 * 1.414 approx 23.26
+    s_safe = compute_dynamic_safe_stock(mean_demand_per_period=50.0, std_demand_per_period=10.0, lead_time_periods=1.0)
+    assert 22.0 <= s_safe <= 25.0
+
+    # 2. Thử nghiệm thẩm định yêu cầu cấp phát bình thường
+    normal_eval = evaluate_allocation_request(
+        department="Phòng Marketing",
+        item_query="Giấy in Double A A4 70gsm",
+        requested_qty=12
+    )
+    assert normal_eval["status"] == "success"
+    assert normal_eval["decision_code"] == "APPROVE_OPTIMAL"
+    assert normal_eval["asset_id"] is not None
+    assert len(normal_eval["similar_episodes"]) > 0
+
+    # 3. Thử nghiệm thẩm định yêu cầu vượt định mức bất thường (yêu cầu 9999 ram)
+    over_eval = evaluate_allocation_request(
+        department="Phòng Marketing",
+        item_query="Giấy in Double A A4 70gsm",
+        requested_qty=9999
+    )
+    assert over_eval["status"] == "success"
+    assert over_eval["decision_code"] == "REJECT_INSUFFICIENT_STOCK"
+    assert "Từ chối" in over_eval["recommendation"] or "không đủ" in over_eval["recommendation"]
+
+
+def test_orchestrator_aim_rm_allocation_query():
+    """Kiểm tra điều phối yêu cầu thẩm định cấp phát qua LangGraph bằng ngôn ngữ tự nhiên."""
+    res = process_user_request(
+        message="Phòng Marketing xin cấp 15 ram giấy in A4 cho chiến dịch mới",
+        role=ROLE_USER,
+        department="Phòng Marketing"
+    )
+    assert res["intent"] == "inventory"
+    assert "AIM-RM" in res["response"]
+    assert "Định mức tồn kho an toàn" in res["response"]
 
 
 def test_orchestrator_inventory_query():

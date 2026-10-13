@@ -1,0 +1,50 @@
+﻿\section{Tuần 15: Hoàn Thiện Luận Văn Chuẩn Bách Khoa \& Nghệ Thuật Vấn Đáp Điểm 10}
+\label{sec:tuan_15}
+
+\begin{advisorbox}[Lời Dặn Của Thầy: Chặng Về Đích — Tỏa Sáng Trước Hội Đồng Bảo Vệ]
+Chúc mừng em đã đi đến tuần cuối cùng của chặng đường 15 tuần đầy thử thách! Em đã hoàn thành từ phân tích nghiệp vụ, thiết kế CSDL, lập trình đa Agent, kiểm thử tự động đến thử nghiệm thực tế. Nhưng hãy nhớ: \textbf{Một sản phẩm tốt chỉ chiếm 50\% thành công, 50\% còn lại nằm ở cách em trình bày và bảo vệ đứa con tinh thần của mình trước Hội đồng chấm Đồ án tốt nghiệp}.
+
+Hội đồng không chỉ chấm xem phần mềm của em chạy được hay không, mà chấm \textbf{phong thái của một kỹ sư trưởng}: Sự tự tin, tính trung thực trong khoa học, khả năng phản biện khi bị hỏi xoáy, và cách em làm chủ từng dòng code trong repository. Hãy giữ cái đầu lạnh, một tâm thế khiêm tốn nhưng quyết đoán, và trình bày rành mạch, dứt khoát!
+\end{advisorbox}
+
+\begin{literaturebox}[Cấu Trúc Luận Văn Đồ Án Tốt Nghiệp Chuẩn 5 Chương]
+Cuốn báo cáo tốt nghiệp của em phải được đóng bìa cứng màu đỏ hoặc xanh theo đúng quy định của Trường Công nghệ Thông tin \& Truyền thông — ĐHBK Hà Nội với 5 chương mạch lạc:
+\begin{itemize}[leftmargin=1.5em]
+    \item \textbf{Chương 1: Tổng quan bài toán}: Nỗi đau quản lý tài sản thực tế, hạn chế của giải pháp truyền thống và mục tiêu đề tài.
+    \item \textbf{Chương 2: Cơ sở lý thuyết}: Lý thuyết CSDL quan hệ 3NF, mô hình ReAct, bài toán Hallucination Tax, đồ thị LangGraph và chuẩn phân quyền RBAC.
+    \item \textbf{Chương 3: Phân tích \& Thiết kế hệ thống}: Sơ đồ kiến trúc Multi-Agent Swarm, lược đồ CSDL ERD, thiết kế 4 công cụ (Tools) và đặc tả API.
+    \item \textbf{Chương 4: Hiện thực hóa \& Kiểm thử}: Bóc tách mã nguồn các module chính, giao diện Streamlit và kết quả 8/8 bài test Pytest.
+    \item \textbf{Chương 5: Đánh giá thực nghiệm \& Kết luận}: Bảng đối chứng Before/After, phân tích hạn chế và định hướng phát triển tương lai.
+\end{itemize}
+\end{literaturebox}
+
+\begin{codeautopsybox}[Chiến Lược Thuyết Trình 15 Phút \& Live Demo An Toàn]
+Hãy chia thời lượng bài thuyết trình bảo vệ 15 phút như sau:
+\begin{enumerate}[leftmargin=1.5em]
+    \item \textbf{00:00 - 03:00 (3 phút)}: Nêu lý do chọn đề tài và nỗi đau thất thoát tài sản phòng ban (đánh trúng tâm lý người nghe).
+    \item \textbf{03:00 - 07:00 (4 phút)}: Kiến trúc hệ thống: Giải thích tại sao chọn LangGraph + RBAC thay vì chatbot thông thường.
+    \item \textbf{07:00 - 11:00 (4 phút)}: \textbf{LIVE DEMO 3 kịch bản đắt giá}:
+    \begin{itemize}
+        \item Kịch bản 1: Tra cứu tồn kho bằng tiếng Việt không dấu $\rightarrow$ Gọi SQL Tool tính tổng tiền kho.
+        \item Kịch bản 2: Tải ảnh tem tài sản bị xước $\rightarrow$ OCR đọc Serial Number và hiển thị thông tin.
+        \item Kịch bản 3: Chuyển quyền Staff cố tình xóa tài sản $\rightarrow$ Hệ thống RBAC chặn đứng ngay trên web.
+    \end{itemize}
+    \item \textbf{11:00 - 13:00 (2 phút)}: Trình chiếu kết quả kiểm thử tự động Pytest (8/8 Green) và bảng số liệu định lượng Before/After.
+    \item \textbf{13:00 - 15:00 (2 phút)}: Kết luận, cảm ơn Thầy Hướng dẫn và mời Hội đồng đặt câu hỏi.
+\end{enumerate}
+\textit{Mẹo sống còn:} Luôn chuẩn bị sẵn một video quay sẵn màn hình demo (Backup Screencast) phòng trường hợp máy chiếu trường bị mất mạng Internet!
+\end{codeautopsybox}
+
+\begin{labmilestonebox}[Nhiệm Vụ Thực Hành Tuần 15]
+\begin{enumerate}[leftmargin=1.5em]
+    \item Biên soạn hoàn thiện slide thuyết trình 20 trang với thiết kế trang nhã, font chữ rõ ràng, nhiều sơ đồ kiến trúc và ít chữ.
+    \item Tập thuyết trình thử một mình, bấm đồng hồ đúng 14 phút 30 giây (không bao giờ nói quá giờ).
+    \item Rà soát lại toàn bộ repo \texttt{office-asset-agent}, dọn dẹp các file rác, viết file \texttt{README.md} hướng dẫn cài đặt 1 lệnh sạch đẹp.
+\end{enumerate}
+\end{labmilestonebox}
+
+\begin{checkpointbox}[Thử Thách Vấn Đáp Hội Đồng]
+\textbf{Câu hỏi 15 (Câu hỏi của Chủ tịch Hội đồng):} Nếu bây giờ có một doanh nghiệp trả tiền để mua lại hệ thống này của em để đưa vào vận hành thực tế cho 5000 nhân viên, điều đầu tiên em cần nâng cấp là gì?\\
+\textit{Mẹo trả lời chuẩn điểm 10:} Thưa Thầy Chủ tịch Hội đồng, điều đầu tiên em sẽ nâng cấp là chuyển đổi tầng CSDL từ SQLite sang cụm cơ sở dữ liệu phân tán PostgreSQL có hỗ trợ Read-Replicas và Connection Pooling (PgBouncer). Tiếp theo, em sẽ đóng gói các Agent thành các Microservices container độc lập chạy trên Kubernetes (K8s) và tích hợp thêm hàng đợi phân tán Celery/Redis để xử lý bất đồng bộ các tác vụ nặng như OCR ảnh và sinh văn bản báo cáo Word dung lượng lớn, đảm bảo hệ thống chịu tải hàng nghìn kết nối đồng thời mà không bị nghẽn cổ chai.
+\end{checkpointbox}
+

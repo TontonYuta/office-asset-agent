@@ -1,0 +1,69 @@
+﻿\section{Tuần 04: Nhập Môn LangGraph \& Mô Hình Máy Trạng Thái Hữu Hạn (StateGraph)}
+\label{sec:tuan_04}
+
+\begin{advisorbox}[Lời Dặn Của Thầy: Tại Sao Các Chuỗi Tuyến Tính (Chains) Thất Bại Trong Thực Tế?]
+Trước đây, các lập trình viên thường dùng LangChain theo dạng đường ống tuyến tính (Linear Pipeline): Đầu vào A $\rightarrow$ Bước B $\rightarrow$ Bước C $\rightarrow$ Kết quả. Nhưng trong nghiệp vụ quản lý tài sản thực tế, mọi việc không bao giờ phẳng lặng như vậy:
+\begin{itemize}[leftmargin=1.5em]
+    \item Nếu người dùng nhập tên tài sản không rõ ràng, hệ thống phải hỏi lại (Human Clarification).
+    \item Nếu Tool SQL trả về kết quả rỗng, hệ thống phải tự động chuyển hướng sang Tool cào Web hoặc kiểm tra xem người dùng có gõ sai chính tả không.
+    \item Nếu nhân viên yêu cầu thanh lý tài sản nhưng không có quyền Admin, hệ thống phải rẽ nhánh từ chối ngay lập tức.
+\end{itemize}
+Một chuỗi tuyến tính (DAG - Directed Acyclic Graph) sẽ gãy vụn ngay khi có lỗi hoặc cần quay đầu (Loops/Cycles). Đó là lý do em phải học \textbf{LangGraph} và kiến trúc \textbf{Máy trạng thái hữu hạn (State Machine)}.
+\end{advisorbox}
+
+\begin{literaturebox}[Tài Liệu Nghiên Cứu Gốc Bắt Buộc]
+Em hãy nghiên cứu nền tảng lý thuyết khoa học máy tính về đồ thị trạng thái:
+\begin{itemize}[leftmargin=1.5em]
+    \item \textbf{Harel, D. (1987)}: \textit{"Statecharts: A Visual Formalism for Complex Systems"}, Science of Computer Programming~\cite{harel1987statecharts}. Tìm hiểu cách phân tách trạng thái phức tạp, chuyển tiếp có điều kiện (Guarded Transitions) và cấu trúc trạng thái phân cấp (Hierarchical States).
+    \item \textbf{LangGraph Core Concepts}: Đọc tài liệu thiết kế của LangGraph về \texttt{StateGraph}, \texttt{TypedDict} làm trạng thái chung (Shared Memory), và cơ chế \texttt{add\_conditional\_edges}.
+\end{itemize}
+\end{literaturebox}
+
+\begin{codeautopsybox}[Giải Phẫu Mã Nguồn: src/agents/orchestrator.py]
+Mở tệp \texttt{src/agents/orchestrator.py}, chú ý cấu trúc \texttt{AgentState} đại diện cho bộ nhớ làm việc xuyên suốt của hệ thống:
+\begin{lstlisting}[language=Python]
+class AgentState(TypedDict):
+    messages: List[BaseMessage]
+    current_user_role: str
+    target_category: Optional[str]
+    identified_intent: Optional[str]
+    tool_output: Optional[Dict[str, Any]]
+    final_response: Optional[str]
+    error_count: int
+\end{lstlisting}
+Đồ thị StateGraph được khởi tạo và kết nối các nút xử lý (Nodes) cùng các cạnh rẽ nhánh có điều kiện (Conditional Edges):
+\begin{lstlisting}[language=Python]
+workflow = StateGraph(AgentState)
+workflow.add_node("intent_router", route_intent_node)
+workflow.add_node("inventory_agent", inventory_agent_node)
+workflow.add_node("support_agent", support_agent_node)
+workflow.add_node("enrich_agent", enrich_agent_node)
+
+workflow.set_entry_point("intent_router")
+workflow.add_conditional_edges(
+    "intent_router",
+    dispatch_agent_by_intent,
+    {
+        "INVENTORY": "inventory_agent",
+        "SUPPORT": "support_agent",
+        "ENRICH": "enrich_agent",
+        "BLOCKED": END
+    }
+)
+\end{lstlisting}
+Nhờ kiến trúc này, toàn bộ luồng thông tin được kiểm soát chặt chẽ, dễ debug và chống lạc trôi trạng thái.
+\end{codeautopsybox}
+
+\begin{labmilestonebox}[Nhiệm Vụ Thực Hành Tuần 04]
+\begin{enumerate}[leftmargin=1.5em]
+    \item Dùng thư viện Mermaid hoặc Graphviz vẽ lại sơ đồ chuyển trạng thái hoàn chỉnh của \texttt{orchestrator.py}.
+    \item Viết một hàm kiểm tra điều kiện chuyển tiếp: Nếu \texttt{error\_count >= 3}, ép buộc luồng rẽ về nút thông báo lỗi khẩn cấp thay vì tiếp tục thử lại vòng lặp vô tận.
+    \item Chạy thử kịch bản giả lập gửi câu hỏi chào hỏi thông thường và quan sát log chuyển nút của LangGraph.
+\end{enumerate}
+\end{labmilestonebox}
+
+\begin{checkpointbox}[Thử Thách Vấn Đáp Hội Đồng]
+\textbf{Câu hỏi 4:} Điểm khác biệt mấu chốt giữa LangChain thông thường và LangGraph là gì? Tại sao đồ án của em bắt buộc phải dùng LangGraph?\\
+\textit{Mẹo trả lời chuẩn điểm 10:} LangChain chủ yếu hỗ trợ đồ thị có hướng không chu trình (DAG), phù hợp với các tác vụ thẳng đuột một chiều. LangGraph hỗ trợ đồ thị có chu trình (Cyclical Graphs), cho phép Agent thực hiện vòng lặp tự sửa lỗi (Self-Correction Loop), rẽ nhánh điều kiện linh hoạt dựa trên kết quả trả về của Tool và lưu vết trạng thái người dùng (State Persistence) chuẩn công nghiệp.
+\end{checkpointbox}
+

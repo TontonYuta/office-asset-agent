@@ -1,0 +1,136 @@
+\documentclass[11pt,a4paper]{article}
+
+\input{preamble_paper.tex}
+
+\begin{document}
+
+% Tiêu Đề Bài Báo Nghiên Cứu
+\begin{center}
+    {\Large\bfseries BẢN TỔNG HỢP VÀ PHÂN TÍCH CHUYÊN SÂU PAPER}\\[0.3cm]
+    {\LARGE\bfseries Agent Laboratory: Using LLM Agents as Research Assistants}\\[0.4cm]
+    {\normalsize\textbf{Tác giả:} Samuel Schmidgall, Yusheng Su, Ze Wang, Ximeng Sun, Jialian Wu,}\\
+    {\normalsize Xiaodong Yu, Jiang Liu, Michael Moor, Zicheng Liu, Emad Barsoum}\\[0.15cm]
+    {\small Johns Hopkins University, Microsoft Research \& Stanford University — Năm \textbf{2025}}\\[0.15cm]
+    {\small Mã định danh: \href{https://arxiv.org/abs/2501.04227}{\texttt{arXiv:2501.04227}} \quad | \quad Mã nguồn: \url{https://github.com/SamuelSchmidgall/AgentLaboratory}}
+\end{center}
+
+\vspace{0.3cm}
+\hrule height 1.2pt
+\vspace{0.6cm}
+
+---
+
+\section{Bối Cảnh \& Triết Lý Khác Biệt: Hợp Tác Người - Máy (Human-in-the-Loop)}
+
+Sau khi các công trình tự động hóa hoàn toàn (như The AI Scientist) xuất hiện, cộng đồng nghiên cứu nhận ra một nhược điểm lớn: Khi AI bị "thả rông" 100\% không có con người định hướng, nó rất dễ đi vào các ngõ cụt nghiên cứu vô nghĩa, chạy thực nghiệm lãng phí hàng nghìn USD tiền GPU và tạo ra các kết quả mà con người không thực sự cần.
+
+\begin{coreconceptbox}[Triết Lý Nền Tảng Của Agent Laboratory]
+Công trình của Schmidgall et al. (Johns Hopkins / Microsoft, 2025) tái định vị vai trò của AI:
+\begin{quote}
+\textit{"Hệ thống này không sinh ra để thay thế sự sáng tạo của con người, mà sinh ra để bổ khuyết cho nó. Con người giữ vai trò khởi tạo ý tưởng chiến lược và phản biện định hướng (High-level Guidance), trong khi đàn Agent tự chủ (Autonomous Multi-Agent Swarm) giải phóng con người khỏi những công việc thủ công tốn thời gian như lập trình chi tiết, tiền xử lý dữ liệu và soạn thảo tài liệu."}
+\end{quote}
+\end{coreconceptbox}
+
+---
+
+\section{Kiến Trúc Ba Pha Tuần Tự (The 3-Phase Specialized Workflow)}
+
+Agent Laboratory phân tách quy trình nghiên cứu đồ sộ thành 3 giai đoạn độc lập với sự phân vai chuyên môn hóa cao của các Sub-Agents:
+
+\begin{formulationbox}[Ba Giai Đoạn Vận Hành Chuyên Biệt]
+\begin{enumerate}[leftmargin=1.5em]
+    \item \textbf{Pha 1: Tổng Hợp Tài Liệu Y Văn (Literature Review Phase):}\\
+    Nhận ý tưởng ban đầu từ con người, tác tử \texttt{Literature Reviewer Agent} tự động kết nối với arXiv, thu thập các bài báo liên quan, phân tích các phương pháp tiếp cận hiện nay và chỉ ra khoảng trống tri thức (Knowledge Gap).
+    \begin{itemize}
+        \item \textit{Chốt chặn con người (Checkpoint 1):} Nhà nghiên cứu đọc bản tổng hợp, phản hồi và tinh chỉnh lại hướng đi trước khi bước sang giai đoạn viết code.
+    \end{itemize}
+
+    \item \textbf{Pha 2: Thực Nghiệm \& Lập Trình (Experimentation Phase):}\\
+    Giai đoạn này được điều phối bởi 3 tác tử vệ tinh:
+    \begin{itemize}
+        \item \textbf{Planning Agent:} Lập kế hoạch nghiên cứu, chia nhỏ thành các mốc khả thi (Milestones).
+        \item \textbf{Data Preparation Agent:} Tải, làm sạch và chuẩn hóa dữ liệu thực nghiệm.
+        \item \textbf{Coding / Experimentation Agent:} Viết mã nguồn Python/PyTorch, huấn luyện mô hình, tự động bắt lỗi cú pháp và chạy lại.
+    \end{itemize}
+    \begin{itemize}
+        \item \textit{Chốt chặn con người (Checkpoint 2):} Nhà nghiên cứu có thể can thiệp bất kỳ lúc nào để gợi ý cách debug hoặc đổi kiến trúc mạng.
+    \end{itemize}
+
+    \item \textbf{Pha 3: Biên Soạn Báo Cáo \& Đóng Gói (Report Writing Phase):}\\
+    Tác tử \texttt{Report Writing Agent} biên dịch toàn bộ mã nguồn thành Repository hoàn chỉnh và viết báo cáo học thuật chuẩn LaTeX theo phương pháp \textbf{Skeletal Scaffolding} (khởi tạo khung sườn $\rightarrow$ soạn thảo từng phần $\rightarrow$ hiệu đính cục bộ).
+\end{enumerate}
+\end{formulationbox}
+
+\subsection{Cơ Chế Đột Phá: Mạng Lưới AgentRxiv (Tháng 03/2025)}
+Agent Laboratory giới thiệu \textbf{AgentRxiv} — một nền tảng chia sẻ tri thức tiến hóa tập thể: Các đàn Agent tự chủ từ các phòng thí nghiệm khác nhau trên thế giới có thể tải kết quả lên AgentRxiv và tự động kế thừa nghiên cứu của nhau, giúp cộng đồng AI tạo nên sự tích lũy tri thức cộng dồn (Cumulative Progress) mà không bị lặp lại công việc của nhau.
+
+---
+
+\section{Kết Quả Thực Nghiệm \& Đánh Giá Từ Chuyên Gia}
+
+Các tác giả đã triển khai Agent Laboratory với nhiều mô hình cơ sở tiên tiến và mời hàng chục chuyên gia nghiên cứu độc lập tham gia khảo sát thực tế:
+
+\begin{benchmarkbox}[Các Phát Hiện Thực Nghiệm Cốt Lõi]
+\begin{enumerate}[leftmargin=1.5em]
+    \item \textbf{Mô hình vượt trội:} Agent Laboratory chạy trên nền tảng \textbf{OpenAI o1-preview} mang lại kết quả nghiên cứu và khả năng tự sửa lỗi lập trình vượt trội nhất so với các mô hình trước đó.
+    \item \textbf{Chất lượng mã nguồn:} Các thuật toán Machine Learning do đàn Agent sinh ra đạt hiệu năng tương đương hoặc vượt qua các phương pháp State-of-the-art (SOTA) hiện có.
+    \item \textbf{Vai trò quyết định của Human Feedback:} Nghiên cứu chứng minh định lượng rằng sự can thiệp và định hướng của con người ở các chốt chặn giúp \textbf{nâng cao chất lượng tổng thể của nghiên cứu lên vượt bậc}, ngăn chặn hoàn toàn hiện tượng AI bị ảo giác trôi dạt logic.
+    \item \textbf{Tiết kiệm chi phí 84\%:} So với các phương pháp tự động mù quáng (như The AI Scientist), Agent Laboratory \textbf{giảm tới 84\% chi phí nghiên cứu} nhờ có con người kịp thời ngăn chặn các nhánh thực nghiệm bế tắc ngay từ đầu.
+\end{enumerate}
+\end{benchmarkbox}
+
+---
+
+\section{Bảng Đối Chiếu So Sánh: The AI Scientist vs. Agent Laboratory}
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabularx}{\textwidth}{lXX}
+\toprule
+\textbf{Tiêu Chí So Sánh} & \textbf{The AI Scientist (Sakana AI, 2024)} & \textbf{Agent Laboratory (Johns Hopkins, 2025)} \\
+\midrule
+\textbf{Triết lý vận hành} & Tự động hóa 100\% (Không có con người) & \textbf{Cộng tác Người - Máy (Human-in-the-Loop)} \\
+\textbf{Định hướng đề tài} & AI tự nghĩ đề tài ngẫu nhiên từ Seed code & \textbf{Con người làm chủ ý tưởng chiến lược} \\
+\textbf{Tổ chức tác tử} & Chu trình 4 pha phẳng & \textbf{Đàn tác tử chuyên môn hóa (Multi-Agent Swarm)} \\
+\textbf{Rủi ro lệch hướng} & Cao (dễ đi vào ngõ cụt vô nghĩa) & \textbf{Rất thấp (nhờ con người kiểm soát từng pha)} \\
+\textbf{Chi phí thực tế} & ~15 USD/bài nhưng dễ lãng phí chạy hỏng & \textbf{Giảm 84\% chi phí nhờ can thiệp đúng lúc} \\
+\textbf{Chia sẻ tri thức} & Độc lập từng phiên chạy & \textbf{AgentRxiv (Tích lũy tri thức cộng đồng)} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+---
+
+\section{Ánh Xạ Trực Tiếp Vào Dự Án Office Asset Agent}
+
+Kiến trúc của Agent Laboratory cung cấp \textbf{khung lý thuyết chuẩn mực nhất} cho hệ thống \texttt{office-asset-agent}:
+
+\begin{enumerate}[leftmargin=1.8em]
+    \item \textbf{Đàn Tác Tử Chuyên Môn Hóa (Tuần 9):} Thay vì dùng một con bot đơn lẻ, chúng ta phân chia trách nhiệm rõ ràng thành 3 sub-agents độc lập:
+    \begin{itemize}
+        \item \texttt{InventoryAgent}: Chuyên viên kho và CSDL.
+        \item \texttt{SupportAgent}: Chuyên viên bảo trì và tiếp nhận sự cố.
+        \item \texttt{EnrichAgent}: Chuyên viên tra cứu mạng và xuất báo cáo Word.
+    \end{itemize}
+    \item \textbf{Cơ Chế Chốt Chặn Human-in-the-Loop (Tuần 11):} Đối với các thao tác rủi ro cao (xóa tài sản, thanh lý thiết bị, điều chuyển phòng ban), AI không bao giờ được tự ý thực thi. Hệ thống dừng lại tại trạng thái chờ phê duyệt, hiển thị hộp xác nhận để người dùng bấm nút duyệt thì lệnh mới được ghi xuống SQLite.
+\end{enumerate}
+
+---
+
+\section{Bộ Câu Hỏi Phản Biện Chuyên Sâu Của Hội Đồng (Defense Insights)}
+
+\begin{deepdivebox}[3 Câu Hỏi Đắt Giá Nhất Về Agent Laboratory Mà Hội Đồng Sẽ Hỏi Bạn]
+\begin{enumerate}[leftmargin=1.5em]
+    \item \textbf{Hội đồng hỏi:} *"Tại sao việc đưa con người vào vòng lặp (Human-in-the-Loop) trong Agent Laboratory lại giúp giảm tới 84\% chi phí so với việc để AI tự động 100\%?"*\\
+    \textit{Đáp án chuẩn:} Khi để AI tự chạy 100\%, nếu xuất phát điểm hoặc thuật toán ban đầu bị sai logic, mô hình sẽ tiếp tục đào sâu vào ngõ cụt, chạy hàng trăm vòng lặp thực nghiệm vô ích và thiêu rụi tài nguyên GPU/API. Khi có con người giám sát ở các chốt chặn, chỉ cần một câu phản hồi ngắn ("Ý tưởng này bị sai ở biến X, hãy đổi sang biến Y"), nhà nghiên cứu lập tức cắt bỏ 90\% các nhánh thực nghiệm lãng phí, giúp hệ thống về đích nhanh chóng và tiết kiệm 84\% chi phí.
+    
+    \item \textbf{Hội đồng hỏi:} *"Đồ án của em đã áp dụng nguyên lý Human-in-the-Loop vào những điểm nghẽn nghiệp vụ nào trong quản lý tài sản?"*\\
+    \textit{Đáp án chuẩn:} Em áp dụng tại 3 điểm chốt chặn nhạy cảm: (1) Khi cán bộ báo hỏng thiết bị, AI chỉ tạo phiếu sự cố tạm thời, Thủ kho bắt buộc phải bấm nút xác nhận tình trạng hư hỏng; (2) Khi xuất văn bản Word kiểm kê, AI chỉ khởi thảo bản nháp để Trưởng phòng rà soát và ký tên; (3) Mọi hành động thanh lý tài sản đều bị chặn cứng bởi RBAC và đòi hỏi chữ ký điện tử của Admin.
+
+    \item \textbf{Hội đồng hỏi:} *"Làm thế nào để các Sub-Agents trong hệ thống trao đổi thông tin với nhau mà không bị mất đồng bộ dữ liệu?"*\\
+    \textit{Đáp án chuẩn:} Kế thừa từ Agent Laboratory và nền tảng LangGraph, hệ thống của em sử dụng cơ chế **Bộ nhớ trạng thái dùng chung (Shared State)** định kiểu bằng \texttt{AgentState (TypedDict)}. Mọi dữ liệu trích xuất từ Tool hoặc kết quả tính toán của \texttt{InventoryAgent} đều được ghi vào trường trạng thái chung này, giúp các Agent kế tiếp (như \texttt{EnrichAgent}) đọc được ngay lập tức mà không cần gọi lại CSDL.
+\end{enumerate}
+\end{deepdivebox}
+
+\end{document}

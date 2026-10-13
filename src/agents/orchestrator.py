@@ -66,7 +66,11 @@ def classify_and_auth(state: AgentState) -> AgentState:
 
 
 def run_inventory_node(state: AgentState) -> AgentState:
-    res = handle_inventory_query(state["user_message"], user_role=state["user_role"])
+    res = handle_inventory_query(
+        state["user_message"],
+        user_role=state["user_role"],
+        department=state.get("department", "Phòng Ban Chức Năng")
+    )
     state["response"] = res["response"]
     state["data"] = res
     return state

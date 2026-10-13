@@ -1,0 +1,132 @@
+\usepackage[utf8]{vietnam}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{geometry}
+\geometry{top=2.2cm,bottom=2.2cm,left=2.2cm,right=2.2cm}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{float}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{tcolorbox}
+
+\tcbuselibrary{skins,breakable}
+
+% Academic Color Palette (Flat, High-Contrast, Sharp)
+\definecolor{NavyHust}{RGB}{10, 37, 64}
+\definecolor{DeepTeal}{RGB}{12, 74, 96}
+\definecolor{CrimsonBurgundy}{RGB}{140, 20, 30}
+\definecolor{EmeraldForest}{RGB}{18, 92, 54}
+\definecolor{SlateGray}{RGB}{60, 64, 67}
+\definecolor{LightBlueBg}{RGB}{240, 244, 250}
+\definecolor{LightSlateBg}{RGB}{246, 248, 250}
+\definecolor{LightGreenBg}{RGB}{242, 248, 244}
+\definecolor{LightRedBg}{RGB}{252, 242, 242}
+\definecolor{BorderGray}{RGB}{180, 185, 190}
+
+% Code Listing Configuration
+\definecolor{codegreen}{RGB}{34, 139, 34}
+\definecolor{codegray}{RGB}{100, 100, 100}
+\definecolor{backcolour}{RGB}{248, 249, 250}
+
+\lstdefinestyle{paperpython}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen}\itshape,
+    keywordstyle=\color{NavyHust}\bfseries,
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{CrimsonBurgundy},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=6pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=4,
+    frame=single,
+    rulecolor=\color{BorderGray}
+}
+\lstset{style=paperpython}
+
+% Header & Footer
+\setlength{\headheight}{16pt}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\sffamily\color{SlateGray}\textbf{CHUYÊN KHẢO PAPER AI AGENT}}
+\fancyhead[R]{\small\sffamily\color{SlateGray}OFFICE ASSET AGENT RESEARCH}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.5pt}
+\renewcommand{\footrulewidth}{0.3pt}
+
+% Section Title Formatting
+\titleformat{\section}
+  {\Large\bfseries\color{NavyHust}}
+  {\thesection.}{0.8em}{}
+  [{\color{NavyHust}\titlerule[1.2pt]}]
+
+\titleformat{\subsection}
+  {\large\bfseries\color{DeepTeal}}
+  {\thesubsection}{0.6em}{}
+
+\titleformat{\subsubsection}
+  {\normalsize\bfseries\color{SlateGray}}
+  {\thesubsubsection}{0.5em}{}
+
+% Academic Sharp Corner Environments (Zero Emojis for 100% pdfLaTeX reliability)
+\newtcolorbox{coreconceptbox}[1][Bản Chất Lý Thuyết Cốt Lõi]{
+    colback=LightBlueBg,
+    colframe=NavyHust,
+    fonttitle=\bfseries\color{white},
+    title={LÝ THUYẾT CỐT LÕI: #1},
+    sharp corners,
+    boxrule=1.0pt,
+    left=8pt,right=8pt,top=8pt,bottom=8pt,
+    breakable
+}
+
+\newtcolorbox{formulationbox}[1][Mô Hình Hóa Toán Học \& Cơ Chế]{
+    colback=LightSlateBg,
+    colframe=DeepTeal,
+    fonttitle=\bfseries\color{white},
+    title={MÔ HÌNH HÓA TOÁN HỌC: #1},
+    sharp corners,
+    boxrule=1.0pt,
+    left=8pt,right=8pt,top=8pt,bottom=8pt,
+    breakable
+}
+
+\newtcolorbox{benchmarkbox}[1][Thực Nghiệm \& Số Liệu Đột Phá]{
+    colback=LightGreenBg,
+    colframe=EmeraldForest,
+    fonttitle=\bfseries\color{white},
+    title={THỰC NGHIỆM ĐỐI CHỨNG: #1},
+    sharp corners,
+    boxrule=1.0pt,
+    left=8pt,right=8pt,top=8pt,bottom=8pt,
+    breakable
+}
+
+\newtcolorbox{deepdivebox}[1][Góc Suy Ngẫm \& Ứng Dụng Đồ Án]{
+    colback=LightRedBg,
+    colframe=CrimsonBurgundy,
+    fonttitle=\bfseries\color{white},
+    title={ỨNG DỤNG VÀ PHẢN BIỆN: #1},
+    sharp corners,
+    boxrule=1.0pt,
+    left=8pt,right=8pt,top=8pt,bottom=8pt,
+    breakable
+}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=NavyHust,
+    citecolor=EmeraldForest,
+    urlcolor=DeepTeal,
+    bookmarksnumbered=true
+}

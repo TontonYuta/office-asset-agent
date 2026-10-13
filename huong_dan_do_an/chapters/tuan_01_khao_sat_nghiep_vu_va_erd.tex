@@ -1,0 +1,53 @@
+\section{Tuần 01: Khảo Sát Nghiệp Vụ Quản Lý Vật Tư \& Thiết Kế CSDL Chuẩn 3NF}
+\label{sec:tuan_01}
+
+\begin{advisorbox}[Lời Dặn Của Thầy: Đừng Bắt Đầu Bằng Code Khi Chưa Thấu Hiểu Nghiệp Vụ]
+Chào em. Sai lầm phổ biến nhất của các sinh viên làm đồ án công nghệ là vội vàng mở IDE viết code hoặc nhào vào gọi API của OpenAI ngay từ ngày đầu tiên. Thầy dặn em: \textbf{Một hệ thống AI Agent chỉ có giá trị khi nó giải quyết được nỗi đau thực tế của nghiệp vụ quản lý}.
+
+Trong các phòng ban trường đại học, viện nghiên cứu hay cơ quan nhà nước, tài sản công (máy tính, máy chiếu, điều hòa, thiết bị thí nghiệm) thường bị thất thoát, hỏng hóc không rõ nguyên nhân vì các đơn vị chỉ quản lý bằng file Excel phân tán. Khi cán bộ A nghỉ việc chuyển giao cho cán bộ B, không ai biết chiếc màn hình Dell 27 inch đang ở phòng nào, tình trạng còn bảo hành hay không. Nhiệm vụ của em trong tuần đầu tiên là phân tích trọn vẹn \textit{Vòng đời tài sản (Asset Lifecycle)}: từ lúc nhập kho $\rightarrow$ bàn giao sử dụng $\rightarrow$ bảo trì định kỳ $\rightarrow$ báo hỏng $\rightarrow$ thanh lý. Hãy thiết kế mô hình dữ liệu quan hệ (ERD) đạt chuẩn dạng chuẩn 3 (3NF) để không bao giờ bị dư thừa dữ liệu hay dị thường cập nhật (Update Anomalies).
+\end{advisorbox}
+
+\begin{literaturebox}[Tài Liệu Nghiên Cứu Gốc Bắt Buộc]
+Em hãy tìm đọc và trích dẫn bài báo kinh điển của Edgar F. Codd~\cite{codd1970relational}:
+\begin{itemize}[leftmargin=1.5em]
+    \item \textbf{Codd, E. F. (1970)}: \textit{"A Relational Model of Data for Large Shared Data Banks"}, Communications of the ACM~\cite{codd1970relational}. Hãy đọc phần phân tích về tính độc lập của dữ liệu (Data Independence) và các dạng chuẩn hóa (Normalization 1NF, 2NF, 3NF).
+    \item \textbf{Bài toán cần trả lời:} Tại sao trong một hệ thống cơ quan, nếu ta lưu trực tiếp tên người sử dụng dưới dạng chuỗi tự do trong bảng thiết bị (ví dụ \texttt{"Nguyễn Văn A - Phòng Đào Tạo"}), hệ thống sẽ thất bại khi nhân viên đó đổi tên, chuyển phòng ban hoặc nghỉ việc?
+\end{itemize}
+\end{literaturebox}
+
+\begin{codeautopsybox}[Giải Phẫu Mã Nguồn: src/models/asset.py \& src/models/user.py]
+Hãy mở trực tiếp hai tệp nguồn trong repo \texttt{office-asset-agent}:
+\begin{enumerate}[leftmargin=1.5em]
+    \item \textbf{Tệp \texttt{src/models/user.py}}: Định nghĩa bảng \texttt{users} với các trường: \texttt{id}, \texttt{username}, \texttt{role} (ADMIN hoặc STAFF), \texttt{department}. Đây là hạt nhân phân quyền.
+    \item \textbf{Tệp \texttt{src/models/asset.py}}: Bảng \texttt{assets} không lưu chuỗi tự do mà thiết lập khóa ngoại liên kết chuẩn:
+\end{enumerate}
+\begin{lstlisting}[language=Python]
+class Asset(Base):
+    __tablename__ = "assets"
+
+    id = Column(Integer, primary_key=True, index=True)
+    asset_code = Column(String(50), unique=True, nullable=False, index=True)
+    name = Column(String(100), nullable=False)
+    category = Column(String(50), nullable=False)
+    status = Column(Enum(AssetStatus), default=AssetStatus.IN_STOCK)
+    department = Column(String(100), default="Warehouse")
+    assigned_to_user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    purchase_price = Column(Float, nullable=False, default=0.0)
+    purchase_date = Column(DateTime, default=datetime.utcnow)
+\end{lstlisting}
+Thầy lưu ý em: Trường \texttt{asset\_code} bắt buộc phải có ràng buộc \texttt{unique=True, index=True} để tăng tốc độ truy vấn khi quét mã vạch và ngăn chặn cấp trùng mã tài sản.
+\end{codeautopsybox}
+
+\begin{labmilestonebox}[Nhiệm Vụ Thực Hành Tuần 01]
+\begin{enumerate}[leftmargin=1.5em]
+    \item Vẽ sơ đồ thực thể liên kết (ERD) chi tiết gồm 3 thực thể cốt lõi: \texttt{User}, \texttt{Asset}, \texttt{Ticket} (phiếu bảo trì/báo hỏng).
+    \item Chứng minh trên văn bản rằng lược đồ cơ sở dữ liệu của em đã thỏa mãn Dạng chuẩn 3 (3NF).
+    \item Khởi tạo repo Git cá nhân, fork từ \texttt{office-asset-agent}, tạo branch \texttt{week-01} và commit tài liệu phân tích nghiệp vụ.
+\end{enumerate}
+\end{labmilestonebox}
+
+\begin{checkpointbox}[Thử Thách Vấn Đáp Hội Đồng]
+\textbf{Câu hỏi 1:} Tại sao em dùng khóa chính nhân tạo (\texttt{id} dạng Integer Auto-increment) mà không dùng luôn mã tài sản (\texttt{asset\_code} dạng String) làm khóa chính tự nhiên?\\
+\textit{Mẹo trả lời chuẩn điểm 10:} Sử dụng Surrogate Key dạng số nguyên giúp chỉ mục B-Tree gọn nhẹ hơn rất nhiều, tăng tốc độ JOIN bảng với các bảng lịch sử bảo trì, và bảo vệ hệ thống khỏi sự cố nếu quy tắc sinh mã tài sản của cơ quan thay đổi định dạng.
+\end{checkpointbox}
+

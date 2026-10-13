@@ -1,0 +1,55 @@
+﻿\section{Tuần 10: Quy Trình Tự Khắc Phục Lỗi (Self-Healing Loop) \& Ngăn Chặn Vòng Lặp Vô Tận}
+\label{sec:tuan_10}
+
+\begin{advisorbox}[Lời Dặn Của Thầy: Đừng Để Ngân Sách API Của Em Bị Thiêu Rụi Trong 5 Phút]
+Một trong những ác mộng lớn nhất khi triển khai AI Agent trên môi trường thực tế là hiện tượng \textbf{Vòng lặp vô tận (Infinite Execution Loop)}. Chuyện này xảy ra khi Agent gọi một Tool bị lỗi $\rightarrow$ Agent cố gắng sửa tham số và gọi lại $\rightarrow$ Tool vẫn lỗi $\rightarrow$ Agent tiếp tục gọi lại hàng nghìn lần cho đến khi tài khoản thẻ tín dụng của em cạn sạch tiền API hoặc máy chủ sập nguồn!
+
+Một hệ thống tự chủ (Autonomous System) chuẩn mực phải biết \textbf{Tự sửa sai (Self-Refine / Self-Healing)}~\cite{madaan2023selfrefine}, nhưng bắt buộc phải có \textbf{Giới hạn đệ quy (Recursion Limit)} và \textbf{Hạn mức chịu lỗi (Error Budget)}. Nếu sau 2 đến 3 lần thử lại mà vẫn không giải quyết được vấn đề, Agent phải tự động nhận thức được giới hạn của mình, dừng lại một cách thanh lịch và xin trợ giúp từ con người.
+\end{advisorbox}
+
+\begin{literaturebox}[Tài Liệu Nghiên Cứu Gốc Bắt Buộc]
+Em hãy tìm đọc bài báo nghiên cứu về cơ chế tự phản biện và tinh chỉnh của LLM:
+\begin{itemize}[leftmargin=1.5em]
+    \item \textbf{Madaan et al. (NeurIPS 2023)}: \textit{"Self-Refine: Iterative Refinement with Self-Feedback"}~\cite{madaan2023selfrefine}. Tìm hiểu vòng lặp: \texttt{Generate} $\rightarrow$ \texttt{Feedback} $\rightarrow$ \texttt{Refine} và giới hạn của việc tự sửa lỗi khi không có tín hiệu phản hồi khách quan từ môi trường thực tế.
+    \item \textbf{LangGraph Recursion Limit Protocol}: Nghiên cứu cơ chế ném ngoại lệ \texttt{GraphRecursionError} khi số bước thực thi đồ thị vượt quá ngưỡng cấu hình \texttt{recursion\_limit}.
+\end{itemize}
+\end{literaturebox}
+
+\begin{codeautopsybox}[Giải Phẫu Mã Nguồn: src/agents/orchestrator.py]
+Mở tệp \texttt{src/agents/orchestrator.py}, quan sát cách cài đặt bộ đếm lỗi và chốt chặn an toàn:
+\begin{lstlisting}[language=Python]
+MAX_RETRY_ATTEMPTS = 3
+
+def handle_agent_error_node(state: AgentState) -> AgentState:
+    current_errors = state.get("error_count", 0) + 1
+    state["error_count"] = current_errors
+    
+    if current_errors >= MAX_RETRY_ATTEMPTS:
+        # Kich hoat Circuit Breaker: Dung thu lai, thong bao cho con nguoi
+        state["final_response"] = (
+            "He thong da co gang xu ly yeu cau qua 3 lan thu nhung gap su co ngoai le. "
+            "De dam bao an toan du lieu, yeu cau da duoc chuyen sang che do cho quan tri vien kiem tra."
+        )
+        return state
+    
+    # Neu con han muc thu lai: Huong dan Agent con cach sua loi tham so
+    last_error_message = state.get("tool_output", {}).get("error", "Unknown error")
+    logging.info(f"Kich hoat Self-Healing lan {current_errors}: {last_error_message}")
+    return state
+\end{lstlisting}
+Khi biên dịch đồ thị, tham số \texttt{config=\{"recursion\_limit": 15\}} được truyền vào để đảm bảo ứng dụng không bao giờ bị treo.
+\end{codeautopsybox}
+
+\begin{labmilestonebox}[Nhiệm Vụ Thực Hành Tuần 10]
+\begin{enumerate}[leftmargin=1.5em]
+    \item Cố tình tạo một trường hợp lỗi: Nhập một câu hỏi yêu cầu tính tổng kho nhưng ngắt quyền truy cập file SQLite (đổi file sang quyền Read-only).
+    \item Quan sát đồ thị StateGraph kích hoạt nút \texttt{handle\_agent\_error\_node}, kiểm tra xem bộ đếm lỗi có tăng dần từ 1 đến 3 hay không.
+    \item Đảm bảo sau 3 lần thử, hệ thống ngắt mạch an toàn và trả lời rõ ràng lý do cho người dùng.
+\end{enumerate}
+\end{labmilestonebox}
+
+\begin{checkpointbox}[Thử Thách Vấn Đáp Hội Đồng]
+\textbf{Câu hỏi 10:} Tại sao nghiên cứu của Huang et al. (2023) lại kết luận rằng \textit{"LLMs cannot self-correct reasoning without external feedback"}? Hệ thống của em cung cấp external feedback như thế nào?\\
+\textit{Mẹo trả lời chuẩn điểm 10:} Bản thân LLM nếu chỉ suy ngẫm nội tại sẽ có xu hướng tự tin thái quá vào logic sai của chính nó. Hệ thống của em không bắt LLM tự đoán mà cung cấp External Feedback cụ thể: Đó là thông báo lỗi chính xác từ trình thông dịch Python, mã lỗi trả về từ SQLite (như \texttt{IntegrityError}, \texttt{OperationalError}) hoặc mã HTTP Status Code. Dựa trên phản hồi khách quan từ máy tính, Agent mới có căn cứ thực tế để tự sửa truy vấn đúng.
+\end{checkpointbox}
+

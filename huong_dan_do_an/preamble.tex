@@ -1,0 +1,151 @@
+\usepackage[utf8]{vietnam}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{geometry}
+\geometry{top=2.2cm,bottom=2.2cm,left=2.2cm,right=2.2cm}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{longtable}
+\usepackage{float}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{tcolorbox}
+\usepackage{cite}
+
+\tcbuselibrary{skins,breakable}
+
+% Academic Color Palette (Flat, High-Contrast, Sharp)
+\definecolor{HustNavy}{RGB}{10, 37, 64}
+\definecolor{CrimsonBurgundy}{RGB}{140, 20, 30}
+\definecolor{EmeraldForest}{RGB}{18, 92, 54}
+\definecolor{DeepTeal}{RGB}{12, 74, 96}
+\definecolor{SlateGray}{RGB}{60, 64, 67}
+\definecolor{LightSlateBg}{RGB}{246, 248, 250}
+\definecolor{LightBlueBg}{RGB}{240, 244, 250}
+\definecolor{LightGreenBg}{RGB}{242, 248, 244}
+\definecolor{LightRedBg}{RGB}{252, 242, 242}
+\definecolor{BorderGray}{RGB}{180, 185, 190}
+
+% Code Listing Configuration
+\definecolor{codegreen}{RGB}{34, 139, 34}
+\definecolor{codegray}{RGB}{100, 100, 100}
+\definecolor{codepurple}{RGB}{128, 0, 128}
+\definecolor{backcolour}{RGB}{248, 249, 250}
+
+\lstdefinestyle{academicpython}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen}\itshape,
+    keywordstyle=\color{HustNavy}\bfseries,
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{CrimsonBurgundy},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=6pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=4,
+    frame=single,
+    rulecolor=\color{BorderGray}
+}
+\lstset{style=academicpython}
+
+% Header & Footer
+\setlength{\headheight}{16pt}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\sffamily\color{SlateGray}\textbf{ĐỒ ÁN TỐT NGHIỆP: OFFICE ASSET AGENT}}
+\fancyhead[R]{\small\sffamily\color{SlateGray}GIÁO TRÌNH 15 TUẦN HÀN LÂM}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.5pt}
+\renewcommand{\footrulewidth}{0.3pt}
+
+% Section Title Formatting
+\titleformat{\section}
+  {\Large\bfseries\color{HustNavy}}
+  {\thesection.}{0.8em}{}
+  [{\color{HustNavy}\titlerule[1.2pt]}]
+
+\titleformat{\subsection}
+  {\large\bfseries\color{DeepTeal}}
+  {\thesubsection}{0.6em}{}
+
+\titleformat{\subsubsection}
+  {\normalsize\bfseries\color{SlateGray}}
+  {\thesubsubsection}{0.5em}{}
+
+% Academic Sharp Corner Environments (Latex-Document-Synthesizer Compliant - Zero Emojis)
+% 1. Lời Dặn Của Thầy Hướng Dẫn (Advisor Directive)
+\newtcolorbox{advisorbox}[1][Lời Dặn Của Thầy Hướng Dẫn]{
+    colback=LightBlueBg,
+    colframe=HustNavy,
+    fonttitle=\bfseries\color{white},
+    title={CHỈ THỊ CỦA THẦY: #1},
+    sharp corners,
+    boxrule=1.0pt,
+    left=8pt,right=8pt,top=8pt,bottom=8pt,
+    breakable
+}
+
+% 2. Nghiên Cứu Gốc & Cơ Sở Lý Thuyết (Literature Grounding)
+\newtcolorbox{literaturebox}[1][Yêu Cầu Đọc Nghiên Cứu Gốc \& Cơ Sở Lý Thuyết]{
+    colback=LightSlateBg,
+    colframe=DeepTeal,
+    fonttitle=\bfseries\color{white},
+    title={NGHIÊN CỨU GỐC: #1},
+    sharp corners,
+    boxrule=1.0pt,
+    left=8pt,right=8pt,top=8pt,bottom=8pt,
+    breakable
+}
+
+% 3. Giải Phẫu Mã Nguồn Repo (Codebase Autopsy)
+\newtcolorbox{codeautopsybox}[1][Giải Phẫu Mã Nguồn Codebase (Repo Grounding)]{
+    colback=LightGreenBg,
+    colframe=EmeraldForest,
+    fonttitle=\bfseries\color{white},
+    title={GIẢI PHẪU CODEBASE: #1},
+    sharp corners,
+    boxrule=1.0pt,
+    left=8pt,right=8pt,top=8pt,bottom=8pt,
+    breakable
+}
+
+% 4. Thử Thách Vấn Đáp Hội Đồng (Defense Checkpoint)
+\newtcolorbox{checkpointbox}[1][Thử Thách Vấn Đáp Hội Đồng (Advisor Defense Checkpoint)]{
+    colback=LightRedBg,
+    colframe=CrimsonBurgundy,
+    fonttitle=\bfseries\color{white},
+    title={VẤN ĐÁP HỘI ĐỒNG: #1},
+    sharp corners,
+    boxrule=1.0pt,
+    left=8pt,right=8pt,top=8pt,bottom=8pt,
+    breakable
+}
+
+% 5. Bài Tập Thực Hành Tuần (Hands-on Milestone)
+\newtcolorbox{labmilestonebox}[1][Nhiệm Vụ Thực Hành Tuần (Hands-on Milestone)]{
+    colback=LightSlateBg,
+    colframe=SlateGray,
+    fonttitle=\bfseries\color{white},
+    title={THỰC HÀNH TUẦN: #1},
+    sharp corners,
+    boxrule=1.0pt,
+    left=8pt,right=8pt,top=8pt,bottom=8pt,
+    breakable
+}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=HustNavy,
+    citecolor=EmeraldForest,
+    urlcolor=DeepTeal,
+    bookmarksnumbered=true
+}

@@ -1,92 +1,83 @@
-# 📚 TRUNG TÂM HƯỚNG DẪN ĐỒ ÁN TOÀN DIỆN (15 TUẦN HỌC KỲ CHUẨN)
-### Giáo Trình Đào Tạo Cầm Tay Chỉ Việc Dành Cho Sinh Viên Chưa Có Nền Tảng (Zero-to-Hero)
-> **Đề tài:** Hệ Thống AI Agent Hỗ Trợ Tra Cứu Thống Kê và Tự Động Hóa Quản Lý Vật Tư - Thiết Bị tại Phòng Ban Doanh Nghiệp (*Office Asset Agent*)  
-> **Sinh viên thực hiện:** Trần Huy Hoàng — MSSV: `20237337`  
-> **Đơn vị đào tạo:** Trường Công nghệ Thông tin & Truyền thông — Đại học Bách khoa Hà Nội  
-> **Đơn vị thử nghiệm:** Phòng Hành chính – Quản trị (Ban Quản lý Cơ sở vật chất Doanh nghiệp)
+# 🎓 Giáo Trình Hướng Dẫn Đồ Án Tốt Nghiệp 15 Tuần: Office Asset Agent
+
+> **Tài liệu Mentorship chính thức từ Giảng viên hướng dẫn — ĐHBK Hà Nội**  
+> **Đề tài:** Hệ Thống AI Agent Hỗ Trợ Tra Cứu và Quản Lý Vật Tư - Thiết Bị Phòng Ban (*Office Asset Agent*)  
+> **Sinh viên:** Trần Huy Hoàng — MSSV: `20237337`  
+> **Đơn vị:** Trường Công nghệ Thông tin & Truyền thông — Đại học Bách Khoa Hà Nội
 
 ---
 
-## 🗺️ 1. Khung Chương Trình Đào Tạo 15 Tuần Học Kỳ
+## 🏛️ 1. Giới Thiệu Cấu Trúc Giáo Trình Hàn Lâm
 
-Chương trình được thiết kế đặc biệt cho sinh viên **chưa học hoặc chưa nắm vững các môn tiên quyết** (Lập trình nâng cao, Cơ sở dữ liệu quan hệ, Kỹ nghệ phần mềm, AI/NLP):
+Toàn bộ tài liệu hướng dẫn được tái cấu trúc thành một ấn phẩm học thuật hoàn chỉnh gồm **34 trang**, biên soạn theo chuẩn LaTeX hiện đại với 5 khối cấu trúc sư phạm chuyên sâu cho từng tuần:
+1. **Chỉ Thị Của Thầy (Advisor Directive):** Bối cảnh thực tiễn phòng ban, đặt vấn đề & triết lý cốt lõi.
+2. **Nghiên Cứu Gốc (Literature Grounding):** Yêu cầu đọc và trích dẫn các bài báo nền tảng (*ReAct, Toolformer, Hallucination Tax arXiv:2602.12631, NIST RBAC, Agent Laboratory, The AI Scientist*).
+3. **Giải Phẫu Codebase (Repo Grounding):** Truy vết trực tiếp từng file và module trong `src/` (`models`, `core`, `tools`, `agents`, `ui`).
+4. **Thực Hành Tuần (Hands-on Milestone):** Giao việc tự viết code, tạo test case, ghi nhận log và commit Git.
+5. **Vấn Đáp Hội Đồng (Defense Checkpoint):** Bộ câu hỏi hóc búa của Thầy phản biện và gợi ý trả lời chuẩn điểm 10.
 
+---
+
+## 📁 2. Cấu Trúc Thư Mục
+
+```text
+huong_dan_do_an/
+├── main.tex                       # File Master tổng hợp toàn bộ 15 tuần thành cuốn sách
+├── main.pdf                       # Ấn phẩm PDF hoàn chỉnh 34 trang, có Mục lục & Trích dẫn BibTeX
+├── preamble.tex                   # Khai báo gói, font tiếng Việt, bảng mã màu học thuật, Sharp Boxes
+├── references.bib                 # Danh mục 17 công trình nghiên cứu học thuật chuẩn BibTeX
+├── figures/                       # Sơ đồ và hình ảnh minh họa
+└── chapters/                      # 15 Chuyên đề tương ứng 15 tuần học tập
+    ├── tuan_01_khao_sat_nghiep_vu_va_erd.tex
+    ├── tuan_02_lap_trinh_orm_sqlite_acid.tex
+    ├── tuan_03_ai_agent_hallucination_tax.tex
+    ├── tuan_04_langgraph_statemachine.tex
+    ├── tuan_05_che_tao_tools_toan_hoc.tex
+    ├── tuan_06_web_scraping_resilience.tex
+    ├── tuan_07_word_reports_data_viz.tex
+    ├── tuan_08_multimodal_vision_ocr.tex
+    ├── tuan_09_multiagent_supervisor_swarm.tex
+    ├── tuan_10_error_handling_self_healing.tex
+    ├── tuan_11_rbac_security_human_in_the_loop.tex
+    ├── tuan_12_streamlit_web_ui_architecture.tex
+    ├── tuan_13_automated_testing_pytest_ci.tex
+    ├── tuan_14_thuc_nghiem_va_danh_gia_dinh_luong.tex
+    └── tuan_15_viet_luan_van_va_bao_ve_hoi_dong.tex
 ```
-GIAI ĐOẠN 1: NỀN TẢNG NGHIỆP VỤ, LẬP TRÌNH & CƠ SỞ DỮ LIỆU (Tuần 1 - 4)
-├── Tuần 01: Khảo sát nghiệp vụ đời thực & Nỗi đau quản trị cơ sở vật chất
-├── Tuần 02: Thiết lập môi trường kỹ sư (Terminal, Python 3.11, venv, Git)
-├── Tuần 03: Bản chất Cơ sở dữ liệu quan hệ (RDBMS), Khóa chính/ngoại & ERD
-└── Tuần 04: Lập trình CSDL với SQLite & SQLAlchemy ORM (CRUD, Transaction ACID)
-
-GIAI ĐOẠN 2: THIẾT KẾ DỮ LIỆU & BỘ CÔNG CỤ TÁC VỤ (TOOLS) (Tuần 5 - 8)
-├── Tuần 05: Thiết kế CSDL chi tiết & Thuật toán Token/Alias Matching
-├── Tuần 06: Chế tạo Tool 1: Máy tính tồn kho tất định & Bài toán arXiv:2602.12631
-├── Tuần 07: Chế tạo Tool 2: Cào web tự động làm giàu tri thức & Fallback an toàn
-└── Tuần 08: Chế tạo Tool 3 & 4: Sinh file Word (.docx), Biểu đồ & Thị giác AI (OCR)
-
-GIAI ĐOẠN 3: BỘ NÃO AI AGENT & ĐIỀU PHỐI LANGGRAPH (Tuần 9 - 11)
-├── Tuần 09: Bản chất AI: Từ Chatbot, LLM đến AI Agent (ReAct Framework)
-├── Tuần 10: Nhập môn LangGraph: Điều phối luồng trạng thái (StateGraph)
-└── Tuần 11: Xây dựng hệ thống Đa Agent (Multi-Agent) & Quy trình 3 bước xử lý lỗi
-
-GIAI ĐOẠN 4: BẢO MẬT, GIAO DIỆN WEB & TÍCH HỢP HỆ THỐNG (Tuần 12 - 13)
-├── Tuần 12: Bảo mật phân quyền 2 vai trò (RBAC) & Giám sát con người (Human-in-the-Loop)
-└── Tuần 13: Xây dựng Giao diện Web tương tác với Streamlit (Session State, 4 Tabs)
-
-GIAI ĐOẠN 5: KIỂM THỬ, THỬ NGHIỆM THỰC TẾ & BẢO VỆ ĐỒ ÁN (Tuần 14 - 15)
-├── Tuần 14: Kiểm thử tự động Pytest (8/8 tests) & Đo lường hiệu quả định lượng
-└── Tuần 15: Biên soạn báo cáo tốt nghiệp & Tuyệt chiêu vấn đáp Hội đồng chuẩn Điểm 10
-```
 
 ---
 
-## 📑 2. Danh Mục Tài Liệu Học Tập
+## 🗺️ 3. Danh Sách 15 Tuần Học Tập
 
-### 🌟 Sách Giáo Trình Toàn Tập 15 Tuần
-* [**`GIAO_TRINH_15_TUAN_TOAN_TAP.md`**](GIAO_TRINH_15_TUAN_TOAN_TAP.md): Phiên bản Markdown đầy đủ, trực quan, đọc trực tiếp trên GitHub hoặc VS Code.
-* [**`giao_trinh_do_an_15_tuan.tex`**](giao_trinh_do_an_15_tuan.tex): Mã nguồn LaTeX cuốn sách giáo trình 15 tuần chuẩn học thuật.
-* [**`giao_trinh_do_an_15_tuan.pdf`**](giao_trinh_do_an_15_tuan.pdf): Bản in PDF hoàn chỉnh **12 trang dày dặn** có Mục lục, phân chia 5 phần rõ ràng, sẵn sàng in ấn nộp Khoa/Bộ môn.
-
----
-
-### 🔹 Bộ Cẩm Nang Chuyên Sâu Từng Chủ Đề (Markdown)
-
-| Tên Tài Liệu | Nội Dung & Mục Đích |
-| :--- | :--- |
-| [**`00_NHAP_MON_DANH_CHO_NGUOI_MOI_BAT_DAU.md`**](00_NHAP_MON_DANH_CHO_NGUOI_MOI_BAT_DAU.md) | Nhập môn AI Agent từ con số 0, giải thích bối cảnh thực tế, bài toán ảo giác LLM (Hallucination Tax arXiv:2602.12631), LangGraph qua hình ảnh tàu điện ngầm. |
-| [**`01_GIAI_PHAU_SOURCE_CODE_CHI_TIET.md`**](01_GIAI_PHAU_SOURCE_CODE_CHI_TIET.md) | Giải phẫu chi tiết toàn bộ mã nguồn từng file trong `src/` (core, models, tools, agents, ui), luồng dữ liệu 3 kịch bản thực tế. |
-| [**`02_BO_BI_KIP_VAN_DAP_HOI_DONG.md`**](02_BO_BI_KIP_VAN_DAP_HOI_DONG.md) | Bộ 25 câu hỏi vấn đáp hóc búa nhất của Hội đồng chấm thi ĐATN Bách Khoa kèm đáp án chuẩn điểm 10. |
-| [**`03_HUONG_DAN_THUC_HANH_VA_MO_RONG.md`**](03_HUONG_DAN_THUC_HANH_VA_MO_RONG.md) | Hướng dẫn cài đặt môi trường, chạy test `pytest`, thao tác web demo và 3 bài thực hành tự mở rộng hệ thống. |
-
----
-
-### 🔹 Các Ấn Phẩm Chuyên Đề Tuần (LaTeX & PDF)
-
-| Chuyên Đề | Tên Chuyên Đề Học Thuật | File LaTeX | Bản In PDF |
-| :---: | :--- | :---: | :---: |
-| **Tuần 01** | Khảo sát nghiệp vụ thực tế & Thiết kế CSDL | [`tuan_01.tex`](tuan_01_nghiep_vu_va_thiet_ke_csdl.tex) | [**`tuan_01.pdf`**](tuan_01_nghiep_vu_va_thiet_ke_csdl.pdf) |
-| **Tuần 02** | Python nền tảng, kết nối SQLite & SQLAlchemy ORM | [`tuan_02.tex`](tuan_02_lap_trinh_python_va_sqlalchemy.tex) | [**`tuan_02.pdf`**](tuan_02_lap_trinh_python_va_sqlalchemy.pdf) |
-| **Tuần 03** | Bản chất AI Agent, Chống ảo giác số học & LangGraph | [`tuan_03.tex`](tuan_03_ai_agent_va_langgraph_co_ban.tex) | [**`tuan_03.pdf`**](tuan_03_ai_agent_va_langgraph_co_ban.pdf) |
-| **Tuần 04** | Chế tạo bộ công cụ (Tools) tác vụ cho Agent | [`tuan_04.tex`](tuan_04_che_tao_bo_cong_cu_tools.tex) | [**`tuan_04.pdf`**](tuan_04_che_tao_bo_cong_cu_tools.pdf) |
-| **Tuần 05** | Bộ điều phối đa Agent (LangGraph), RBAC & Web Streamlit | [`tuan_05.tex`](tuan_05_dieu_phoi_agent_va_giao_dien_web.tex) | [**`tuan_05.pdf`**](tuan_05_dieu_phoi_agent_va_giao_dien_web.pdf) |
-| **Tuần 06** | Thử nghiệm thực tế, Viết báo cáo & Chiến lược vấn đáp | [`tuan_06.tex`](tuan_06_bao_cao_tot_nghiep_va_van_dap.tex) | [**`tuan_06.pdf`**](tuan_06_bao_cao_tot_nghiep_va_van_dap.pdf) |
+| Tuần | Tên Chuyên Đề Học Thuật | File Nguồn LaTeX | Trích Dẫn Trọng Tâm |
+| :---: | :--- | :--- | :--- |
+| **01** | Khảo sát nghiệp vụ & Thiết kế CSDL 3NF | [`tuan_01`](chapters/tuan_01_khao_sat_nghiep_vu_va_erd.tex) | Edgar F. Codd (1970) CACM |
+| **02** | Lập trình ORM SQLAlchemy & Bảo toàn ACID | [`tuan_02`](chapters/tuan_02_lap_trinh_orm_sqlite_acid.tex) | Jim Gray (1981), Härder & Reuter (1983) |
+| **03** | AI Agent & Thuế ảo giác số học (*Hallucination Tax*) | [`tuan_03`](chapters/tuan_03_ai_agent_hallucination_tax.tex) | ReAct (ICLR 2023), arXiv:2602.12631 |
+| **04** | LangGraph & Mô hình Máy trạng thái hữu hạn | [`tuan_04`](chapters/tuan_04_langgraph_statemachine.tex) | David Harel (1987) Statecharts |
+| **05** | Tool 1: Máy tính tồn kho & Token/Alias Matching | [`tuan_05`](chapters/tuan_05_che_tao_tools_toan_hoc.tex) | Levenshtein (1966), Manning et al. (2008) |
+| **06** | Tool 2: Cào Web làm giàu tri thức & Khả năng chịu lỗi | [`tuan_06`](chapters/tuan_06_web_scraping_resilience.tex) | Roy Fielding (2000), Circuit Breaker Pattern |
+| **07** | Tool 3: Xuất báo cáo Word (.docx) & Biểu đồ | [`tuan_07`](chapters/tuan_07_word_reports_data_viz.tex) | Edward Tufte (2001), NĐ 30/2020/NĐ-CP |
+| **08** | Tool 4: Thị giác đa phương thức (Vision OCR) | [`tuan_08`](chapters/tuan_08_multimodal_vision_ocr.tex) | Ray Smith (2007) Tesseract, Multimodal LLMs |
+| **09** | Kiến trúc Multi-Agent Swarm & Supervisor Orchestrator | [`tuan_09`](chapters/tuan_09_multiagent_supervisor_swarm.tex) | Agent Laboratory (2025), The AI Scientist |
+| **10** | Chu trình Tự khắc phục lỗi (Self-Healing Loop) | [`tuan_10`](chapters/tuan_10_error_handling_self_healing.tex) | Self-Refine (NeurIPS 2023) |
+| **11** | An ninh phân quyền RBAC & Giám sát con người (HITL) | [`tuan_11`](chapters/tuan_11_rbac_security_human_in_the_loop.tex) | NIST RBAC (IEEE 1996), AI Safety |
+| **12** | Giao diện Web tương tác hiện đại với Streamlit | [`tuan_12`](chapters/tuan_12_streamlit_web_ui_architecture.tex) | Streamlit Reactive Execution, WCAG 2.1 |
+| **13** | Kiểm thử tự động hoàn diện (Pytest Suite 8/8 Green) | [`tuan_13`](chapters/tuan_13_automated_testing_pytest_ci.tex) | Kent Beck (2002) TDD, IEEE 1008 |
+| **14** | Thử nghiệm thực tế & Đo lường định lượng Before/After | [`tuan_14`](chapters/tuan_14_thuc_nghiem_va_danh_gia_dinh_luong.tex) | Empirical Software Engineering (2012) |
+| **15** | Hoàn thiện luận văn 5 chương & Nghệ thuật vấn đáp Điểm 10 | [`tuan_15`](chapters/tuan_15_viet_luan_van_va_bao_ve_hoi_dong.tex) | Quy định ĐATN ĐHBK Hà Nội |
 
 ---
 
-## ⚡ 3. Hướng Dẫn Vận Hành & Biên Dịch
+## ⚡ 4. Lệnh Biên Dịch Lại LaTeX Sang PDF
+
+Để biên dịch lại ấn phẩm từ mã nguồn, chạy chuỗi lệnh sau trong thư mục `huong_dan_do_an/`:
 
 ```bash
-# 1. Kích hoạt môi trường ảo và chạy test
-source .venv/bin/activate
-PYTHONPATH=. .venv/bin/pytest tests/test_system.py -v
-
-# 2. Khởi chạy Web Demo
-.venv/bin/streamlit run src/ui/app.py
-
-# 3. Biên dịch lại sách giáo trình 15 tuần sang PDF
-cd huong_dan_do_an
-pdflatex -interaction=nonstopmode giao_trinh_do_an_15_tuan.tex
+pdflatex -interaction=nonstopmode main.tex
+bibtex main
+pdflatex -interaction=nonstopmode main.tex
+pdflatex -interaction=nonstopmode main.tex
 ```
 
----
-*Chúc bạn học tập hiệu quả, vững tin với giáo trình 15 tuần và bảo vệ thành công rực rỡ!*
+File ấn phẩm đầu ra chính thức: [**`main.pdf`**](main.pdf).

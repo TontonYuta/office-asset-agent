@@ -1,0 +1,65 @@
+\section{Tuần 05: Chế Tạo Tool 1 — Máy Tính Tồn Kho Tất Định \& Thuật Toán Token/Alias Matching}
+\label{sec:tuan_05}
+
+\begin{advisorbox}[Lời Dặn Của Thầy: Người Dùng Sẽ Không Bao Giờ Nhập Đúng Tên Thiết Bị Như Trong Sách Vở]
+Chào em. Trong lý thuyết CSDL, câu lệnh \texttt{WHERE name = 'Laptop Dell XPS 13'} chạy rất hoàn hảo. Nhưng trong thực tế tại các phòng ban trường ta, cán bộ sẽ gõ vào hộp chat: \textit{"kho còn con láp nào k?"}, \textit{"tìm máy tính xách tay dell"}, hay thậm chí là gõ không dấu \textit{"kiem tra may in"}. Nếu em chỉ dùng so khớp chuỗi chính xác \texttt{LIKE \%...\%}, hệ thống của em sẽ trả về kết quả rỗng 80\% số lần truy vấn!
+
+Tuần này em phải xây dựng \textbf{Tool 1: Máy tính tồn kho tất định (Deterministic SQL Calculator)} tích hợp bộ lọc chuẩn hóa \textbf{Token/Alias Matching} và thuật toán khoảng cách xâu Levenshtein~\cite{levenshtein1966binary}. Công cụ này vừa có sự mềm dẻo của xử lý ngôn ngữ tự nhiên, vừa có sự chính xác tuyệt đối của phép tính tổng số học SQL.
+\end{advisorbox}
+
+\begin{literaturebox}[Tài Liệu Nghiên Cứu Gốc Bắt Buộc]
+Em hãy nghiên cứu các tài liệu kinh điển về kỹ thuật tìm kiếm văn bản và so khớp xâu:
+\begin{itemize}[leftmargin=1.5em]
+    \item \textbf{Levenshtein, V. I. (1966)}: \textit{"Binary Codes Capable of Correcting Deletions, Insertions, and Reversals"}, Soviet Physics Doklady~\cite{levenshtein1966binary}. Nắm vững cách tính khoảng cách chỉnh sửa giữa 2 chuỗi ký tự.
+    \item \textbf{Manning et al. (2008)}: \textit{"Introduction to Information Retrieval"}, Cambridge University Press~\cite{manning2008introduction}. Đọc Chương 2 về Tokenization, Normalization và Stopwords trong tiếng Việt.
+\end{itemize}
+\end{literaturebox}
+
+\begin{codeautopsybox}[Giải Phẫu Mã Nguồn: src/tools/sql\_calculator.py]
+Mở tệp \texttt{src/tools/sql\_calculator.py}, nghiên cứu từ điển đồng nghĩa (Synonyms/Alias Map) và hàm bóc tách từ khóa:
+\begin{lstlisting}[language=Python]
+CATEGORY_ALIASES = {
+    "laptop": ["may tinh xach tay", "lap", "may tinh ca nhan", "macbook", "dell", "thinkpad"],
+    "printer": ["may in", "may scan", "in canon", "in hp"],
+    "projector": ["may chieu", "man chieu", "projector panasonic"],
+    "chair": ["ghe xoay", "ghe cong thai hoc", "ghe lam viec"],
+    "desk": ["ban lam viec", "ban hop", "ban go"]
+}
+
+def resolve_canonical_category(raw_text: str) -> Optional[str]:
+    clean_text = raw_text.lower().strip()
+    for category, aliases in category_aliases.items():
+        if category in clean_text:
+            return category
+        for alias in aliases:
+            if alias in clean_text:
+                return category
+    return None
+\end{lstlisting}
+Sau khi chuẩn hóa được danh mục gốc (Canonical Category), hàm sẽ thực thi câu lệnh SQL tổng hợp:
+\begin{lstlisting}[language=Python]
+def query_inventory_stats(session, category: str):
+    query = session.query(
+        func.count(Asset.id).label("total_count"),
+        func.sum(case((Asset.status == AssetStatus.IN_STOCK, 1), else_=0)).label("in_stock_count"),
+        func.sum(case((Asset.status == AssetStatus.ASSIGNED, 1), else_=0)).label("assigned_count"),
+        func.sum(case((Asset.status == AssetStatus.BROKEN, 1), else_=0)).label("broken_count"),
+        func.sum(Asset.purchase_price).label("total_valuation")
+    ).filter(Asset.category == category)
+    return query.first()
+\end{lstlisting}
+\end{codeautopsybox}
+
+\begin{labmilestonebox}[Nhiệm Vụ Thực Hành Tuần 05]
+\begin{enumerate}[leftmargin=1.5em]
+    \item Mở rộng từ điển \texttt{CATEGORY\_ALIASES} thêm 3 danh mục thực tế: \texttt{"monitor"} (màn hình), \texttt{"air\_conditioner"} (điều hòa nhiệt độ), \texttt{"mouse"} (chuột quang).
+    \item Viết hàm kiểm thử tự động với 20 câu hỏi tiếng Việt không dấu, viết tắt để đo tỷ lệ phân giải danh mục chính xác (Accuracy > 95\%).
+    \item Viết test kiểm tra trường hợp tính tổng tồn kho khi danh mục không có bất kỳ tài sản nào (xử lý an toàn giá trị \texttt{NULL/None}).
+\end{enumerate}
+\end{labmilestonebox}
+
+\begin{checkpointbox}[Thử Thách Vấn Đáp Hội Đồng]
+\textbf{Câu hỏi 5:} Tại sao em không dùng Vector Search (RAG với ChromaDB/FAISS) để tìm kiếm danh mục thay vì dùng bảng tra cứu Alias Matching?\\
+\textit{Mẹo trả lời chuẩn điểm 10:} Vector Search dựa trên độ tương đồng ngữ nghĩa (Cosine Similarity), có thể bị nhầm lẫn giữa các khái niệm gần nhau (ví dụ: "chuột máy tính" và "bàn phím" đều có vector gần giống nhau về phụ kiện máy tính). Với các danh mục tài sản hành chính hữu hạn, phương pháp Canonical Alias kết hợp Regex Matching mang tính tất định (Deterministic), tốc độ $O(1)$, không tốn chi phí nhúng vector (Embedding) và loại trừ hoàn toàn kết quả sai lệch.
+\end{checkpointbox}
+

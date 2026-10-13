@@ -24,6 +24,7 @@ from src.tools.sql_calculator import (
     commit_stock_transaction,
 )
 from src.tools.doc_generator import generate_inventory_chart
+from src.tools.inventory_memory import evaluate_allocation_request
 from src.agents.orchestrator import process_user_request
 
 # Cấu hình giao diện Streamlit
@@ -98,9 +99,10 @@ with st.sidebar:
         st.rerun()
 
 # ----------------- MAIN INTERFACE TABS -----------------
-tab_chat, tab_inventory, tab_tickets, tab_manuals = st.tabs([
+tab_chat, tab_inventory, tab_safe_stock, tab_tickets, tab_manuals = st.tabs([
     "💬 Trợ Lý Hội Thoại (Multi-Agent)",
     "📦 Danh Mục Vật Tư & Kho",
+    "🧠 Thẩm Định Cấp Phát (AIM-RM)",
     "📋 Phiếu Sửa Chữa & Duyệt Đơn",
     "📖 Sổ Tay Tri Thức Theo Model"
 ])
@@ -166,15 +168,19 @@ with tab_chat:
                             st.write("📋 **Danh sách mặt hàng trích xuất:**")
                             st.table(res["data"]["items"])
                             if st.button("✅ [Human-in-the-Loop] Duyệt Cập Nhật Vào CSDL Kho"):
+                                updated_count = 0
                                 for item in res["data"]["items"]:
-                                    commit_stock_transaction(
-                                        asset_id=1 if "Giấy" in item["name"] else (2 if "Bút" in item["name"] else 3),
-                                        transaction_type="IN",
-                                        quantity=item["quantity"],
-                                        provider_or_dept=res["data"].get("provider", "Nhà cung cấp"),
-                                        notes=f"Nhập tự động từ hóa đơn {res['data'].get('invoice_number')}"
-                                    )
-                                st.success("🎉 Đã cập nhật cộng dồn số lượng tồn kho thành công!")
+                                    t_id = item.get("target_id")
+                                    if t_id is not None:
+                                        commit_stock_transaction(
+                                            asset_id=t_id,
+                                            transaction_type="IN",
+                                            quantity=item["quantity"],
+                                            provider_or_dept=res["data"].get("provider", "Nhà cung cấp"),
+                                            notes=f"Nhập tự động từ hóa đơn {res['data'].get('invoice_number')} (Qwen2.5-VL Layout Parser)"
+                                        )
+                                        updated_count += 1
+                                st.success(f"🎉 Đã cập nhật cộng dồn số lượng cho {updated_count} mặt hàng vào CSDL thành công!")
                                 st.rerun()
 
     # Nhận câu hỏi từ chat input
@@ -265,7 +271,75 @@ with tab_inventory:
                     else:
                         st.error(res["message"])
 
-# ----------------- TAB 3: DANH SÁCH PHIẾU BÁO HỎNG & DUYỆT ĐƠN -----------------
+# ----------------- TAB 3: THẨM ĐỊNH CẤP PHÁT (AIM-RM & SAFE-STOCK) -----------------
+with tab_safe_stock:
+    st.subheader("🧠 Thẩm Định Đơn Xin Cấp Phát Vật Tư (AIM-RM & Safe-Stock Strategy)")
+    st.markdown(
+        "*Ứng dụng kiến trúc AIM-RM (arXiv:2602.05524) kết hợp lý thuyết tồn kho an toàn để ngăn chặn "
+        "quyết định cảm tính, hiện tượng roi da (Bullwhip Effect) và chống ảo giác số học.*"
+    )
+
+    with st.form("aim_rm_audit_form"):
+        col_s1, col_s2, col_s3 = st.columns(3)
+        with col_s1:
+            audit_dept = st.selectbox(
+                "Phòng ban yêu cầu cấp phát:",
+                ["Phòng Marketing", "Phòng Kế toán", "Phòng Kỹ thuật", "Phòng Nhân sự", "Ban Giám đốc"]
+            )
+        with col_s2:
+            assets_items = get_all_assets()
+            audit_item_name = st.selectbox(
+                "Mặt hàng xin cấp:",
+                [a["name"] for a in assets_items]
+            )
+        with col_s3:
+            audit_qty = st.number_input("Số lượng đề xuất cấp:", min_value=1, value=15, step=1)
+
+        run_audit_btn = st.form_submit_button("🔍 Thẩm Định & Tra Cứu Bộ Nhớ Lịch Sử (AIM-RM)")
+
+    if run_audit_btn:
+        with st.spinner("Đang truy xuất kịch bản tương đồng từ bộ nhớ và tính toán Dynamic Safe-Stock..."):
+            eval_res = evaluate_allocation_request(
+                department=audit_dept,
+                item_query=audit_item_name,
+                requested_qty=audit_qty
+            )
+            if eval_res["status"] == "success":
+                # Thống kê nhanh
+                m1, m2, m3, m4 = st.columns(4)
+                m1.metric("Tồn kho hiện tại", f"{eval_res['current_onhand']} {eval_res['unit']}")
+                m2.metric("Dự kiến sau cấp", f"{eval_res['projected_stock_after']} {eval_res['unit']}")
+                m3.metric("Tồn kho an toàn (S_safe)", f"{eval_res['safe_stock_benchmark']} {eval_res['unit']}")
+                m4.metric("Trung bình lịch sử", f"{eval_res['historical_mean']} {eval_res['unit']}")
+
+                st.markdown("---")
+                st.markdown(eval_res["recommendation"])
+
+                st.markdown("#### 📜 Kịch bản tương đồng trong bộ nhớ lịch sử (Top Similar Episodes):")
+                if eval_res["similar_episodes"]:
+                    st.dataframe(eval_res["similar_episodes"], use_container_width=True)
+
+                if current_role == ROLE_ADMIN and eval_res["decision_code"] != "REJECT_INSUFFICIENT_STOCK":
+                    st.markdown("---")
+                    col_appr1, col_appr2 = st.columns([2, 1])
+                    with col_appr1:
+                        st.info("Cán bộ có quyền phê duyệt xuất kho trực tiếp theo khuyến nghị của AIM-RM.")
+                    with col_appr2:
+                        if st.button("✅ [Cán bộ Phê duyệt Xuất Kho]", key="btn_approve_aim_rm"):
+                            tx_res = commit_stock_transaction(
+                                asset_id=eval_res["asset_id"],
+                                transaction_type="OUT",
+                                quantity=audit_qty,
+                                provider_or_dept=audit_dept,
+                                notes=f"Duyệt qua AIM-RM Safe-Stock (Z-Score: {eval_res['z_score']})"
+                            )
+                            if tx_res["success"]:
+                                st.success(tx_res["message"])
+                                st.rerun()
+                            else:
+                                st.error(tx_res["message"])
+
+# ----------------- TAB 4: DANH SÁCH PHIẾU BÁO HỎNG & DUYỆT ĐƠN -----------------
 with tab_tickets:
     st.subheader("📋 Danh Sách Phiếu Báo Hỏng Thiết Bị (Maintenance Tickets)")
     db = SessionLocal()
@@ -303,7 +377,7 @@ with tab_tickets:
     finally:
         db.close()
 
-# ----------------- TAB 4: SỔ TAY TRI THỨC THEO MODEL -----------------
+# ----------------- TAB 5: SỔ TAY TRI THỨC THEO MODEL -----------------
 with tab_manuals:
     st.subheader("📖 Cơ Sở Tri Thức Kỹ Thuật (Đã Nạp & Làm Giàu)")
     db = SessionLocal()

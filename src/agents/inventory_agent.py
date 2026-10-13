@@ -1,9 +1,12 @@
 """
 Inventory Management & Deterministic Calculation Agent.
-Đồ án 2: Tra cứu tồn kho chính xác bằng code Python/SQL, loại bỏ ảo giác tính nhẩm.
+Đồ án 2: 
+- Tra cứu tồn kho chính xác bằng code Python/SQL, loại bỏ ảo giác tính nhẩm (Hallucination Tax - arXiv:2602.12631).
+- Tích hợp bộ nhớ AIM-RM & Safe-Stock thẩm định cấp phát (Supply Chain Agent - arXiv:2602.05524).
 """
 
-from typing import Dict, Any
+import re
+from typing import Dict, Any, Optional
 from src.core.config import ROLE_ADMIN
 from src.tools.sql_calculator import (
     search_asset_by_query,
@@ -11,15 +14,60 @@ from src.tools.sql_calculator import (
     get_all_assets,
 )
 from src.tools.doc_generator import generate_inventory_chart
+from src.tools.inventory_memory import evaluate_allocation_request
 
 
-def handle_inventory_query(user_message: str, user_role: str = "user") -> Dict[str, Any]:
+def handle_inventory_query(
+    user_message: str,
+    user_role: str = "user",
+    department: str = "Phòng Ban Chức Năng"
+) -> Dict[str, Any]:
     """
-    Phân tích câu hỏi tự nhiên về kho vật tư và trả lời số liệu chính xác 100%.
+    Phân tích câu hỏi tự nhiên về kho vật tư, tính toán chính xác 100% bằng SQL
+    và thẩm định định mức tồn kho an toàn bằng AIM-RM.
     """
     msg_lower = user_message.lower()
 
-    # 1. Yêu cầu vẽ biểu đồ thống kê
+    # 1. Yêu cầu thẩm định đơn xin cấp phát vật tư (AIM-RM Safe-Stock & Memory Retrieval)
+    allocation_keywords = ["xin cấp", "xin xuất", "cấp phát", "thẩm định", "định mức an toàn", "safe stock", "dự trù"]
+    if any(k in msg_lower for k in allocation_keywords) and not ("còn bao nhiêu" in msg_lower):
+        # Trích xuất số lượng số học từ câu nói (VD: "xin cấp 50 ram", "cấp phát 20 hộp")
+        qty_match = re.search(r"(\d+)", user_message)
+        requested_qty = int(qty_match.group(1)) if qty_match else 15
+
+        eval_res = evaluate_allocation_request(
+            department=department,
+            item_query=user_message,
+            requested_qty=requested_qty
+        )
+
+        if eval_res["status"] == "success":
+            episodes_text = ""
+            for ep in eval_res["similar_episodes"]:
+                episodes_text += (
+                    f"  * Kỳ {ep.get('notes', 'Giao dịch')}: đã cấp `{ep['quantity']}` "
+                    f"(Độ tương đồng kịch bản: {ep['similarity_score']*100:.1f}%)\n"
+                )
+
+            response_text = (
+                f"🧠 **[AIM-RM Memory Retrieval & Safe-Stock Audit]**\n\n"
+                f"* **Vật tư thẩm định:** {eval_res['asset_name']} (`{eval_res['asset_code']}`)\n"
+                f"* **Đơn vị xin cấp:** {department} | **Số lượng yêu cầu:** `{eval_res['requested_qty']} {eval_res['unit']}`\n"
+                f"* **Tồn kho hiện tại:** `{eval_res['current_onhand']} {eval_res['unit']}` | **Dự kiến sau cấp:** `{eval_res['projected_stock_after']} {eval_res['unit']}`\n"
+                f"* **Định mức tồn kho an toàn ($S_{{safe}}$):** `{eval_res['safe_stock_benchmark']} {eval_res['unit']}`\n"
+                f"* **Mức tiêu thụ trung bình lịch sử ($\\\\mu \\\\pm \\\\sigma$):** `{eval_res['historical_mean']} \\\\pm {eval_res['historical_std']} {eval_res['unit']}`\n\n"
+                f"📜 **Kịch bản tương đồng trong bộ nhớ lịch sử (Top Similar Episodes):**\n"
+                f"{episodes_text}\n"
+                f"⚖️ **Khuyến nghị của Hệ thống:**\n"
+                f"{eval_res['recommendation']}"
+            )
+            return {
+                "status": "allocation_evaluation",
+                "data": eval_res,
+                "response": response_text
+            }
+
+    # 2. Yêu cầu vẽ biểu đồ thống kê
     if "biểu đồ" in msg_lower or "chart" in msg_lower or "đồ thị" in msg_lower:
         if user_role != ROLE_ADMIN:
             return {
@@ -39,7 +87,7 @@ def handle_inventory_query(user_message: str, user_role: str = "user") -> Dict[s
             )
         }
 
-    # 2. Yêu cầu xem tổng giá trị kho / chi phí (Admin only)
+    # 3. Yêu cầu xem tổng giá trị kho / chi phí (Admin only)
     if "tổng giá trị" in msg_lower or "tổng tiền" in msg_lower or "định giá" in msg_lower or "chi phí" in msg_lower:
         if user_role != ROLE_ADMIN:
             return {
@@ -57,7 +105,7 @@ def handle_inventory_query(user_message: str, user_role: str = "user") -> Dict[s
             )
         }
 
-    # 3. Yêu cầu xem danh sách cảnh báo sắp hết hàng
+    # 4. Yêu cầu xem danh sách cảnh báo sắp hết hàng
     if "sắp hết" in msg_lower or "hết hàng" in msg_lower or "cần nhập" in msg_lower or "cảnh báo" in msg_lower:
         metrics = calculate_inventory_metrics()
         low_items = metrics["low_stock_items"]
@@ -70,7 +118,7 @@ def handle_inventory_query(user_message: str, user_role: str = "user") -> Dict[s
             "response": f"⚠️ **Cảnh báo các mặt hàng có số lượng tồn kho thấp (cần nhập thêm):**\n\n{items_str}"
         }
 
-    # 4. Yêu cầu tra cứu mặt hàng cụ thể (VD: "giấy a4", "bút dạ", "mực in", "máy chiếu")
+    # 5. Yêu cầu tra cứu mặt hàng cụ thể (VD: "giấy a4", "bút dạ", "mực in", "máy chiếu")
     matched_asset = search_asset_by_query(user_message)
     if matched_asset:
         val_vnd = matched_asset.quantity * matched_asset.unit_price
@@ -96,7 +144,7 @@ def handle_inventory_query(user_message: str, user_role: str = "user") -> Dict[s
             "response": response_text
         }
 
-    # 5. Nếu không khớp món cụ thể, trả về danh mục tổng quát
+    # 6. Nếu không khớp món cụ thể, trả về danh mục tổng quát
     all_items = get_all_assets()
     item_list = ", ".join([a["name"] for a in all_items[:5]])
     return {

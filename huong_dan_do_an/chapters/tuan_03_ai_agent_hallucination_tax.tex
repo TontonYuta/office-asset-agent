@@ -1,0 +1,47 @@
+﻿\section{Tuần 03: Bản Chất AI Agent \& Bài Toán Thuế Ảo Giác Số Học (Hallucination Tax)}
+\label{sec:tuan_03}
+
+\begin{advisorbox}[Lời Dặn Của Thầy: Đừng Đánh Đồng Chatbot Với AI Agent]
+Tuần này chúng ta bước vào thế giới trí tuệ nhân tạo. Rất nhiều người lầm tưởng cài một con Chatbot nói chuyện hay là đã có một hệ thống AI. Nhưng với tư cách là một kỹ sư Bách Khoa, em phải nhìn thấy bản chất xác suất của mô hình ngôn ngữ lớn (LLM): \textbf{LLM chỉ là cỗ máy dự đoán từ tiếp theo (Next-Token Predictor)}. Nó không có bộ nhớ động, không có khả năng tính toán số học chính xác và thường xuyên "chém gió" (ảo giác - Hallucination) với vẻ ngoài vô cùng tự tin!
+
+Nếu em để LLM tự đọc danh sách tài sản rồi nhẩm tính: \textit{"Phòng có bao nhiêu chiếc laptop đang hoạt động và tổng trị giá là bao nhiêu?"}, nó sẽ đưa ra những con số sai lệch hoàn toàn. Trong nghiên cứu của Tran et al. (2026)~\cite{hallucinationtax2026}, hiện tượng này được định nghĩa là \textbf{"Thuế ảo giác" (Hallucination Tax)}. Cách duy nhất để xóa bỏ khoản "thuế" này là biến LLM thành \textbf{AI Agent} theo mô hình ReAct~\cite{yao2023react}: LLM đóng vai trò bộ não suy luận (Reasoning), nhưng mọi thao tác truy vấn tính toán bắt buộc phải ủy quyền cho các công cụ ngoại vi tất định (Deterministic Tools)~\cite{schick2023toolformer}.
+\end{advisorbox}
+
+\begin{literaturebox}[Tài Liệu Nghiên Cứu Gốc Bắt Buộc]
+Em hãy nghiên cứu 3 bài báo khoa học mang tính bước ngoặt:
+\begin{itemize}[leftmargin=1.5em]
+    \item \textbf{Yao et al. (ICLR 2023)}: \textit{"ReAct: Synergizing Reasoning and Acting in Language Models"}~\cite{yao2023react}. Phân tích vòng lặp: \texttt{Thought} $\rightarrow$ \texttt{Action} $\rightarrow$ \texttt{Observation} $\rightarrow$ \texttt{Thought}.
+    \item \textbf{Schick et al. (NeurIPS 2023)}: \textit{"Toolformer: Language Models Can Teach Themselves to Use Tools"}~\cite{schick2023toolformer}. Cơ chế LLM tự sinh API Call để bù đắp khuyết tật tính toán.
+    \item \textbf{Tran et al. (arXiv:2602.12631, 2026)}: \textit{"The Hallucination Tax in Large Language Model Arithmetic Reasoning"}~\cite{hallucinationtax2026}. Chứng minh rằng độ phức tạp của bài toán số học khiến xác suất sai lệch của LLM tăng theo hàm mũ nếu không có Deterministic SQL Execution.
+\end{itemize}
+\end{literaturebox}
+
+\begin{codeautopsybox}[Giải Phẫu Mã Nguồn: Đối Chiếu Trực Quan]
+Quan sát sự khác biệt cốt tử trong thiết kế của repo \texttt{office-asset-agent}:
+\begin{lstlisting}[language=Python]
+# CACH TIEP CAN SAI LAM (NGAI THO - DUNG NGUYEN BAN LLM DE TINH):
+prompt = f"Du lieu cac tai san la: {assets_json}. Hay tinh tong gia tri kho?"
+# Ket qua: LLM sinh so ngau nhien vi phep cong float bi tran context token!
+
+# CACH TIEP CAN CHUAN AI AGENT (OFFICE ASSET AGENT):
+# LLM nhan dien y dinh (Intent) va goi ham Tool:
+from src.tools.sql_calculator import query_inventory_stats
+stats = query_inventory_stats(db_session, category="Laptop")
+# SQLite thuc thi phep tinh SUM(purchase_price) va COUNT(id) chinh xac 100%!
+\end{lstlisting}
+Agent chỉ nhận kết quả chính xác từ SQLite và diễn đạt lại thành ngôn ngữ tự nhiên thân thiện cho người dùng.
+\end{codeautopsybox}
+
+\begin{labmilestonebox}[Nhiệm Vụ Thực Hành Tuần 03]
+\begin{enumerate}[leftmargin=1.5em]
+    \item Viết một thực nghiệm nhỏ: Cung cấp danh sách 50 tài sản với giá tiền lẻ cho một mô hình LLM bất kỳ và yêu cầu tính tổng. Chạy 10 lần và ghi lại tỷ lệ sai số.
+    \item Lập bảng so sánh đối chứng giữa kết quả tính nhẩm của LLM và kết quả của lệnh SQL \texttt{SELECT SUM(purchase\_price)}.
+    \item Đưa bảng số liệu thực nghiệm này vào báo cáo đồ án để làm minh chứng khoa học cho việc tại sao phải xây dựng Tool.
+\end{enumerate}
+\end{labmilestonebox}
+
+\begin{checkpointbox}[Thử Thách Vấn Đáp Hội Đồng]
+\textbf{Câu hỏi 3:} Tại sao em không dùng Fine-Tuning mô hình ngôn ngữ lớn để nó học thuộc dữ liệu kho vật tư thay vì dùng kiến trúc Agent gọi Tool?\\
+\textit{Mẹo trả lời chuẩn điểm 10:} Fine-Tuning chỉ giúp mô hình học phong cách diễn đạt hoặc tri thức tĩnh, chứ không cập nhật được dữ liệu kho thay đổi theo từng giây. Hơn nữa, việc huấn luyện lại rất tốn kém chi phí tính toán và vẫn không giải quyết được ảo giác số học. Kiến trúc Agent Tool-Calling tách rời phần não suy luận và phần dữ liệu động, đảm bảo tính đúng đắn 100\% của số liệu tồn kho.
+\end{checkpointbox}
+

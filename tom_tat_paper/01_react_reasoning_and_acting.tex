@@ -1,0 +1,159 @@
+\documentclass[11pt,a4paper]{article}
+
+\input{preamble_paper.tex}
+
+\begin{document}
+
+% Tiêu Đề Bài Báo Nghiên Cứu
+\begin{center}
+    {\Large\bfseries BẢN TỔNG HỢP VÀ PHÂN TÍCH CHUYÊN SÂU PAPER}\\[0.3cm]
+    {\LARGE\bfseries ReAct: Synergizing Reasoning and Acting in Language Models}\\[0.4cm]
+    {\normalsize\textbf{Tác giả:} Shunyu Yao, Jeffrey Zhao, Dian Yu, Nan Du, Izhak Shafran, Karthik Narasimhan, Yuan Cao}\\[0.15cm]
+    {\small Princeton University \& Google Research — Hội nghị \textbf{ICLR 2023}}\\[0.15cm]
+    {\small Mã định danh: \href{https://arxiv.org/abs/2210.03629}{\texttt{arXiv:2210.03629}} \quad | \quad Mã nguồn: \url{https://github.com/ysymyx/ReAct}}
+\end{center}
+
+\vspace{0.3cm}
+\hrule height 1.2pt
+\vspace{0.6cm}
+
+---
+
+\section{Bối Cảnh Ra Đời \& Nỗi Đau Cốt Lõi Của Các Mô Hình Trước Đó}
+
+Trước khi bài báo ReAct được công bố tại ICLR 2023, cộng đồng nghiên cứu AI chia việc ứng dụng Mô hình Ngôn ngữ Lớn (LLM) thành hai nhánh tách biệt:
+\begin{enumerate}[leftmargin=1.8em]
+    \item \textbf{Trường phái Suy luận thuần túy (Reasoning-only - Chain-of-Thought / CoT):} Cho phép LLM tự "nói chuyện một mình" (internal thought traces) để chia nhỏ bài toán phức tạp thành các bước suy nghĩ trung gian (Wei et al., 2022).
+    \item \textbf{Trường phái Hành động thuần túy (Acting-only - Action Generation):} Cho phép mô hình sinh ra chuỗi hành động tương tác với môi trường bên ngoài (như gọi API, bấm nút trên web, gõ lệnh shell).
+\end{enumerate}
+
+\begin{coreconceptbox}[Điểm Mù Cốt Tử Của Hai Trường Phái Cũ]
+Bài báo của Yao et al. đã chỉ ra điểm mù chí mạng của từng cách tiếp cận:
+\begin{itemize}[leftmargin=1.5em]
+    \item \textbf{Khuyết tật của CoT thuần túy (Mô hình đóng):} CoT chỉ dựa vào tri thức tĩnh đã lưu trong trọng số (parametric memory). Do không thể tương tác với thế giới bên ngoài, mô hình không thể cập nhật thông tin thời gian thực, dễ bị \textbf{ảo giác (Hallucination)} và khi bước suy luận thứ nhất sai, sai số sẽ nhân lên theo cấp số nhân ở các bước sau (\textit{Error Propagation}).
+    \item \textbf{Khuyết tật của Action thuần túy (Mô hình mù):} Khi chỉ phát ra hành động (ví dụ: \texttt{Search[X]} $\rightarrow$ \texttt{Search[Y]}), mô hình hành xử như một bộ phản xạ cơ học không có trí nhớ làm việc (Working Memory). Nó không thể tự nhắc nhở mình đang tìm kiếm cái gì, không thể trừu tượng hóa các mục tiêu phụ và bất lực khi gặp lỗi ngoại lệ.
+\end{itemize}
+\end{coreconceptbox}
+
+---
+
+\section{Hình Thức Hóa Toán Học Của Khung Phương Pháp ReAct}
+
+ReAct giải quyết vấn đề bằng cách \textbf{hợp nhất không gian suy luận và không gian hành động} vào một chuỗi biểu diễn ngôn ngữ thống nhất.
+
+\begin{formulationbox}[Định Nghĩa Không Gian Trạng Thái \& Hành Động Mở Rộng]
+Xét một bài toán Agent tương tác với môi trường:
+\begin{itemize}[leftmargin=1.5em]
+    \item Tại mỗi bước thời gian $t$, Agent nhận được ngữ cảnh lịch sử:
+    \begin{equation}
+        c_t = (x, a_1, o_1, a_2, o_2, \dots, a_{t-1}, o_{t-1})
+    \end{equation}
+    trong đó $x$ là câu hỏi/nhiệm vụ ban đầu, $a_i$ là hành động đã thực hiện, và $o_i$ là quan sát nhận về từ môi trường.
+    \item Trong các kiến trúc cũ, không gian hành động $\mathcal{A}$ chỉ chứa các thao tác môi trường thuần túy. ReAct mở rộng không gian hành động thành:
+    \begin{equation}
+        \hat{\mathcal{A}} = \mathcal{A} \cup \mathcal{L}
+    \end{equation}
+    trong đó $\mathcal{L}$ là không gian các biểu thức ngôn ngữ tự do đại diện cho \textbf{Ý nghĩ nội tại (Thought traces)}.
+\end{itemize}
+\end{formulationbox}
+
+Một hành động $a_t \in \mathcal{L}$ (Thought) có đặc điểm:
+\begin{itemize}[leftmargin=1.5em]
+    \item \textbf{Không thay đổi trạng thái môi trường ngoại vi} (không tốn tài nguyên gọi API, không ghi dữ liệu vào CSDL).
+    \item \textbf{Cập nhật trạng thái bộ nhớ làm việc} của Agent: $c_{t+1} = (c_t, a_t)$, giúp định hướng cho hành động tương tác ngoại vi tiếp theo $a_{t+1} \in \mathcal{A}$.
+\end{itemize}
+
+Chu trình điều phối 3 bước tuần hoàn của ReAct:
+\begin{equation}
+    \text{Thought}_t \sim \pi_\theta(\cdot \mid c_t) \quad \longrightarrow \quad \text{Action}_t \sim \pi_\theta(\cdot \mid c_t, \text{Thought}_t) \quad \longrightarrow \quad \text{Observation}_t \sim \text{Env}(\text{Action}_t)
+\end{equation}
+
+---
+
+\section{Bốn Chức Năng Sư Phạm Của "Thought" Trong Thực Tế}
+
+Qua phân tích định tính, Yao et al. chỉ ra rằng các Thought traces sinh ra đóng 4 vai trò kiến trúc sống còn:
+\begin{enumerate}[leftmargin=1.8em]
+    \item \textbf{Phân rã mục tiêu (Decomposing subgoals):} Chia câu hỏi lớn thành các câu hỏi nhỏ tuần tự (ví dụ: *"Để biết ông A hơn ông B bao nhiêu tuổi, trước hết tôi phải tra năm sinh của ông A"*).
+    \item \textbf{Chắt lọc tri thức (Extracting salient parts):} Khi một lệnh tìm kiếm trả về một trang web dài hàng nghìn từ, Thought đóng vai trò bộ lọc rút trích thông tin quan trọng nhất để đưa vào ngữ cảnh.
+    \item \textbf{Lập luận thông thường (Common-sense reasoning):} Bổ sung các phán đoán logic mà công cụ tìm kiếm không trả về trực tiếp.
+    \item \textbf{Tự điều chỉnh khi gặp lỗi (Exception handling \& Plan shifting):} Khi một lệnh gọi Tool trả về kết quả rỗng (ví dụ: \texttt{Not found}), Thought sẽ nhận diện thất bại và đổi từ khóa tìm kiếm thay vì tiếp tục đâm đầu vào ngõ cụt.
+\end{enumerate}
+
+---
+
+\section{Kết Quả Thực Nghiệm Đột Phá}
+
+Bài báo đánh giá ReAct trên 2 miền bài toán độc lập:
+
+\begin{benchmarkbox}[1. Bài Toán Lập Luận Chuyên Sâu (HotpotQA \& FEVER)]
+Trên bài toán trả lời câu hỏi đa bước (HotpotQA) và thẩm định tính xác thực (FEVER) tương tác với Wikipedia API:
+\begin{table}[H]
+\centering
+\small
+\begin{tabularx}{\textwidth}{lXXX}
+\toprule
+\textbf{Phương Pháp} & \textbf{Tương Tác API} & \textbf{Độ Chính Xác (F1 / Acc)} & \textbf{Tỷ Lệ Ảo Giác (Hallucination)} \\
+\midrule
+Standard Prompting & Không & Thấp & Rất cao \\
+Chain-of-Thought (CoT) & Không & Trung bình (nhiều suy luận bịa) & Cao (56\% lỗi do ảo giác) \\
+Action-only (Act) & Có (Search/Lookup) & Thấp (thiếu lập luận) & Thấp \\
+\textbf{ReAct} & \textbf{Có} & \textbf{Vượt trội} & \textbf{Giảm mạnh (chỉ 14\%)} \\
+\textbf{ReAct + CoT (Hybrid)} & \textbf{Có} & \textbf{Đạt điểm cao nhất} & \textbf{Tối ưu toàn diện} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+\textbf{Kết luận đắt giá:} CoT có độ linh hoạt suy luận cao nhưng tỷ lệ bịa đặt thông tin rất lớn; Act không bịa nhưng dễ mất phương hướng. ReAct kết hợp điểm mạnh của cả hai: Vừa hành động kiểm chứng thực tế, vừa giữ vững la bàn suy luận.
+\end{benchmarkbox}
+
+\begin{benchmarkbox}[2. Bài Toán Ra Quyết Định Môi Trường (ALFWorld \& WebShop)]
+Trên các môi trường tương tác phức tạp:
+\begin{itemize}[leftmargin=1.5em]
+    \item \textbf{ALFWorld (Thao tác trong nhà dạng văn bản):} ReAct đạt tỷ lệ thành công tuyệt đối vượt qua các mô hình Học Tăng Cường (Reinforcement Learning) và Bắt chước (Imitation Learning) đến \textbf{+34\%} (từ 45\% lên 79\%) chỉ với 1-2 ví dụ Few-Shot in-context.
+    \item \textbf{WebShop (Mô phỏng mua sắm thương mại điện tử):} ReAct vượt qua các baseline RL \textbf{+10\%} về tỷ lệ tìm đúng sản phẩm và hoàn tất giỏ hàng.
+\end{itemize}
+\end{benchmarkbox}
+
+---
+
+\section{Ánh Xạ Trực Tiếp Vào Dự Án Office Asset Agent}
+
+Trong hệ thống \texttt{office-asset-agent}, chu trình ReAct được cài đặt chuẩn xác trong module \texttt{src/agents/inventory\_agent.py} và \texttt{src/agents/orchestrator.py}:
+
+\begin{lstlisting}[language=Python]
+# MINH HOA LUONG THUC THI REACT TRONG HE THONG QUAN LY VAT TU:
+# 1. NGUOI DUNG HOI: "Phong Dao tao con may chiec laptop Dell va tong gia tri bao nhieu?"
+
+# [THOUGHT 1]: Nguoi dung can biet so luong va tong gia tri cua danh muc "laptop" 
+# thuoc thuong hieu "Dell" tai phong ban "Phong Dao tao". 
+# Toi can goi Tool Deterministic SQL Calculator de tinh toan chinh xac thay vi tinh nham.
+
+# [ACTION 1]: query_inventory_stats(category="laptop", department="Dao tao", brand="Dell")
+
+# [OBSERVATION 1]: {"total_count": 5, "in_stock": 2, "assigned": 3, "total_valuation": 75000000.0}
+
+# [THOUGHT 2]: Co so du lieu tra ve co tong cong 5 chiec, trong do 2 chiec con trong kho, 
+# 3 chiec dang duoc su dung. Tong tri gia la 75 trieu dong. Du lieu da day du de tra loi.
+
+# [FINAL RESPONSE]: "Thua quy thay co, tai Phong Dao tao hien co tong cong 5 chiec laptop Dell 
+# voi tong gia tri la 75.000.000 dong (trong do 2 chiec dang san co trong kho)."
+\end{lstlisting}
+
+---
+
+\section{Bộ Câu Hỏi Phản Biện Chuyên Sâu Của Hội Đồng (Defense Insights)}
+
+\begin{deepdivebox}[3 Câu Hỏi Đắt Giá Nhất Về ReAct Mà Hội Đồng Sẽ Hỏi Bạn]
+\begin{enumerate}[leftmargin=1.5em]
+    \item \textbf{Hội đồng hỏi:} *"Tại sao ReAct lại tốn nhiều token hơn CoT thông thường? Em đã tối ưu hóa chi phí token như thế nào?"*\\
+    \textit{Đáp án chuẩn:} ReAct tốn thêm token do phải lưu trữ cả các chuỗi Thought trung gian và văn bản Observation trả về từ Tool. Trong đồ án, em đã tối ưu bằng cách: Chỉ lưu các trường tóm tắt có cấu trúc của Tool (JSON compact) thay vì nhét toàn bộ HTML/văn bản thô, và thiết lập cơ chế cắt tỉa ngữ cảnh (Context Pruning) loại bỏ các bước tìm kiếm trung gian sau khi đã trích xuất được kết quả.
+    
+    \item \textbf{Hội đồng hỏi:} *"Nếu Action trả về kết quả rỗng (Observation = None) thì ReAct có bị rơi vào vòng lặp vô tận không?"*\\
+    \textit{Đáp án chuẩn:} Nếu không kiểm soát, ReAct có thể liên tục sinh Thought và thử lại. Em đã giải quyết bằng cách áp dụng \textbf{Ngưỡng thử lại tối đa (Max Retries = 3)} và cơ chế ngắt mạch (Circuit Breaker) trong LangGraph: Sau 3 lần quan sát rỗng, Agent bắt buộc phải chuyển sang bước kích hoạt Fallback hỏi lại người dùng.
+
+    \item \textbf{Hội đồng hỏi:} *"Sự khác biệt bản chất giữa ReAct và OpenAI Function Calling là gì?"*\\
+    \textit{Đáp án chuẩn:} Function Calling ban đầu chỉ là cơ chế ánh xạ từ văn bản sang cú pháp JSON của hàm (Action-only). ReAct là một \textbf{khung nhận thức toàn diện} bao bọc bên ngoài: Nó bắt buộc mô hình phải sinh ra lý do suy luận (Thought) trước khi quyết định gọi hàm, giúp việc chọn hàm chính xác hơn và cho phép con người dễ dàng đọc vết giải trình (Explainability).
+\end{enumerate}
+\end{deepdivebox}
+
+\end{document}

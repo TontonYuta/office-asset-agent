@@ -1,0 +1,90 @@
+\begin{thebibliography}{10}
+
+\bibitem{codd1970relational}
+E.~F. Codd, ``A relational model of data for large shared data banks,'' {\em
+  Communications of the ACM}, vol.~13, no.~6, pp.~377--387, 1970.
+
+\bibitem{gray1981transaction}
+J.~Gray, ``The transaction concept: Virtues and limitations,'' {\em Proceedings
+  of the Seventh International Conference on Very Large Data Bases (VLDB)},
+  pp.~144--154, 1981.
+
+\bibitem{haerder1983acid}
+T.~H{\"a}rder and A.~Reuter, ``Principles of transaction-oriented database
+  recovery,'' {\em ACM Computing Surveys}, vol.~15, no.~4, pp.~287--317, 1983.
+
+\bibitem{hallucinationtax2026}
+H.~H. Tran and A.~R. Lab, ``The hallucination tax in large language model
+  arithmetic reasoning: Why autonomous systems require deterministic tooling,''
+  {\em arXiv preprint arXiv:2602.12631}, 2026.
+
+\bibitem{yao2023react}
+S.~Yao, J.~Zhao, D.~Yu, N.~Du, I.~Shafran, K.~Narasimhan, and Y.~Cao,
+  ``{ReAct}: Synergizing reasoning and acting in language models,'' in {\em
+  International Conference on Learning Representations (ICLR)}, 2023.
+
+\bibitem{schick2023toolformer}
+T.~Schick, J.~Dwivedi-Yu, R.~Dess{\`\i}, R.~Raileanu, M.~Lomeli,
+  L.~Zettlemoyer, N.~Cancedda, and T.~Scialom, ``Toolformer: Language models
+  can teach themselves to use tools,'' {\em Advances in Neural Information
+  Processing Systems (NeurIPS)}, vol.~36, pp.~68539--68551, 2023.
+
+\bibitem{harel1987statecharts}
+D.~Harel, ``Statecharts: A visual formalism for complex systems,'' {\em Science
+  of Computer Programming}, vol.~8, no.~3, pp.~231--274, 1987.
+
+\bibitem{levenshtein1966binary}
+V.~I. Levenshtein, ``Binary codes capable of correcting deletions, insertions,
+  and reversals,'' {\em Soviet Physics Doklady}, vol.~10, no.~8, pp.~707--710,
+  1966.
+
+\bibitem{manning2008introduction}
+C.~D. Manning, P.~Raghavan, and H.~Sch{\"u}tze, {\em Introduction to
+  Information Retrieval}.
+\newblock Cambridge University Press, 2008.
+
+\bibitem{fielding2000rest}
+R.~T. Fielding, {\em Architectural Styles and the Design of Network-based
+  Software Architectures}.
+\newblock PhD thesis, University of California, Irvine, 2000.
+
+\bibitem{tufte2001visual}
+E.~R. Tufte, {\em The Visual Display of Quantitative Information}.
+\newblock Graphics Press, 2nd~ed., 2001.
+
+\bibitem{smith2007tesseract}
+R.~Smith, ``An overview of the {Tesseract} {OCR} engine,'' in {\em Ninth
+  International Conference on Document Analysis and Recognition (ICDAR)},
+  pp.~629--633, 2007.
+
+\bibitem{schmidgall2025agentlab}
+S.~Schmidgall, Y.~Su, Z.~Wang, X.~Yutong, and A.~Team, ``Agent laboratory:
+  Using {LLM} agents as autonomous research assistants,'' {\em arXiv preprint
+  arXiv:2501.04227}, 2025.
+
+\bibitem{sakana2024aiscientist}
+C.~Lu, C.~Lu, R.~T. Lange, J.~Foerster, J.~Clune, and D.~Ha, ``The {AI}
+  scientist: Towards fully automated open-ended scientific discovery,'' {\em
+  Nature Machine Intelligence}, 2026.
+
+\bibitem{madaan2023selfrefine}
+A.~Madaan, N.~Tandon, P.~Gupta, S.~Hallinan, L.~Gao, S.~Wiegreffe, U.~Alon,
+  N.~Dziri, S.~Prabhumoye, Y.~Yang, {\em et~al.}, ``Self-refine: Iterative
+  refinement with self-feedback,'' {\em Advances in Neural Information
+  Processing Systems (NeurIPS)}, vol.~36, 2023.
+
+\bibitem{sandhu1996role}
+R.~S. Sandhu, E.~J. Coyne, H.~L. Feinstein, and C.~E. Youman, ``Role-based
+  access control models,'' {\em IEEE Computer}, vol.~29, no.~2, pp.~38--47,
+  1996.
+
+\bibitem{beck2002test}
+K.~Beck, {\em Test-Driven Development: By Example}.
+\newblock Addison-Wesley Professional, 2002.
+
+\bibitem{wohlin2012experimentation}
+C.~Wohlin, P.~Runeson, M.~H{\"o}st, M.~C. Ohlsson, B.~Regnell, and
+  A.~Wessl{\'e}n, {\em Experimentation in Software Engineering}.
+\newblock Springer Science \& Business Media, 2012.
+
+\end{thebibliography}

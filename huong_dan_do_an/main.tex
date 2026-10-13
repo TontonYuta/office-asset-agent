@@ -1,0 +1,113 @@
+\documentclass[11pt,a4paper]{article}
+
+\input{preamble.tex}
+
+\begin{document}
+
+% Trang Bìa Chuẩn Học Thuật
+\begin{titlepage}
+    \centering
+    \vspace*{0.5cm}
+    {\large\bfseries ĐẠI HỌC BÁCH KHOA HÀ NỘI}\\[0.3cm]
+    {\large\bfseries TRƯỜNG CÔNG NGHỆ THÔNG TIN VÀ TRUYỀN THÔNG}\\[1.5cm]
+    
+    \rule{\textwidth}{1.5pt}\\[0.5cm]
+    {\huge\bfseries GIÁO TRÌNH HƯỚNG DẪN ĐỒ ÁN TỐT NGHIỆP 15 TUẦN}\\[0.4cm]
+    {\Large\bfseries XÂY DỰNG HỆ THỐNG AI AGENT HỖ TRỢ TRA CỨU VÀ QUẢN LÝ VẬT TƯ - THIẾT BỊ PHÒNG BAN}\\[0.2cm]
+    {\large\itshape (Office Asset Agent: Literature Grounding, Architecture \& Defense Strategy)}\\
+    \rule{\textwidth}{1.5pt}\\[1.5cm]
+
+    \begin{minipage}{0.48\textwidth}
+        \large
+        \textbf{Sinh viên thực hiện:}\\
+        Trần Huy Hoàng\\
+        MSSV: \texttt{20237337}\\
+        Lớp: KTPM - K68\\
+        Chuyên ngành: Kỹ nghệ Phần mềm
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.48\textwidth}
+        \large
+        \raggedleft
+        \textbf{Giảng viên hướng dẫn:}\\
+        Hội đồng Cố vấn Học thuật\\
+        Bộ môn Kỹ nghệ Phần mềm\\
+        Trường CNTT\&TT — ĐHBK Hà Nội
+    \end{minipage}
+
+    \vfill
+    {\large\bfseries HÀ NỘI — NĂM 2026}
+\end{titlepage}
+
+\newpage
+\pagenumbering{roman}
+
+% Lời Nói Đầu Của Thầy Hướng Dẫn
+\section*{Lời Nói Đầu Của Giảng Viên Hướng Dẫn}
+\addcontentsline{toc}{section}{Lời Nói Đầu Của Giảng Viên Hướng Dẫn}
+
+Chào các em sinh viên làm Đồ án tốt nghiệp.
+
+Tài liệu này không phải là một cuốn giáo trình lý thuyết suông, cũng không phải là tập hướng dẫn "mì ăn liền" chép code sao chép bề nổi. Đây là cuốn \textbf{Cẩm nang Kèm cặp 15 tuần (15-Week Capstone Mentorship Manual)} được biên soạn với vị thế của một Giảng viên hướng dẫn thực thụ tại Đại học Bách Khoa Hà Nội.
+
+Trong suốt 15 tuần này, Thầy sẽ đồng hành cùng em qua 5 giai đoạn tiến hóa của một kỹ sư phần mềm chuyên nghiệp:
+\begin{itemize}[leftmargin=1.5em]
+    \item \textbf{Giai đoạn 1 (Tuần 1 -- 4): Nền tảng Kỹ thuật \& Lý thuyết}: Thấu hiểu nghiệp vụ quản lý tài sản cơ quan, chuẩn hóa dữ liệu 3NF, bảo toàn giao dịch ACID với SQLAlchemy/SQLite và thấu hiểu bài toán "Thuế ảo giác số học" (Hallucination Tax) của LLM.
+    \item \textbf{Giai đoạn 2 (Tuần 5 -- 8): Chế tạo Bộ Công Cụ Tác Vụ (The Tool Arsenal)}: Xây dựng 4 công cụ tất định hỗ trợ Agent: Máy tính tồn kho Token/Alias Matching, Cào web làm giàu tri thức, Tự động xuất văn bản Word (.docx) chuẩn Nghị định 30/2020/NĐ-CP và Thị giác OCR đa phương thức.
+    \item \textbf{Giai đoạn 3 (Tuần 9 -- 11): Bộ Não Điều Phối \& An Ninh Hệ Thống}: Thiết lập đàn tác tử (Multi-Agent Swarm) với LangGraph StateMachine, quy trình tự chữa lành lỗi (Self-Healing Loop) và phân quyền chặt chẽ RBAC.
+    \item \textbf{Giai đoạn 4 (Tuần 12 -- 13): Giao Diện Người Dùng \& Kiểm Thử Tự Động}: Xây dựng Web UI Streamlit đa tab tương tác mượt mà và bộ kiểm thử tự động Pytest 8/8 test cases xanh lá.
+    \item \textbf{Giai đoạn 5 (Tuần 14 -- 15): Đo Lường Thực Nghiệm \& Bảo Vệ Đồ Án}: Thu thập số liệu định lượng Before/After, viết luận văn chuẩn 5 chương và làm chủ nghệ thuật vấn đáp trước Hội đồng chấm thi.
+\end{itemize}
+
+Mỗi tuần, Thầy yêu cầu em phải đọc kỹ \textbf{Lời dặn của Thầy}, tra cứu các \textbf{Bài báo nghiên cứu gốc (Literature Grounding)}, mở trực tiếp \textbf{Codebase trong repo \texttt{office-asset-agent}}, hoàn thành \textbf{Nhiệm vụ thực hành} và tự trả lời \textbf{Câu hỏi thử thách vấn đáp}.
+
+Chúc em giữ vững ngọn lửa đam mê, rèn luyện bản lĩnh kỹ sư và bảo vệ đồ án đạt kết quả xuất sắc nhất!
+
+\vspace{0.8cm}
+\begin{flushright}
+    \textbf{Giảng viên Hướng dẫn}\\
+    \textit{Trường Công nghệ Thông tin \& Truyền thông — ĐHBK Hà Nội}
+\end{flushright}
+
+\newpage
+\tableofcontents
+\newpage
+\pagenumbering{arabic}
+
+% Nạp 15 Tuần Học Tập Tương Ứng 15 Chapters
+\input{chapters/tuan_01_khao_sat_nghiep_vu_va_erd.tex}
+\newpage
+\input{chapters/tuan_02_lap_trinh_orm_sqlite_acid.tex}
+\newpage
+\input{chapters/tuan_03_ai_agent_hallucination_tax.tex}
+\newpage
+\input{chapters/tuan_04_langgraph_statemachine.tex}
+\newpage
+\input{chapters/tuan_05_che_tao_tools_toan_hoc.tex}
+\newpage
+\input{chapters/tuan_06_web_scraping_resilience.tex}
+\newpage
+\input{chapters/tuan_07_word_reports_data_viz.tex}
+\newpage
+\input{chapters/tuan_08_multimodal_vision_ocr.tex}
+\newpage
+\input{chapters/tuan_09_multiagent_supervisor_swarm.tex}
+\newpage
+\input{chapters/tuan_10_error_handling_self_healing.tex}
+\newpage
+\input{chapters/tuan_11_rbac_security_human_in_the_loop.tex}
+\newpage
+\input{chapters/tuan_12_streamlit_web_ui_architecture.tex}
+\newpage
+\input{chapters/tuan_13_automated_testing_pytest_ci.tex}
+\newpage
+\input{chapters/tuan_14_thuc_nghiem_va_danh_gia_dinh_luong.tex}
+\newpage
+\input{chapters/tuan_15_viet_luan_van_va_bao_ve_hoi_dong.tex}
+
+\newpage
+% Danh Mục Tài Liệu Tham Khảo Học Thuật
+\bibliographystyle{ieeetr}
+\bibliography{references}
+
+\end{document}

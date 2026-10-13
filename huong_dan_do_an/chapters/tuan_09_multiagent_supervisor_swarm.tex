@@ -1,0 +1,62 @@
+﻿\section{Tuần 09: Kiến Trúc Đa Tác Tử (Multi-Agent Swarm) \& Điều Phối Trung Tâm (Supervisor)}
+\label{sec:tuan_09}
+
+\begin{advisorbox}[Lời Dặn Của Thầy: Nguyên Lý Chia Để Trị (Divide and Conquer)]
+Trong các bài tập lớn cơ bản, sinh viên hay nhét tất cả Prompt, tất cả 10 cái Tool vào duy nhất một con LLM khổng lồ (Monolithic Agent). Khi đó, Prompt sẽ dài hàng chục nghìn token, mô hình bị loãng sự chú ý (Attention Dilution) và rất dễ gọi nhầm Tool hoặc quên mất vai trò ban đầu.
+
+Trong các hệ thống AI tiên tiến được công bố gần đây như \textit{Agent Laboratory}~\cite{schmidgall2025agentlab} hay \textit{The AI Scientist}~\cite{sakana2024aiscientist}, kiến trúc bắt buộc là \textbf{Multi-Agent Swarm (Đàn tác tử chuyên môn hóa)}. Em phải chia hệ thống thành các Agent vệ tinh độc lập:
+\begin{itemize}[leftmargin=1.5em]
+    \item \textbf{InventoryAgent}: Chuyên gia kho bãi, chỉ quan tâm đến tồn kho, số lượng, định giá và CSDL.
+    \item \textbf{SupportAgent}: Chuyên viên kỹ thuật, tiếp nhận sự cố, lập phiếu Ticket, hướng dẫn xử lý hỏng hóc.
+    \item \textbf{EnrichAgent}: Chuyên viên tra cứu, cào thông số web và sinh tài liệu Word.
+\end{itemize}
+Đứng trên tất cả là \textbf{Supervisor Orchestrator} đóng vai trò như một người Trưởng phòng thông minh, nhận câu hỏi từ người dùng và phân việc đúng cho cấp dưới.
+\end{advisorbox}
+
+\begin{literaturebox}[Tài Liệu Nghiên Cứu Gốc Bắt Buộc]
+Em hãy nghiên cứu hai công trình kiến trúc Multi-Agent hàng đầu thế giới:
+\begin{itemize}[leftmargin=1.5em]
+    \item \textbf{Schmidgall et al. (arXiv:2501.04227, 2025)}: \textit{"Agent Laboratory: Using LLM Agents as Autonomous Research Assistants"}~\cite{schmidgall2025agentlab}. Đọc phần phân chia vai trò chuyên biệt (Specialized Roles) và giao tiếp giữa các sub-agents qua trạng thái dùng chung.
+    \item \textbf{Lu et al. (Nature Machine Intelligence, 2026)}: \textit{"The AI Scientist: Towards Fully Automated Open-Ended Scientific Discovery"}~\cite{sakana2024aiscientist}. Nắm rõ quy trình điều phối vòng đời của các tác tử độc lập và cơ chế Supervisor đánh giá chất lượng đầu ra.
+\end{itemize}
+\end{literaturebox}
+
+\begin{codeautopsybox}[Giải Phẫu Mã Nguồn: src/agents/orchestrator.py \& src/agents/]
+Mở thư mục \texttt{src/agents/}, quan sát sự phân vai rõ ràng:
+\begin{enumerate}[leftmargin=1.5em]
+    \item \textbf{\texttt{src/agents/inventory\_agent.py}}: Chỉ nhận các tools liên quan đến SQL Calculator và kiểm tra tồn kho. System prompt quy định chặt chẽ: \textit{"Bạn là chuyên viên quản lý kho vật tư..."}.
+    \item \textbf{\texttt{src/agents/support\_agent.py}}: Xử lý các nghiệp vụ tạo ticket hỏng hóc, cập nhật trạng thái thiết bị thành \texttt{BROKEN}.
+    \item \textbf{\texttt{src/agents/enrich\_agent.py}}: Đóng gói các công cụ cào web và sinh văn bản Word.
+    \item \textbf{\texttt{src/agents/orchestrator.py}}: Phân loại Intent bằng hàm định tuyến chính xác:
+\end{enumerate}
+\begin{lstlisting}[language=Python]
+def dispatch_agent_by_intent(state: AgentState) -> str:
+    intent = state.get("identified_intent")
+    user_role = state.get("current_user_role", "STAFF")
+    
+    # Kiem tra an ninh: Neu can quyen Admin ma user chi la Staff thi chan ngay
+    if intent == "ADMIN_ONLY_ACTION" and user_role != "ADMIN":
+        return "BLOCKED"
+    if intent in ["CHECK_INVENTORY", "VALUATION"]:
+        return "INVENTORY"
+    elif intent in ["REPORT_BROKEN", "CREATE_TICKET"]:
+        return "SUPPORT"
+    elif intent in ["EXPORT_DOC", "SEARCH_SPECS"]:
+        return "ENRICH"
+    return "INVENTORY" # Default fallback
+\end{lstlisting}
+\end{codeautopsybox}
+
+\begin{labmilestonebox}[Nhiệm Vụ Thực Hành Tuần 09]
+\begin{enumerate}[leftmargin=1.5em]
+    \item Tạo kịch bản người dùng gửi yêu cầu phức hợp: \textit{"Kiểm tra xem phòng còn laptop không, nếu còn thì xuất báo cáo Word và gửi phiếu cấp phát cho tôi"}.
+    \item Lần vết (Trace) trong log để xem Orchestrator phân chia tác vụ tuần tự qua \texttt{InventoryAgent} rồi chuyển tiếp sang \texttt{EnrichAgent} như thế nào.
+    \item Đảm bảo context trao đổi giữa các Agent không bị trùng lặp và giữ kích thước Token tối ưu.
+\end{enumerate}
+\end{labmilestonebox}
+
+\begin{checkpointbox}[Thử Thách Vấn Đáp Hội Đồng]
+\textbf{Câu hỏi 9:} Ưu điểm vượt trội của kiến trúc Phân cấp (Hierarchical Supervisor) so với kiến trúc Ngang hàng (Peer-to-Peer Agent Network) trong bài toán quản lý tài sản là gì?\\
+\textit{Mẹo trả lời chuẩn điểm 10:} Trong nghiệp vụ hành chính, trật tự và quyền hạn là yếu tố sống còn. Kiến trúc Ngang hàng (Peer-to-Peer) dễ dẫn đến hiện tượng các Agent "nói chuyện qua lại" vô tận gây tốn chi phí và khó kiểm soát an ninh. Kiến trúc Hierarchical Supervisor tập trung hóa quyền điều phối, đảm bảo một đầu mối chịu trách nhiệm kiểm tra an ninh (RBAC Gatekeeper) trước khi chuyển việc cho Agent con, giúp hệ thống tất định và tin cậy tuyệt đối.
+\end{checkpointbox}
+

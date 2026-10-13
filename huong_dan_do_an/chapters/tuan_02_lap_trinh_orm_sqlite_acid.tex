@@ -1,0 +1,54 @@
+\section{Tuần 02: Lập Trình ORM Với SQLAlchemy, SQLite \& Bảo Toàn Giao Dịch ACID}
+\label{sec:tuan_02}
+
+\begin{advisorbox}[Lời Dặn Của Thầy: Đừng Bao Giờ Coi Thường Cơ Chế Giao Dịch (Transactions)]
+Trong tuần thứ 2, em sẽ hiện thực hóa lược đồ dữ liệu từ giấy vào mã nguồn Python. Rất nhiều sinh viên viết code SQL bằng cách cộng chuỗi (string concatenation) hoặc lạm dụng \texttt{cursor.execute()} mà không hiểu về Session Management. Hậu quả là ứng dụng bị dính lỗi SQL Injection và rò rỉ kết nối (Connection Leak).
+
+Thầy yêu cầu em sử dụng SQLAlchemy ORM 2.0. Đây là thư viện chuẩn công nghiệp ánh xạ các bảng CSDL thành các class Python hướng đối tượng. Tuy nhiên, điều cốt lõi mà em phải nắm vững là \textbf{4 thuộc tính ACID (Atomicity, Consistency, Isolation, Durability)}. Khi người dùng gửi yêu cầu: \textit{"Chuyển laptop từ kho sang phòng Đào tạo và tạo phiếu bàn giao"}, nếu thao tác thứ nhất thành công mà thao tác thứ hai bị lỗi, hệ thống của em phải \textbf{Rollback} ngay lập tức. Dữ liệu tài sản không bao giờ được phép rơi vào trạng thái "nửa vời".
+\end{advisorbox}
+
+\begin{literaturebox}[Tài Liệu Nghiên Cứu Gốc Bắt Buộc]
+Em hãy nghiên cứu hai công trình nền tảng về lý thuyết giao dịch CSDL:
+\begin{itemize}[leftmargin=1.5em]
+    \item \textbf{Gray, J. (1981)}: \textit{"The Transaction Concept: Virtues and Limitations"}, VLDB~\cite{gray1981transaction}. Tìm hiểu định nghĩa mô hình Commit/Abort và bài toán phục hồi hệ thống khi có sự cố.
+    \item \textbf{Härder, T. \& Reuter, A. (1983)}: \textit{"Principles of Transaction-Oriented Database Recovery"}, ACM Computing Surveys~\cite{haerder1983acid}. Nắm rõ cơ chế WAL (Write-Ahead Logging) và giải thích tại sao SQLite mặc định khóa file khi ghi.
+\end{itemize}
+\end{literaturebox}
+
+\begin{codeautopsybox}[Giải Phẫu Mã Nguồn: src/core/database.py \& src/core/init\_db.py]
+Mở tệp \texttt{src/core/database.py}: Thầy đã cấu hình SQLite engine với chế độ kích hoạt Foreign Keys (vì SQLite mặc định tắt kiểm tra khóa ngoại):
+\begin{lstlisting}[language=Python]
+from sqlalchemy import create_engine, event
+from sqlalchemy.orm import declarative_base, sessionmaker
+
+engine = create_engine(
+    DATABASE_URL,
+    connect_args={"check_same_thread": False} if "sqlite" in DATABASE_URL else {}
+)
+
+# Kich hoat Foreign Key pragma cho SQLite
+@event.listens_for(engine, "connect")
+def set_sqlite_pragma(dbapi_connection, connection_record):
+    cursor = dbapi_connection.cursor()
+    cursor.execute("PRAGMA foreign_keys=ON")
+    cursor.close()
+
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+Base = declarative_base()
+\end{lstlisting}
+Trong tệp \texttt{src/core/init\_db.py}, hàm \texttt{seed\_initial\_data()} sử dụng khối \texttt{try...except...finally} để bảo đảm phiên làm việc \texttt{db.close()} luôn được giải phóng tài nguyên.
+\end{codeautopsybox}
+
+\begin{labmilestonebox}[Nhiệm Vụ Thực Hành Tuần 02]
+\begin{enumerate}[leftmargin=1.5em]
+    \item Chạy lệnh nạp dữ liệu mẫu: \texttt{python -m src.core.init\_db}. Kiểm tra tệp \texttt{office\_asset.db} được sinh ra.
+    \item Viết một đoạn mã kiểm thử độc lập (\texttt{test\_transaction.py}) cố tình chèn một \texttt{Ticket} có \texttt{asset\_id} không tồn tại để chứng minh rằng PRAGMA Foreign Keys đã kích hoạt và bắn ra lỗi \texttt{IntegrityError}.
+    \item Kiểm tra đảm bảo cơ chế tự động Rollback hoạt động hoàn hảo khi xảy ra ngoại lệ.
+\end{enumerate}
+\end{labmilestonebox}
+
+\begin{checkpointbox}[Thử Thách Vấn Đáp Hội Đồng]
+\textbf{Câu hỏi 2:} SQLite là cơ sở dữ liệu dạng file (File-based database). Nếu nhiều Agent hoặc nhiều người dùng đồng thời ghi dữ liệu thì xảy ra hiện tượng gì? Làm sao giải quyết trong môi trường Production?\\
+\textit{Mẹo trả lời chuẩn điểm 10:} SQLite sẽ bị lỗi \texttt{database is locked} do cơ chế khóa mức bảng/file. Ta giải quyết bằng cách bật chế độ \texttt{PRAGMA journal\_mode=WAL} (Write-Ahead Logging) cho phép đọc và ghi song song, hoặc trong môi trường doanh nghiệp lớn sẽ chuyển sang RDBMS client-server như PostgreSQL mà không cần sửa đổi mã nguồn nghiệp vụ nhờ lớp trừu tượng SQLAlchemy ORM.
+\end{checkpointbox}
+

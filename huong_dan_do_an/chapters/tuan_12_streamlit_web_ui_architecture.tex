@@ -1,0 +1,69 @@
+﻿\section{Tuần 12: Xây Dựng Giao Diện Web Tương Tác Hiện Đại Với Streamlit}
+\label{sec:tuan_12}
+
+\begin{advisorbox}[Lời Dặn Của Thầy: Giao Diện Là Cầu Nối Giữa Thuật Toán Và Người Dùng Thực Tế]
+Chào em. Một hệ thống AI dù sở hữu thuật toán LangGraph tinh xảo hay CSDL chuẩn 3NF đến đâu, nếu chỉ chạy trên Terminal đen ngòm thì cũng không thể chuyển giao cho cán bộ phòng ban sử dụng được. Trải nghiệm người dùng (UX/UI) là yếu tố quyết định đồ án của em có tính thực tiễn hay chỉ là bài tập trên giấy.
+
+Tuần này em sẽ xây dựng giao diện ứng dụng web hoàn chỉnh bằng \textbf{Streamlit}. Điểm đặc biệt của Streamlit là mô hình thực thi phản ứng (Reactive Execution Model): Mỗi khi người dùng bấm nút hay gõ phím, toàn bộ mã nguồn script sẽ chạy lại từ đầu. Nếu em không hiểu sâu về \textbf{\texttt{st.session\_state}} và cơ chế lưu đệm \textbf{\texttt{@st.cache\_data}}, hệ thống của em sẽ liên tục làm mới trang, mất trắng lịch sử chat và gây ức chế tột độ cho người dùng. Hãy thiết kế giao diện đa tab khoa học, thẩm mỹ và mượt mà.
+\end{advisorbox}
+
+\begin{literaturebox}[Tài Liệu Nghiên Cứu Gốc Bắt Buộc]
+Em hãy tìm đọc và tham khảo các tài liệu thiết kế giao diện hiện đại:
+\begin{itemize}[leftmargin=1.5em]
+    \item \textbf{Streamlit Architecture Documentation}: Tìm hiểu mô hình vòng đời ứng dụng (Rerun Cycle), phân biệt giữa State nội tại của Widget và trạng thái toàn cục trong \texttt{st.session\_state}.
+    \item \textbf{Modern UI Design Systems}: Tìm hiểu nguyên lý bố cục Dashboard 3 cột, độ tương phản màu sắc hỗ trợ khả năng tiếp cận (Accessibility WCAG 2.1) và phản hồi thị giác khi chờ đợi (Loading Spinners, Toast notifications).
+\end{itemize}
+\end{literaturebox}
+
+\begin{codeautopsybox}[Giải Phẫu Mã Nguồn: src/ui/app.py]
+Mở tệp \texttt{src/ui/app.py}, quan sát cách chia 4 phân hệ chức năng bằng cấu trúc Tabs của Streamlit:
+\begin{lstlisting}[language=Python]
+import streamlit as st
+
+st.set_page_config(page_title="Office Asset Agent", layout="wide", page_icon="[Office]")
+
+# 1. Khoi tao Session State de luu tru phien hoi thoai va vai tro
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+if "current_user_role" not in st.session_state:
+    st.session_state.current_user_role = "ADMIN"
+
+# 2. Thanh ben (Sidebar) quan ly danh tinh va thong so ket noi
+with st.sidebar:
+    st.title("Thiet Lap Quyen")
+    st.session_state.current_user_role = st.selectbox(
+        "Chon vai tro:", ["ADMIN", "STAFF"], index=0
+    )
+
+# 3. Khu vuc 4 Tabs chinh cua ung dung
+tab_chat, tab_dashboard, tab_tickets, tab_vision = st.tabs([
+    "Tro Chuyen Agent", 
+    "Bang Dieu Khien Kho", 
+    "Quan Ly Su Co", 
+    "Thi Giac & Bao Cao"
+])
+
+with tab_chat:
+    for msg in st.session_state.messages:
+        with st.chat_message(msg["role"]):
+            st.markdown(msg["content"])
+    
+    if user_prompt := st.chat_input("Hoi ve tai san hoac yeu cau..."):
+        # Xu ly Agent va cap nhat st.session_state.messages
+        pass
+\end{lstlisting}
+\end{codeautopsybox}
+
+\begin{labmilestonebox}[Nhiệm Vụ Thực Hành Tuần 12]
+\begin{enumerate}[leftmargin=1.5em]
+    \item Khởi chạy ứng dụng web bằng lệnh: \texttt{streamlit run src/ui/app.py} trên cổng mặc định \texttt{8501}.
+    \item Kiểm tra tính năng chuyển đổi vai trò (ADMIN $\leftrightarrow$ STAFF) trên Sidebar và quan sát cách giao diện ẩn/hiện các nút thao tác xóa hoặc phê duyệt tài sản.
+    \item Tại \texttt{tab\_vision}, thử tải lên một bức ảnh tem tài sản từ máy tính và kiểm tra kết quả hiển thị bảng thông số trích xuất ngay trên màn hình.
+\end{enumerate}
+\end{labmilestonebox}
+
+\begin{checkpointbox}[Thử Thách Vấn Đáp Hội Đồng]
+\textbf{Câu hỏi 12:} Tại sao khi người dùng chat trong Streamlit, nếu không cấu hình khéo léo thì trang web sẽ bị tải lại và mất trắng lịch sử chat? Em giải quyết vấn đề này thế nào?\\
+\textit{Mẹo trả lời chuẩn điểm 10:} Do Streamlit tuân theo mô hình Script Re-run (thực thi lại toàn bộ file từ dòng đầu đến dòng cuối mỗi khi có tương tác). Để giữ nguyên lịch sử trò chuyện, em đã khởi tạo một mảng rỗng trong bộ nhớ phiên \texttt{st.session\_state["messages"]} ngay lần chạy đầu tiên. Mọi tin nhắn gửi đi và phản hồi của Agent đều được \texttt{append} vào mảng này. Khi trang web re-run, vòng lặp \texttt{for msg in st.session\_state.messages} sẽ vẽ lại toàn bộ đoạn chat mà không hề bị mất dữ liệu.
+\end{checkpointbox}
+

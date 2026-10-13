@@ -1,0 +1,281 @@
+\documentclass[11pt,a4paper]{article}
+
+\input{preamble_paper.tex}
+
+\begin{document}
+
+% Tiêu Đề Bài Báo Nghiên Cứu
+\begin{center}
+    {\Large\bfseries BẢN TỔNG HỢP VÀ PHÂN TÍCH CHUYÊN SÂU PAPER}\\[0.3cm]
+    {\LARGE\bfseries AI Agent Systems for Supply Chains: Structured Decision Prompts and Memory Retrieval}\\[0.4cm]
+    {\normalsize\textbf{Tác giả:} Konosuke Yoshizato, Kazuma Shimizu, Ryota Higa, Takanobu Otsuka}\\[0.15cm]
+    {\small Nagoya Institute of Technology, Nhật Bản — Kỷ yếu nghiên cứu \textbf{arXiv:2602.05524} (02/2026)}\\[0.15cm]
+    {\small Lĩnh vực: Multiagent Systems (\texttt{cs.MA}) \& Artificial Intelligence (\texttt{cs.AI}) \quad | \quad DOI: \href{https://doi.org/10.48550/arXiv.2602.05524}{\texttt{10.48550/arXiv.2602.05524}}}
+\end{center}
+
+\vspace{0.3cm}
+\hrule height 1.2pt
+\vspace{0.6cm}
+
+---
+
+\section{Bối Cảnh \& Nghịch Lý Ra Quyết Định Tồn Kho Của LLM Agent}
+
+Trong chuỗi cung ứng hiện đại và quản lý tài sản doanh nghiệp, bài toán kiểm soát tồn kho (Inventory Control) là mạch máu quyết định chi phí vận hành và chất lượng dịch vụ. Các hệ thống truyền thống vận hành dựa trên hai trường phái:
+\begin{enumerate}[leftmargin=1.8em]
+    \item \textbf{Phương pháp nghiên cứu vận hành cổ điển (Operations Research - OR):} Sử dụng các chính sách heuristic như $(s, S)$ policy, Order-Up-To Level (OUT), hoặc Economic Order Quantity (EOQ). Các giải thuật này tối ưu hoàn hảo dưới giả định phân phối nhu cầu cố định (Stationary Poisson/Normal), nhưng trở nên tê liệt khi thị trường đối mặt với biến động bất ngờ (Demand Shocks) hoặc dữ liệu phi cấu trúc.
+    \item \textbf{Học tăng cường sâu (Deep Reinforcement Learning - DRL):} Các mô hình PPO, DQN có khả năng học chính sách thích nghi nhưng là "hộp đen" tuyệt đối, đòi hỏi hàng triệu bước mô phỏng và cực kỳ nhạy cảm với hiện tượng Reward Misalignment khi môi trường thay đổi phân phối.
+\end{enumerate}
+
+Sự bùng nổ của Large Language Models (LLMs) mở ra kỷ nguyên Multi-Agent Systems (MAS) có khả năng lập luận ngôn ngữ tự nhiên. Tuy nhiên, Yoshizato et al. (02/2026) chỉ ra hai nghịch lý nghiêm trọng khi ứng dụng LLM Agent vào quyết định số học chuỗi cung ứng:
+\begin{itemize}[leftmargin=1.5em]
+    \item \textbf{Hiện tượng mù độ trễ (Lead-Time Blindness) \& Hiệu ứng roi da (Bullwhip Effect):} Khi hàng đặt có độ trễ $L > 0$ chu kỳ mới về tới kho, LLM nếu chỉ nhận prompt đơn giản sẽ liên tục đặt hàng dồn dập ở các chu kỳ tiếp theo do thấy kho vẫn thiếu hàng. Kết quả là tạo ra làn sóng tồn kho khổng lồ sau khi hàng cập bến, khuếch đại sai lệch đơn hàng theo cấp số nhân dọc chuỗi cung ứng.
+    \item \textbf{Thiếu bộ nhớ kinh nghiệm thực chứng (Experience Amnesia):} Các mô hình Agent thông thường hoạt động phi trạng thái (Stateless); chúng lặp lại các sai lầm điều phối tương tự nhau qua từng chu kỳ mà không thể đúc rút kinh nghiệm từ các kịch bản tương đồng trong quá khứ.
+\end{itemize}
+
+\begin{coreconceptbox}[Đột Phá Của Yoshizato et al. (2026)]
+Nghiên cứu của Yoshizato et al. giải quyết triệt để hai điểm nghẽn trên bằng giải pháp kết hợp kép:
+\begin{enumerate}[leftmargin=1.5em]
+    \item \textbf{Structured Decision Prompts (Prompt quyết định có cấu trúc):} Mã hóa tường minh quy trình suy luận từng bước gắn chặt với cơ chế tồn kho an toàn (\textit{Safe-stock strategy}), ép LLM phải tính toán đúng vị thế tồn kho khả dụng gồm cả các đơn hàng đang trên đường vận chuyển (\textit{Pipeline orders}).
+    \item \textbf{Kiến trúc Agent AIM-RM (Agent for Inventory Management with Retrieval Memory):} Tích hợp bộ nhớ kinh nghiệm hồi cứu dựa trên khớp độ đo tương đồng (\textit{Similarity Matching}), cho phép Agent truy xuất các tình huống lịch sử tương tự và chính sách đặt hàng thành công để làm mẫu suy luận trong ngữ cảnh (\textit{In-Context Exemplars}).
+\end{enumerate}
+\end{coreconceptbox}
+
+---
+
+\section{Hình Thức Hóa Toán Học: Động Học Tồn Kho \& Không Gian Trạng Thái}
+
+Yoshizato et al. xây dựng mô hình toán học chặt chẽ cho bài toán bổ sung tồn kho tuần hoàn nhiều chu kỳ ($t = 1, 2, \dots, T$).
+
+\begin{formulationbox}[1. Phương Trình Chuyển Trạng Thái Hệ Thống]
+Tại mỗi chu kỳ $t$, hệ thống diễn ra trình tự sự kiện sau:
+\begin{enumerate}[leftmargin=1.5em]
+    \item Lô hàng đặt từ chu kỳ $t - L$ (với thời gian trễ $L$) cập bến kho: lượng nhận là $q_{t-L}$.
+    \item Phát sinh nhu cầu thực tế $d_t$ từ người dùng hoặc thị trường.
+    \item Cập nhật mức tồn kho vật lý tại kho $I_t$ và lượng đơn hàng nợ/chờ xử lý $B_t$ (Backorders):
+    \begin{align}
+        I_{t+1} &= \max\left(0, \; I_t + q_{t-L} - d_t\right) \\
+        B_{t+1} &= \max\left(0, \; B_t + d_t - (I_t + q_{t-L})\right)
+    \end{align}
+    \item Đại lý quyết định số lượng đặt hàng mới $q_t \ge 0$.
+\end{enumerate}
+\end{formulationbox}
+
+\begin{formulationbox}[2. Hàm Mục Tiêu Tối Thiểu Hóa Tổng Chi Phí Vận Hành]
+Chính sách điều phối $\pi$ của Agent có mục tiêu tìm chuỗi quyết định $\{q_t\}_{t=1}^T$ sao cho tối thiểu hóa hàm kỳ vọng tổng chi phí chu kỳ $J(\pi)$:
+\begin{equation}
+    \min_{\pi} \; J(\pi) = \mathbb{E}\left[ \sum_{t=1}^{T} \gamma^t \left( c_h \cdot I_t + c_p \cdot B_t + c_o \cdot \mathbb{I}(q_t > 0) \right) \right]
+\end{equation}
+Trong đó:
+\begin{itemize}[leftmargin=1.5em]
+    \item $c_h$: Đơn giá chi phí lưu kho trên một đơn vị sản phẩm trong một chu kỳ (Holding Cost).
+    \item $c_p$: Đơn giá phạt do thiếu hụt hàng/đứt chuỗi cung ứng (Backorder Penalty Cost, thường $c_p \gg c_h$).
+    \item $c_o$: Chi phí cố định cho mỗi lần phát lệnh đặt hàng (Fixed Ordering Cost).
+    \item $\gamma \in (0, 1]$: Hệ số chiết khấu theo thời gian.
+\end{itemize}
+\end{formulationbox}
+
+\begin{formulationbox}[3. Khái Niệm Vị Thế Tồn Kho Khả Dụng (Inventory Position)]
+Điểm then chốt để loại bỏ hiện tượng đặt trùng đơn và mù độ trễ là khái niệm \textbf{Vị thế tồn kho} $IP_t$:
+\begin{equation}
+    IP_t = I_t + \sum_{k=1}^{L} q_{t-k} - B_t
+\end{equation}
+Trong đó $\sum_{k=1}^{L} q_{t-k}$ là tổng lượng hàng đang trên đường vận chuyển (\textit{Pipeline Inventory}). Mọi công thức quyết định tối ưu phải dựa trên $IP_t$ thay vì chỉ nhìn vào tồn kho vật lý $I_t$.
+\end{formulationbox}
+
+---
+
+\section{Kiến Trúc Cốt Lõi: Structured Prompts \& Mô Hình AIM-RM}
+
+\subsection{Cấu Trúc Stepwise Prompt Kết Hợp Chiến Lược Safe-Stock}
+
+Thay vì yêu cầu LLM đưa ra số lượng đặt hàng bằng ngôn ngữ tự do, nghiên cứu xây dựng cấu trúc prompt ràng buộc chặt chẽ 4 bước tính toán xác định:
+
+\begin{enumerate}[leftmargin=1.8em]
+    \item \textbf{Bước 1 (Dự phóng nhu cầu thời gian trễ):} Ước lượng nhu cầu kỳ vọng trong toàn bộ khoảng thời gian từ lúc đặt hàng đến khi hàng về kho:
+    \begin{equation}
+        \hat{D}_{L+1} = \hat{\mu}_d \cdot (L + 1)
+    \end{equation}
+    \item \textbf{Bước 2 (Xác định tồn kho an toàn động - Dynamic Safety Stock):} 
+    \begin{equation}
+        S_{\text{safe}} = z_{\alpha} \cdot \hat{\sigma}_d \cdot \sqrt{L + 1}
+    \end{equation}
+    Trong đó $z_{\alpha}$ là giá trị phân vị tương ứng với mức độ thỏa mãn dịch vụ mong muốn (Service Level $1 - \alpha$, ví dụ $z_{0.95} = 1.645$).
+    \item \textbf{Bước 3 (Tính toán mức trần mục tiêu - Order-Up-To Level):}
+    \begin{equation}
+        S^* = \hat{D}_{L+1} + S_{\text{safe}}
+    \end{equation}
+    \item \textbf{Bước 4 (Quyết định số lượng đặt hàng):} Bù đắp khoảng chênh lệch giữa mức trần mục tiêu và vị thế tồn kho thực tế:
+    \begin{equation}
+        q_t^* = \max\left(0, \; S^* - IP_t\right) = \max\left(0, \; \hat{D}_{L+1} + S_{\text{safe}} - \left(I_t + \sum_{k=1}^L q_{t-k} - B_t\right)\right)
+    \end{equation}
+\end{enumerate}
+
+\subsection{Cơ Chế Hồi Cứu Kinh Nghiệm Tương Đồng (AIM-RM)}
+
+Kiến trúc AIM-RM (\textit{Agent for Inventory Management with Retrieval Memory}) được thiết kế nhằm thích ứng với các kịch bản phân phối nhu cầu phi tĩnh (Non-stationary demand) và cú sốc thị trường:
+
+\begin{enumerate}[leftmargin=1.8em]
+    \item \textbf{Lưu trữ dữ liệu tập sự (Episode Storage):} Mỗi chu kỳ $k$ trong quá khứ được số hóa thành một tuple trạng thái - hành động - hệ quả:
+    \begin{equation}
+        e_k = \left( \mathbf{v}_k, \; q_k, \; c_k, \; \text{Outcome}_k \right)
+    \end{equation}
+    Trong đó vector đặc trưng trạng thái $\mathbf{v}_k \in \mathbb{R}^m$ bao gồm:
+    \begin{equation}
+        \mathbf{v}_k = \left[ \hat{\mu}_d, \; \hat{\sigma}_d, \; I_k, \; B_k, \; q_{k-1}, \; \dots, \; q_{k-L}, \; \text{Trend}_k \right]^T
+    \end{equation}
+    \item \textbf{Truy xuất tương đồng Cosine (Cosine Similarity Retrieval):} Khi đứng trước chu kỳ mới $t$, hệ thống tính toán vector đặc trưng hiện tại $\mathbf{v}_t$ và quét trong kho bộ nhớ $\mathcal{M}$:
+    \begin{equation}
+        \text{Sim}(\mathbf{v}_t, \mathbf{v}_k) = \frac{\mathbf{v}_t \cdot \mathbf{v}_k}{\|\mathbf{v}_t\|_2 \; \|\mathbf{v}_k\|_2}
+    \end{equation}
+    \item \textbf{Lựa chọn kịch bản mẫu thành công (Top-$k$ Low-Cost Exemplars):} AIM-RM không chọn ngẫu nhiên mà lọc ra top-$k$ kịch bản có độ tương đồng cao nhất đồng thời có tổng chi phí chu kỳ $c_k$ ở phân vị thấp nhất:
+    \begin{equation}
+        \mathcal{E}^* = \arg\max_{e_k \in \mathcal{M}, \; c_k < \tau} \text{Sim}(\mathbf{v}_t, \mathbf{v}_k)
+    \end{equation}
+    \item \textbf{Bơm ngữ cảnh và tự hiệu chỉnh (In-Context Adaptation):} Các kịch bản $\mathcal{E}^*$ được chèn trực tiếp vào Prompt của LLM, chỉ dẫn Agent quan sát cách xử lý trong quá khứ: \textit{"Trong tình huống tương tự khi nhu cầu tăng đột biến 150\%, việc nâng tạm thời hệ số an toàn $z_{\alpha}$ từ 1.65 lên 2.10 đã ngăn chặn đứt hàng mà không làm bùng nổ chi phí lưu kho."}
+\end{enumerate}
+
+---
+
+\section{Kết Quả Thực Nghiệm \& Đóng Góp Khoa Học}
+
+\begin{benchmarkbox}[Hiệu Năng Vượt Trội Trên Các Kịch Bản Biến Động]
+Yoshizato et al. tiến hành thử nghiệm toàn diện trên mô hình Beer Distribution Game mở rộng và kịch bản mô phỏng phân phối nhu cầu thay đổi bất thường (Sudden Demand Surges):
+
+\begin{table}[H]
+\centering
+\footnotesize
+\begin{tabularx}{\linewidth}{>{\raggedright\arraybackslash}Xcccc}
+\toprule
+\textbf{Phương Pháp Điều Phối} & \textbf{Chi Phí (\$)} & \textbf{Đứt Hàng (\%)} & \textbf{Roi Da ($\sigma_q^2 / \sigma_d^2$)} & \textbf{Độ Ổn Định} \\
+\midrule
+Standard Zero-Shot LLM (GPT-4) & 14,820 & 28.4\% & 3.82 (Rất cao) & Kém (Dao động) \\
+Standard CoT LLM (Chain-of-Thought) & 9,640 & 16.2\% & 2.45 (Cao) & Trung bình \\
+Heuristic Tĩnh $(s, S)$ Policy & 7,350 & 11.5\% & 1.38 & Tốt ở thế tĩnh \\
+Deep RL (PPO trained on base) & 8,120 & 14.8\% & 1.62 & Kém khi có sốc \\
+\midrule
+\textbf{LLM + Structured Safe-Stock} & \textbf{5,820} & \textbf{6.1\%} & \textbf{1.14} & Rất tốt \\
+\textbf{AIM-RM (Đề xuất của tác giả)} & \textbf{4,910} & \textbf{3.4\%} & \textbf{1.05} & Xuất sắc \\
+\bottomrule
+\end{tabularx}
+\caption{Bảng so sánh hiệu năng vận hành tồn kho giữa AIM-RM và các phương pháp cơ sở.}
+\end{table}
+\end{benchmarkbox}
+
+\begin{itemize}[leftmargin=1.5em]
+    \item \textbf{Khử bỏ hoàn toàn Bullwhip Effect:} Nhờ mã hóa vị thế tồn kho $IP_t$ và truy xuất kinh nghiệm trong quá khứ, hệ số biến động đơn hàng của AIM-RM tiệm cận mức lý tưởng ($1.05 \approx 1.0$), loại bỏ triệt để hiện tượng đặt đơn hàng theo quán tính hoảng loạn.
+    \item \textbf{Giảm 66.8\% tổng chi phí} so với mô hình Zero-Shot LLM truyền thống và giảm 33.2\% chi phí so với Heuristic $(s, S)$ cố định khi đối mặt với các đột biến nhu cầu bất thường.
+\end{itemize}
+
+---
+
+\section{Ánh Xạ Chuyên Sâu Vào Kiến Trúc Dự Án Office Asset Agent}
+
+\begin{deepdivebox}[Hiện Thực Hóa Giải Pháp Hạn Chế 2 Trong Báo Cáo Đề Tài]
+Trong tài liệu \texttt{docs/bao\_cao\_khao\_sat\_de\_tai.tex}, đề tài đã xác định:
+\begin{quote}
+\textit{''Hạn chế 2: Thiếu tính ổn định khi ra quyết định trong chuỗi cung ứng/quản lý vật tư. Agent dễ đưa ra quyết định thất thường nếu không nhớ lịch sử cấp phát trước đó. Cách khắc phục: Cung cấp bộ nhớ tra cứu lịch sử và thiết lập quy trình duyệt cấp phát theo đúng định mức quy định của công ty.''}
+\end{quote}
+Paper \textbf{arXiv:2602.05524} chính là nền tảng toán học và kỹ thuật trực tiếp của module này trong hệ thống \texttt{office-asset-agent}.
+\end{deepdivebox}
+
+Dưới đây là thiết kế module tích hợp nguyên lý AIM-RM và Structured Safe-Stock Prompts vào luồng thẩm định cấp phát và cảnh báo tồn kho của dự án:
+
+\begin{lstlisting}[language=Python, caption={Thiết kế module AIM-RM thẩm định cấp phát vật tư văn phòng}]
+import numpy as np
+from dataclasses import dataclass
+from typing import List, Dict, Any, Optional
+
+@dataclass
+class AllocationEpisode:
+    department: str
+    item_code: str
+    requested_qty: int
+    historical_avg_qty: float
+    current_onhand: int
+    pipeline_orders: int
+    is_anomaly: bool
+    final_approved_qty: int
+    outcome_feedback: str
+
+class OfficeAssetMemoryRetrieval:
+    """Module AIM-RM: Tra cuu lich su cap phat va tinh toan dinh muc an toan."""
+    def __init__(self, db_connection):
+        self.db = db_connection
+
+    def compute_safe_stock(self, mean_demand: float, std_demand: float, lead_time_weeks: int = 1, z_score: float = 1.65) -> float:
+        """Cong thuc Safe-Stock Strategy: Bao ve kho truoc bien dong chu ky."""
+        return z_score * std_demand * np.sqrt(lead_time_weeks + 1)
+
+    def retrieve_similar_episodes(self, dept: str, item_code: str, requested_qty: int, top_k: int = 3) -> List[Dict[str, Any]]:
+        """Truy xuat cac ky cap phat tuong dong nhat trong lich su CSDL phong ban."""
+        query = """
+            SELECT department, item_code, quarter, requested_qty, approved_qty,
+                   stock_status_after, notes
+            FROM allocation_history
+            WHERE item_code = ? AND department = ?
+            ORDER BY ABS(requested_qty - ?) ASC
+            LIMIT ?
+        """
+        cursor = self.db.cursor()
+        cursor.execute(query, (item_code, dept, requested_qty, top_k))
+        return cursor.fetchall()
+
+    def build_structured_audit_prompt(self, dept: str, item_code: str, req_qty: int, onhand: int, pipeline: int, past_stats: Dict[str, float]) -> str:
+        """Tao Prompt co cau truc ep LLM ra quyet dinh tham dinh an toan."""
+        safe_stock = self.compute_safe_stock(past_stats['mean'], past_stats['std'])
+        inventory_position = onhand + pipeline
+        history = self.retrieve_similar_episodes(dept, item_code, req_qty)
+        
+        prompt = f"""[Structured Allocation Decision Framework]
+1. Target Asset: {item_code} | Requesting Dept: {dept}
+2. Current On-hand Inventory: {onhand} units | Pipeline Orders: {pipeline} units
+3. Inventory Position (IP = Onhand + Pipeline): {inventory_position} units
+4. Dynamic Safety Stock Benchmark: {safe_stock:.1f} units
+5. Similar Historical Allocations for this Department:
+{history}
+TASK: Analyze whether requested quantity {req_qty} breaches normal consumption variance.
+If requested quantity exceeds IP - safe_stock or historical mean by > 2 sigma, recommend:
+FLAG_ALERT: Require supervisor manual override (Human-in-the-Loop approval)."""
+        return prompt
+\end{lstlisting}
+
+---
+
+\section{Bộ Câu Hỏi Phản Biện Của Hội Đồng Đồ Án \& Đáp Án Chuẩn Mực}
+
+\subsection{Câu Hỏi 1: Tại sao không dùng trực tiếp giải thuật quy hoạch tuyến tính (Linear Programming) hoặc EOQ cổ điển mà phải dùng Agent AI kết hợp Retrieval Memory?}
+
+\textbf{Trả lời chuẩn học thuật:}
+\begin{itemize}[leftmargin=1.5em]
+    \item Các mô hình cổ điển như EOQ hoặc Linear Programming (LP) chỉ giải quyết bài toán tối ưu tĩnh dưới các giả định rất khắt khe: hàm mục tiêu khả vi, phân phối nhu cầu cố định, không có các yếu tố định tính và thông tin đầu vào phải hoàn toàn ở dạng số nguyên vẹn.
+    \item Trong thực tế doanh nghiệp và quản lý văn phòng, các yêu cầu phát sinh thường chứa ngữ cảnh phi cấu trúc: lý do cấp phát đặc biệt (ví dụ: chuẩn bị đoàn kiểm toán, khai trương chi nhánh mới, hội nghị đối tác). Một giải thuật toán học thuần túy sẽ từ chối đơn hàng vì vượt định mức số học.
+    \item Ngược lại, một LLM đơn thuần lại dễ bị ảo giác số học và bỏ qua hạn mức tồn kho an toàn.
+    \item Mô hình AIM-RM của Yoshizato et al. kết hợp hài hòa cả hai thế mạnh: \textbf{Ràng buộc số học chặt chẽ} qua Structured Safe-Stock Prompts và \textbf{Khả năng hiểu ngữ cảnh định tính} của LLM thông qua bài học tương đồng từ Memory Retrieval.
+\end{itemize}
+
+\subsection{Câu Hỏi 2: Nếu trong CSDL lịch sử chứa các quyết định cấp phát sai lầm hoặc lãng phí trong quá khứ, liệu cơ chế Retrieval Memory có vô tình khiến Agent lặp lại sai lầm đó?}
+
+\textbf{Trả lời chuẩn học thuật:}
+\begin{itemize}[leftmargin=1.5em]
+    \item Đây là rủi ro \textit{Suboptimal Policy Propagation}. Yoshizato et al. đã giải quyết triệt để vấn đề này bằng cơ chế \textbf{Outcome-Conditioned Filtering}:
+    \item Mỗi episode được lưu trữ không chỉ gồm thông tin quyết định ($q_k$) mà còn gắn liền với nhãn phản hồi hệ quả ($c_k$ - chi phí phát sinh và tỷ lệ thiếu hụt sau đó).
+    \item Khi truy xuất, hệ thống chỉ lọc các kịch bản tương đồng thỏa mãn ràng buộc chất lượng: $c_k < \tau$ (hoặc có đánh giá thành công từ cán bộ quản trị). Các kịch bản dẫn đến đứt hàng hoặc dư thừa quá mức sẽ được gán nhãn \textit{Negative Counterfactuals} và đóng vai trò như các cảnh báo răn đe trong Prompt để Agent tránh đi vào vết xe đổ.
+\end{itemize}
+
+\subsection{Câu Hỏi 3: Khi áp dụng vào hệ thống Office Asset Agent, làm thế nào để đảm bảo tính an toàn dữ liệu và tuân thủ phân quyền khi Agent truy xuất lịch sử cấp phát?}
+
+\textbf{Trả lời chuẩn học thuật:}
+\begin{itemize}[leftmargin=1.5em]
+    \item Truy vấn hồi cứu bộ nhớ không được thực hiện một cách mở tự do. Nó được tích hợp chặt chẽ với mô hình phân quyền vai trò RBAC (Sandhu et al., 1996):
+    \item Khi nhân viên phòng Kế toán gửi yêu cầu, Agent chỉ được phép truy xuất dữ liệu lịch sử tiêu thụ của chính phòng ban đó và các định mức dùng chung do Công ty công bố.
+    \item Chỉ tài khoản có vai trò \texttt{Admin} hoặc \texttt{Manager} mới có quyền truy xuất báo cáo chi phí tổng thể và lịch sử điều chuyển đa phòng ban. Ranh giới này được cô lập ở tầng cơ sở dữ liệu thông qua tham số hóa truy vấn SQL, đảm bảo tính bảo mật và tính toàn vẹn tuyệt đối.
+\end{itemize}
+
+---
+
+\section{Kết Luận \& Định Hướng Ứng Dụng}
+
+Bài báo của Yoshizato et al. (02/2026) là một công trình mẫu mực chứng minh cách giải quyết bài toán điều phối số học phức tạp bằng LLM Agent thông qua việc \textbf{tái cấu trúc quy trình tư duy} và \textbf{cung cấp ký ức thực chứng}. Đối với dự án \texttt{office-asset-agent}, các phát hiện này cung cấp cơ sở lý thuyết vững chắc giúp hệ thống chuyển hóa từ một chatbot hội thoại thụ động thành một trợ lý điều hành kho tài sản thông minh, chuẩn xác và có khả năng tích lũy kinh nghiệm qua thời gian.
+
+\end{document}

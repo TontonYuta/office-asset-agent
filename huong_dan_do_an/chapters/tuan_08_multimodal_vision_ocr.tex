@@ -1,0 +1,60 @@
+\section{Tuần 08: Chế Tạo Tool 4 — Thị Giác Đa Phương Thức (Multimodal Vision OCR)}
+\label{sec:tuan_08}
+
+\begin{advisorbox}[Lời Dặn Của Thầy: Đừng Bắt Cán Bộ Kho Phải Gõ Từng Ký Tự Serial Number]
+Hãy tưởng tượng một thủ kho bước vào căn phòng chứa 50 chiếc máy tính mới nhập. Nếu bắt họ ngồi trước bàn phím gõ tay từng chuỗi ký tự Serial Number dài 20 ký tự loằng ngoằng như \texttt{"SN-DELL-2026-XPS-9520-VN"}, họ sẽ gõ sai ít nhất 10\% và mất cả buổi chiều. 
+
+Một hệ thống AI thời đại mới phải có \textbf{Đôi mắt (Multimodal Vision)}. Người cán bộ chỉ cần rút điện thoại chụp lại tem nhãn tài sản dán sau lưng máy, hoặc mã QR/Barcode trên vỏ hộp, Agent phải tự động trích xuất mã thiết bị, phân loại thương hiệu và đối chiếu ngay vào CSDL. Trong tuần này, em sẽ tích hợp \textbf{Tool 4: Trích xuất thị giác đa phương thức (Vision OCR)} kết hợp giữa xử lý ảnh truyền thống và mô hình thị giác ngôn ngữ (Vision LLM).
+\end{advisorbox}
+
+\begin{literaturebox}[Tài Liệu Nghiên Cứu Gốc Bắt Buộc]
+Em hãy nghiên cứu các nền tảng kỹ thuật nhận dạng ký tự quang học:
+\begin{itemize}[leftmargin=1.5em]
+    \item \textbf{Smith, R. (2007)}: \textit{"An Overview of the Tesseract OCR Engine"}, ICDAR~\cite{smith2007tesseract}. Tìm hiểu quy trình tiền xử lý ảnh: Binarization (nhị phân hóa Otsu), Line finding, Word recognition và bộ giải mã ngôn ngữ thống kê.
+    \item \textbf{Multimodal Large Language Models (MLLMs)}: Đọc tài liệu kỹ thuật về kiến trúc liên kết hình ảnh - văn bản (Visual Tokens Projection) trong GPT-4V/Gemini Vision để hiểu cách mô hình nhận diện được chữ viết tay và tem nhãn bị mờ xước.
+\end{itemize}
+\end{literaturebox}
+
+\begin{codeautopsybox}[Giải Phẫu Mã Nguồn: src/tools/vision\_ocr.py]
+Mở tệp \texttt{src/tools/vision\_ocr.py}, quan sát cách module xử lý ảnh đầu vào và trích xuất thông tin có cấu trúc:
+\begin{lstlisting}[language=Python]
+import re
+from PIL import Image
+
+def analyze_asset_image_label(image_path: str) -> Dict[str, Any]:
+    """Phan tich anh tem tai san va trich xuat ma Serial, model."""
+    try:
+        # 1. Trich xuat van ban thuc te tu anh tem nhan (OCR hoac Vision Model)
+        raw_text = extract_text_from_image(image_path)
+        
+        # 2. Su dung bieu thuc chinh quy (Regex) de dinh vi Serial Number
+        serial_match = re.search(r"(?:S/N|SN|SERIAL|MA)[:\s]*([A-Z0-9\-]+)", raw_text, re.IGNORECASE)
+        asset_code = serial_match.group(1) if serial_match else None
+        
+        # 3. Nhan dien chung loai thiet bi tu tu khoa trong anh
+        detected_category = detect_category_from_text(raw_text)
+        
+        return {
+            "status": "SUCCESS",
+            "asset_code": asset_code,
+            "category": detected_category,
+            "raw_text_detected": raw_text
+        }
+    except Exception as exc:
+        return {"status": "ERROR", "message": f"Loi doc anh: {str(exc)}"}
+\end{lstlisting}
+\end{codeautopsybox}
+
+\begin{labmilestonebox}[Nhiệm Vụ Thực Hành Tuần 08]
+\begin{enumerate}[leftmargin=1.5em]
+    \item Chụp 5 bức ảnh tem nhãn thiết bị thực tế trong trường (Laptop, Màn hình, Máy in) ở các điều kiện ánh sáng khác nhau: đủ sáng, góc nghiêng 45 độ, và thiếu sáng.
+    \item Đưa 5 ảnh vào kiểm thử qua \texttt{src/tools/vision\_ocr.py} và ghi lại tỷ lệ trích xuất đúng mã \texttt{asset\_code}.
+    \item Hoàn thiện cơ chế: Nếu ảnh quá mờ không đọc được mã Serial, Agent phải phản hồi lịch sự yêu cầu người dùng chụp lại góc thẳng và bật đèn flash.
+\end{enumerate}
+\end{labmilestonebox}
+
+\begin{checkpointbox}[Thử Thách Vấn Đáp Hội Đồng]
+\textbf{Câu hỏi 8:} Nếu tem tài sản bị trầy xước mất 2 ký tự cuối của Serial Number, hệ thống của em giải quyết thế nào để không bị ghi đè nhầm sang thiết bị khác?\\
+\textit{Mẹo trả lời chuẩn điểm 10:} Hệ thống không bao giờ tự ý đoán mò ký tự bị mất để ghi đè CSDL. Thay vào đó, Tool OCR sẽ trả về chuỗi có ký tự đại diện (Wildcard), kích hoạt cơ chế truy vấn tìm kiếm gần đúng trong bảng \texttt{assets}. Nếu tìm thấy 2-3 thiết bị có tiền tố trùng khớp, Agent sẽ hiển thị danh sách các ứng viên kèm tên phòng ban để người dùng trực tiếp chọn xác nhận (Human-in-the-Loop validation).
+\end{checkpointbox}
+

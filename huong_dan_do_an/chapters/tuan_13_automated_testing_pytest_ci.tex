@@ -1,0 +1,52 @@
+﻿\section{Tuần 13: Kiểm Thử Tự Động Hoàn Diện (Pytest Suite \& Verification)}
+\label{sec:tuan_13}
+
+\begin{advisorbox}[Lời Dặn Của Thầy: Mọi Tuyên Bố Kỹ Thuật Phải Được Chứng Minh Bằng Mã Kiểm Thử]
+Nhiều sinh viên khi lên bục bảo vệ Đồ án tốt nghiệp rất hay nói những câu vô căn cứ như: \textit{"Hệ thống của em chạy rất ổn định, không có lỗi gì cả"}. Thầy hỏi lại: \textit{"Làm sao em chứng minh được nó ổn định? Em đã viết bao nhiêu test case? Tỷ lệ bao phủ code (Coverage) là bao nhiêu?"} thì lúng túng không trả lời được.
+
+Một kỹ sư Bách Khoa chân chính không bao giờ kiểm thử bằng cách mở web lên gõ tay vài câu rồi tự khen mình giỏi. Em phải tuân theo phương pháp \textbf{Kiểm thử hướng phát triển (Test-Driven Development - TDD)}~\cite{beck2002test}. Toàn bộ hệ thống phải được bao bọc bởi một bộ kiểm thử tự động (\textbf{Pytest Suite}). Mỗi lần sửa một dòng code, em chỉ cần gõ một lệnh duy nhất: \texttt{pytest} và toàn bộ 8 bài test nghiệp vụ từ An ninh, SQL, Web Search, OCR đến LangGraph phải đồng loạt hiện màu xanh lá (\textbf{Green Loop}).
+\end{advisorbox}
+
+\begin{literaturebox}[Tài Liệu Nghiên Cứu Gốc Bắt Buộc]
+Em hãy nghiên cứu các quy chuẩn kỹ thuật phần mềm về kiểm thử:
+\begin{itemize}[leftmargin=1.5em]
+    \item \textbf{Beck, K. (2002)}: \textit{"Test-Driven Development: By Example"}, Addison-Wesley Professional~\cite{beck2002test}. Hiểu vòng tròn: \texttt{Red} (viết test thất bại) $\rightarrow$ \texttt{Green} (viết code tối thiểu để pass) $\rightarrow$ \texttt{Refactor} (tối ưu hóa mã nguồn).
+    \item \textbf{IEEE Standard for Software Unit Testing (IEEE 1008)}: Nắm vững các cấp độ kiểm thử: Unit Test (cô lập module), Integration Test (tương tác giữa các module) và End-to-End Test (luồng nghiệp vụ từ đầu đến cuối).
+\end{itemize}
+\end{literaturebox}
+
+\begin{codeautopsybox}[Giải Phẫu Mã Nguồn: tests/test\_system.py]
+Mở tệp \texttt{tests/test\_system.py}, em sẽ thấy 8 bài kiểm thử then chốt của dự án \texttt{office-asset-agent}:
+\begin{enumerate}[leftmargin=1.5em]
+    \item \texttt{test\_rbac\_security()}: Kiểm tra ném ngoại lệ khi Staff cố tình gọi quyền Admin.
+    \item \texttt{test\_deterministic\_sql\_calculator()}: Kiểm tra tính toán SUM/COUNT kho vật tư chính xác từng đơn vị.
+    \item \texttt{test\_document\_and\_chart\_generation()}: Kiểm tra xuất file Word và ảnh biểu đồ hợp lệ.
+    \item \texttt{test\_web\_search\_enrichment()}: Kiểm tra cơ chế Fallback khi ngắt kết nối mạng.
+    \item \texttt{test\_vision\_ocr()}: Kiểm tra đọc mã vạch và Serial Number từ ảnh mẫu.
+    \item \texttt{test\_orchestrator\_inventory\_query()}: Kiểm tra luồng StateGraph xử lý câu hỏi tồn kho.
+    \item \texttt{test\_orchestrator\_support\_and\_ticket\_creation()}: Kiểm tra luồng tiếp nhận sự cố.
+    \item \texttt{test\_orchestrator\_rbac\_blocking()}: Kiểm tra Orchestrator chặn đứng truy vấn vượt quyền.
+\end{enumerate}
+\begin{lstlisting}[language=Python]
+def test_deterministic_sql_calculator(db_session):
+    stats = query_inventory_stats(db_session, category="laptop")
+    assert stats is not None
+    assert stats.total_count >= 1
+    assert stats.total_valuation > 0.0
+    # Dam bao khong co phep tinh nao bi None hoac tra ve so am
+\end{lstlisting}
+\end{codeautopsybox}
+
+\begin{labmilestonebox}[Nhiệm Vụ Thực Hành Tuần 13]
+\begin{enumerate}[leftmargin=1.5em]
+    \item Chạy toàn bộ bộ kiểm thử trong Terminal: \texttt{python -m pytest tests/test\_system.py -v}.
+    \item Đảm bảo kết quả đầu ra đạt \textbf{8 passed in X.XXs} (100\% xanh lá).
+    \item Chụp lại ảnh màn hình Terminal xanh lá này để đưa vào Chương 4 của cuốn Báo cáo Đồ án tốt nghiệp làm minh chứng chất lượng phần mềm.
+\end{enumerate}
+\end{labmilestonebox}
+
+\begin{checkpointbox}[Thử Thách Vấn Đáp Hội Đồng]
+\textbf{Câu hỏi 13:} Khi chạy Pytest, nếu gọi trực tiếp các API trả phí của OpenAI/Google thì vừa tốn tiền vừa bị chậm và phụ thuộc vào kết nối mạng. Em đã áp dụng kỹ thuật gì để giải quyết vấn đề này?\\
+\textit{Mẹo trả lời chuẩn điểm 10:} Trong kiểm thử tự động, em áp dụng kỹ thuật \textbf{Mocking / Monkeypatching}. Các lời gọi API bên ngoài được thay thế bằng các hàm giả lập (Mock Functions) trả về cấu trúc dữ liệu định trước. Nhờ đó, bộ test chạy hoàn toàn độc lập với Internet (Offline-ready), tốc độ thực thi siêu tốc (chỉ mất khoảng 3 giây cho toàn bộ 8 bài test), không tốn một đồng chi phí API nào và đảm bảo tính lặp lại (Reproducibility) nhất quán trong môi trường CI/CD.
+\end{checkpointbox}
+

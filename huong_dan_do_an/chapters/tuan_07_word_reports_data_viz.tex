@@ -1,0 +1,66 @@
+﻿\section{Tuần 07: Chế Tạo Tool 3 — Tự Động Xuất Văn Bản Báo Cáo (.docx) \& Biểu Đồ Trực Quan}
+\label{sec:tuan_07}
+
+\begin{advisorbox}[Lời Dặn Của Thầy: Sản Phẩm Kỹ Sư Phải Giải Quyết Bài Toán Hành Chính Cho Lãnh Đạo]
+Một thực tế phũ phàng trong các cơ quan là các Trưởng phòng, Giám đốc hay Ban Giám hiệu sẽ không bao giờ ngồi đọc hàng nghìn dòng log JSON hay mở terminal của em ra xem. Điều họ cần vào cuối mỗi quý là một \textbf{Biên bản kiểm kê tài sản} được đóng dấu mộc, một \textbf{Phiếu bàn giao thiết bị} in ra giấy A4 có chữ ký hai bên, và một \textbf{Biểu đồ tròn} thể hiện trực quan tỷ lệ thiết bị đang hỏng hóc để xin kinh phí sửa chữa.
+
+Nếu Agent chỉ biết trả lời text trên màn hình, đồ án của em mới chỉ dừng lại ở mức đồ chơi. Tuần này, em phải hoàn thiện \textbf{Tool 3: Tự động kết xuất tài liệu Word (.docx) và vẽ biểu đồ trực quan hóa số liệu}. Văn bản sinh ra phải tuân thủ nghiêm ngặt thể thức văn bản hành chính Việt Nam (căn lề, cỡ chữ, quốc hiệu, tiêu ngữ, bảng biểu kẻ rõ ràng).
+\end{advisorbox}
+
+\begin{literaturebox}[Tài Liệu Nghiên Cứu Gốc Bắt Buộc]
+Em hãy nghiên cứu các quy chuẩn về truyền tải thông tin thị giác và thể thức văn bản:
+\begin{itemize}[leftmargin=1.5em]
+    \item \textbf{Tufte, E. R. (2001)}: \textit{"The Visual Display of Quantitative Information"}, Graphics Press~\cite{tufte2001visual}. Học nguyên lý tối đa hóa tỷ lệ dữ liệu trên mực in (Data-Ink Ratio) và thiết kế biểu đồ không gây nhiễu thị giác.
+    \item \textbf{Nghị định 30/2020/NĐ-CP của Chính phủ}: Quy định về thể thức, kỹ thuật trình bày văn bản hành chính (Khổ giấy A4, font Times New Roman, lề trên 20-25mm, lề trái 30-35mm, vị trí nơi nhận và chữ ký).
+\end{itemize}
+\end{literaturebox}
+
+\begin{codeautopsybox}[Giải Phẫu Mã Nguồn: src/tools/doc\_generator.py]
+Mở tệp \texttt{src/tools/doc\_generator.py}, xem xét cách sử dụng thư viện \texttt{python-docx} và \texttt{matplotlib} để sinh tài liệu:
+\begin{lstlisting}[language=Python]
+import docx
+from docx.shared import Inches, Pt, RGBColor
+from docx.enum.text import WD_ALIGN_PARAGRAPH
+import matplotlib.pyplot as plt
+
+def generate_inventory_report_doc(summary_data: dict, output_path: str) -> str:
+    doc = docx.Document()
+    
+    # 1. Quoc hieu & Tieu ngu chuan nghi dinh
+    p_header = doc.add_paragraph()
+    p_header.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    run_qh = p_header.add_run("CONG HOA XA HOI CHU NGHIA VIET NAM\nDoc lap - Tu do - Hanh phuc\n")
+    run_qh.bold = True
+    
+    # 2. Tieu de van ban
+    p_title = doc.add_paragraph()
+    p_title.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    run_title = p_title.add_run("BIEN BAN KIEM KE VA DANH GIA TAI SAN PHONG BAN")
+    run_title.bold = True
+    run_title.font.size = Pt(14)
+    
+    # 3. Ve bieu do phan bo trang thai bang Matplotlib va chen vao Word
+    chart_path = generate_status_pie_chart(summary_data)
+    doc.add_picture(chart_path, width=Inches(5.0))
+    
+    # 4. Bang so lieu chi tiet
+    table = doc.add_table(rows=1, cols=4)
+    # Ghi du lieu dong vao bang...
+    doc.save(output_path)
+    return output_path
+\end{lstlisting}
+\end{codeautopsybox}
+
+\begin{labmilestonebox}[Nhiệm Vụ Thực Hành Tuần 07]
+\begin{enumerate}[leftmargin=1.5em]
+    \item Chạy hàm sinh tài liệu mẫu: Kiểm tra tệp \texttt{.docx} được tạo ra trong thư mục \texttt{exports/}.
+    \item Tùy biến biểu đồ hình tròn của \texttt{matplotlib}: Bổ sung chú thích tỷ lệ phần trăm (autopct), màu sắc trang nhã học thuật (Navy, Slate, Burgundy).
+    \item Viết một kịch bản test tự động: Khi người dùng chat lệnh \textit{"Xuất báo cáo tài sản phòng Hành chính"}, Agent tự động kích hoạt Tool 3 và gửi lại đường dẫn tải file Word.
+\end{enumerate}
+\end{labmilestonebox}
+
+\begin{checkpointbox}[Thử Thách Vấn Đáp Hội Đồng]
+\textbf{Câu hỏi 7:} Tại sao em xuất ra định dạng Microsoft Word (.docx) mà không phải là PDF hoặc file ảnh thông thường?\\
+\textit{Mẹo trả lời chuẩn điểm 10:} Trong quy trình làm việc thực tế của cơ quan, văn bản kiểm kê tài sản sau khi được AI khởi thảo thường cần lãnh đạo phòng ban rà soát, bổ sung ý kiến chỉ đạo hoặc chỉnh sửa chữ ký trước khi phát hành chính thức. Định dạng Word cho phép con người dễ dàng biên tập (Human-in-the-Loop editing), sau đó mới xuất bản sang PDF để lưu trữ vĩnh viễn.
+\end{checkpointbox}
+
