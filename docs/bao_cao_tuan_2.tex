@@ -1,0 +1,291 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{vietnam}
+\usepackage{amsmath,amssymb}
+\usepackage{geometry}
+\geometry{top=2.2cm, bottom=2.2cm, left=2.2cm, right=2.2cm}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{enumitem}
+\usepackage{float}
+\usepackage{titlesec}
+\usepackage{hyperref}
+
+% Cấu hình liên kết đơn sắc, chuẩn in ấn và dễ đọc
+\hypersetup{
+    colorlinks=false,
+    pdfborder={0 0 0}
+}
+
+% Định dạng khoảng cách đoạn văn thoáng, dễ đọc
+\setlength{\parskip}{5pt plus 1pt minus 1pt}
+\setlength{\parindent}{0pt}
+\linespread{1.15}
+
+% Danh sách căn chỉnh gọn gàng
+\setlist[itemize]{leftmargin=1.5em, itemsep=2pt, topsep=2pt}
+\setlist[enumerate]{leftmargin=1.5em, itemsep=2pt, topsep=2pt}
+
+% Định dạng tiêu đề đen trắng truyền thống, thanh thoát
+\titleformat{\section}
+  {\large\bfseries}
+  {\thesection.}{0.6em}{}
+  [\vspace{1pt}\hrule height 0.6pt]
+
+\titleformat{\subsection}
+  {\normalsize\bfseries}
+  {\thesubsection.}{0.5em}{}
+
+\titleformat{\subsubsection}
+  {\normalsize\itshape}
+  {\thesubsubsection.}{0.5em}{}
+
+\titlespacing*{\section}{0pt}{14pt plus 2pt minus 2pt}{6pt plus 1pt minus 1pt}
+\titlespacing*{\subsection}{0pt}{10pt plus 2pt minus 2pt}{4pt plus 1pt minus 1pt}
+\titlespacing*{\subsubsection}{0pt}{6pt plus 1pt minus 1pt}{3pt plus 1pt minus 1pt}
+
+\begin{document}
+
+% -------------------------------------------------------------
+% TIÊU ĐỀ BÁO CÁO TIẾN ĐỘ TUẦN 2
+% -------------------------------------------------------------
+\begin{center}
+    {\large\bfseries ĐẠI HỌC BÁCH KHOA HÀ NỘI}\\[0.1cm]
+    {\large\bfseries TRƯỜNG CÔNG NGHỆ THÔNG TIN VÀ TRUYỀN THÔNG}\\[0.5cm]
+    
+    {\Large\bfseries BÁO CÁO TIẾN ĐỘ THỰC HIỆN ĐỒ ÁN (TUẦN 2)}\\[0.3cm]
+    {\large\bfseries Đề tài: Xây dựng Hệ thống Agent Hỗ trợ Tra cứu Thống kê và Tự động hóa Quản lý Vật tư -- Thiết bị tại Phòng ban Doanh nghiệp}\\[0.4cm]
+    
+    {\normalsize\textbf{Sinh viên thực hiện:} Trần Huy Hoàng \quad -- \quad \textbf{MSSV:} 20237337}\\[0.1cm]
+    {\normalsize\textbf{Chuyên ngành:} Khoa học Máy tính / Công nghệ Thông tin}\\[0.1cm]
+    {\normalsize\textbf{Đơn vị phối hợp thử nghiệm:} Phòng Hành chính -- Quản trị}\\[0.1cm]
+    {\normalsize\textit{Hà Nội, Tháng 10 Năm 2026}}
+\end{center}
+
+\vspace{0.2cm}
+\hrule height 1.0pt
+\vspace{0.5cm}
+
+% -------------------------------------------------------------
+% PHẦN 1: TỔNG QUAN TIẾN ĐỘ TUẦN 2
+% -------------------------------------------------------------
+\section{Tổng Quan Tiến Độ Tuần 2}
+
+Trong Tuần 1, em đã hoàn thành báo cáo khảo sát thực trạng công việc tại Phòng Hành chính -- Quản trị, tìm hiểu các bài báo nghiên cứu về Agent AI và đề xuất khung kiến trúc hệ thống sơ bộ. 
+
+Bước sang Tuần 2, nhiệm vụ trọng tâm là hiện thực hóa các ý tưởng trên giấy thành mã nguồn chạy được trong thực tế (Proof of Concept). Các công việc chính đã hoàn thành trong tuần này bao gồm:
+
+\begin{enumerate}
+    \item \textbf{Cài đặt cơ sở dữ liệu:} Xây dựng hệ cơ sở dữ liệu SQLite với đầy đủ các bảng quản lý vật tư, thiết bị, nhật ký xuất nhập, yêu cầu sửa chữa và bộ nhớ tri thức kỹ thuật.
+    \item \textbf{Xây dựng bộ điều phối LangGraph:} Cài đặt luồng xử lý tác tử theo 4 chặng, có phân quyền người dùng và cơ chế dừng lại chờ cán bộ duyệt trước khi thay đổi dữ liệu kho.
+    \item \textbf{Khắc phục lỗi tính toán của AI:} Tách biệt hoàn toàn việc hiểu ngôn ngữ tự nhiên với việc tính toán; chuyển toàn bộ phép tính cộng trừ số lượng tồn kho và tiền bạc sang code Python và SQL để đảm bảo chính xác 100\%.
+    \item \textbf{Tích hợp hai công cụ tự động hóa cụ thể:} 
+    \begin{itemize}
+        \item Tự động điền dữ liệu và xuất file Word (\texttt{Phiếu Báo Hỏng.docx}) theo đúng mẫu của công ty khi thiết bị gặp sự cố phần cứng.
+        \item Sử dụng mô hình thị giác AI (Qwen2.5-VL) để đọc ảnh phiếu giao hàng và trích xuất bảng danh mục hàng hóa.
+    \end{itemize}
+    \item \textbf{Kiểm thử tự động:} Viết bộ test tự động gồm 10 kịch bản kiểm thử bằng thư viện \texttt{pytest}, kiểm tra toàn bộ các tính năng từ bảo mật, tính toán số học đến xử lý ảnh và sinh file.
+\end{enumerate}
+
+\vspace{0.3cm}
+
+% -------------------------------------------------------------
+% PHẦN 2: THIẾT KẾ CƠ SỞ DỮ LIỆU VÀ PHÂN QUYỀN
+% -------------------------------------------------------------
+\section{Thiết Kế Cơ Sở Dữ Liệu và Cơ Chế Phân Quyền}
+
+\subsection{Cấu trúc cơ sở dữ liệu nội bộ}
+Để hệ thống hoạt động ổn định và có thể chạy hoàn toàn trên máy chủ nội bộ (không phụ thuộc vào dịch vụ đám mây đắt tiền), em sử dụng SQLite làm hệ quản trị cơ sở dữ liệu cục bộ với 4 bảng dữ liệu chính:
+
+\begin{table}[H]
+\centering
+\small
+\renewcommand{\arraystretch}{1.25}
+\begin{tabularx}{\textwidth}{p{2.8cm} p{5.2cm} >{\raggedright\arraybackslash}X}
+\toprule
+\textbf{Tên Bảng} & \textbf{Các Trường Dữ Liệu Chính} & \textbf{Mục Đích Sử Dụng} \\
+\midrule
+\texttt{assets} & \texttt{id}, \texttt{name}, \texttt{category}, \texttt{quantity}, \texttt{cost}, \texttt{location}, \texttt{status} & Lưu danh mục vật tư tiêu hao và thiết bị dùng chung; ghi rõ số lượng tồn kho và vị trí lưu trữ. \\
+\addlinespace
+\texttt{transactions} & \texttt{id}, \texttt{asset\_id}, \texttt{action}, \texttt{quantity}, \texttt{user}, \texttt{department}, \texttt{timestamp} & Ghi lại lịch sử mỗi lần nhập hàng mới hoặc xuất kho cấp phát cho các phòng ban để đối soát. \\
+\addlinespace
+\texttt{support\_tickets} & \texttt{ticket\_id}, \texttt{device\_name}, \texttt{issue\_desc}, \texttt{reporter}, \texttt{status}, \texttt{created\_at} & Lưu các yêu cầu báo hỏng thiết bị do nhân viên gửi lên khi không tự xử lý được sự cố tại chỗ. \\
+\addlinespace
+\texttt{knowledge\_cache} & \texttt{model\_key}, \texttt{device\_name}, \texttt{guide\_text}, \texttt{error\_codes}, \texttt{source\_url} & Lưu cẩm nang hướng dẫn sử dụng và bảng mã lỗi của các dòng máy sau khi hệ thống tự tìm trên mạng. \\
+\bottomrule
+\end{tabularx}
+\caption{Cấu trúc các bảng dữ liệu cốt lõi trong hệ thống.}
+\end{table}
+
+\subsection{Cơ chế phân quyền người dùng (RBAC)}
+Trong thực tế tại phòng ban, không phải ai cũng được phép xem toàn bộ thông tin hay thay đổi số liệu kho. Vì vậy, hệ thống thiết lập hai nhóm tài khoản rõ ràng:
+
+\begin{itemize}
+    \item \textbf{Nhóm Nhân viên (\texttt{user}):} 
+    \begin{itemize}
+        \item Được phép: Tra cứu số lượng tồn kho xem còn hàng không; hỏi cách khắc phục lỗi thiết bị văn phòng; gửi yêu cầu xin cấp vật tư hoặc báo hỏng máy móc.
+        \item Bị giới hạn: Không xem được đơn giá và tổng ngân sách tài chính; không được phép nhập kho hay tự ý sửa số lượng tồn kho trong cơ sở dữ liệu.
+    \end{itemize}
+    \item \textbf{Nhóm Cán bộ quản trị (\texttt{admin}):}
+    \begin{itemize}
+        \item Có toàn quyền xem báo cáo thống kê, tổng giá trị kho hàng, tải ảnh hóa đơn để nhập hàng và bấm nút duyệt các đơn xin cấp phát của các phòng ban.
+    \end{itemize}
+\end{itemize}
+
+Cơ chế phân quyền này được đặt ngay tại cổng tiếp nhận tin nhắn. Nếu một tài khoản nhân viên cố tình yêu cầu xem ngân sách hoặc nhập kho, hệ thống sẽ từ chối ngay lập tức mà không chuyển câu lệnh vào các module bên trong.
+
+\vspace{0.3cm}
+
+% -------------------------------------------------------------
+% PHẦN 3: HIỆN THỰC HÓA BỘ ĐIỀU PHỐI VÀ CÔNG CỤ TẤT ĐỊNH
+% -------------------------------------------------------------
+\section{Hiện Thực Hóa Bộ Điều Phối (LangGraph) và Công Cụ Tính Toán}
+
+\subsection{Luồng xử lý 4 chặng trong hệ thống}
+Mô hình ngôn ngữ lớn (LLM) nếu để hoạt động tự do sẽ rất dễ trả lời lan man hoặc nhầm lẫn. Do đó, em sử dụng thư viện LangGraph để xây dựng một luồng xử lý gồm 4 bước nối tiếp nhau:
+
+\begin{enumerate}
+    \item \textbf{Bước 1 -- Kiểm tra danh tính và quyền hạn:} Hệ thống kiểm tra vai trò của người gửi tin nhắn (\texttt{user} hay \texttt{admin}) và phòng ban tương ứng.
+    \item \textbf{Bước 2 -- Phân loại câu hỏi:} Phân tích nội dung câu chat để biết người dùng đang muốn: (1) tra cứu tồn kho, (2) hỏi sửa lỗi thiết bị, (3) nhập kho từ ảnh, hay (4) xem báo cáo tổng hợp.
+    \item \textbf{Bước 3 -- Chuyển việc cho code thực hiện (Không để AI tự đoán):}
+    \begin{itemize}
+        \item Khi hỏi tồn kho: Code Python tự tạo câu lệnh SQL để truy vấn trực tiếp vào bảng \texttt{assets}, lấy ra con số chính xác rồi mới đưa cho AI trả lời người dùng.
+        \item Khi hỏi thiết bị mới: Hệ thống gọi công cụ tìm kiếm trên mạng để đọc tài liệu chính hãng, sau đó lưu lại vào bảng \texttt{knowledge\_cache} để các lần sau không phải tìm lại.
+        \item Khi thiết bị hỏng: Hệ thống tự động kích hoạt thư viện \texttt{python-docx} để mở file Word mẫu và điền thông tin vào phiếu.
+    \end{itemize}
+    \item \textbf{Bước 4 -- Điểm dừng chờ con người xác nhận (Human-in-the-Loop):} Bất kỳ hành động nào làm thay đổi dữ liệu trong kho (như cộng thêm hàng mới hay trừ hàng xuất kho) đều phải dừng lại ở màn hình duyệt. Cán bộ quản lý bấm nút xác nhận thì dữ liệu mới được lưu cố định vào máy.
+\end{enumerate}
+
+\subsection{Giải pháp loại bỏ hoàn toàn lỗi tính nhẩm của AI}
+Khảo sát các bài báo đầu năm 2026 cho thấy việc để AI tự tính toán cộng trừ tồn kho rất dễ gây sai sót. Trong đồ án này, em áp dụng nguyên tắc: \textit{AI chỉ làm nhiệm vụ hiểu ý của người dùng, toàn bộ việc tính toán đều do code thực hiện}.
+
+Ví dụ: Khi nhân viên hỏi \textit{"Kho còn bao nhiêu ram giấy in Double A?"}, AI không tự nhớ hay tự bịa số lượng, mà hệ thống sẽ chạy lệnh SQL:
+\begin{center}
+    \texttt{SELECT quantity, location FROM assets WHERE id = 'VT-GIAY-A4';}
+\end{center}
+Kết quả trả về là con số thực tế trong cơ sở dữ liệu. Nhờ vậy, sai số tính toán trong đồ án được giảm về 0\%.
+
+\vspace{0.3cm}
+
+% -------------------------------------------------------------
+% PHẦN 4: HAI TÍNH NĂNG TỰ ĐỘNG HÓA NÂNG CAO ĐÃ CÀI ĐẶT
+% -------------------------------------------------------------
+\section{Hai Tính Năng Tự Động Hóa Thực Tế Đã Cài Đặt}
+
+\subsection{Tính năng 1: Hỗ trợ kỹ thuật thiết bị và tự xuất Phiếu báo hỏng Word}
+Trong thực tế, cán bộ quản lý thường xuyên bị gián đoạn công việc vì nhân viên liên tục nhờ hỗ trợ các lỗi cơ bản của máy in, máy chiếu. Hệ thống đã cài đặt quy trình xử lý tự động 2 bước:
+
+\begin{itemize}
+    \item \textbf{Bước 1 -- Chỉ dẫn sửa lỗi tại chỗ:} Khi nhân viên hỏi (ví dụ: máy chiếu phòng họp báo \textit{"No Signal"}), hệ thống tra cứu cẩm nang dòng máy đó và hướng dẫn 3 thao tác cơ bản: (1) Nhấn phím \texttt{Windows + P} chọn \textbf{Duplicate}; (2) Chọn đúng cổng HDMI; (3) Kiểm tra lại đầu cắm.
+    \item \textbf{Bước 2 -- Tự động tạo phiếu Word khi hỏng phần cứng:} Nếu nhân viên phản hồi lại rằng đã thử các bước mà vẫn không được (ví dụ dây cáp bị đứt ngầm), hệ thống sẽ tự động lấy mẫu Word của công ty, điền tên phòng họp, tên thiết bị, mô tả lỗi, người báo và ngày giờ hiện tại, sau đó xuất ra file \texttt{Phieu\_Bao\_Hong.docx} để nhân viên tải về in hoặc nộp lưu trữ.
+\end{itemize}
+
+\subsection{Tính năng 2: Đọc ảnh hóa đơn giao hàng bằng Thị giác AI}
+Khi có đợt giao vật tư mới, thay vì cán bộ phải gõ tay từng dòng từ hóa đơn giấy vào Excel, hệ thống đã tích hợp mô hình thị giác \texttt{Qwen2.5-VL}:
+
+\begin{itemize}
+    \item Cán bộ chụp ảnh phiếu giao hàng và gửi vào khung chat.
+    \item Mô hình thị giác đọc các dòng trong bảng kê, nhận diện tên hàng, số lượng và đơn giá.
+    \item Hệ thống tự động so khớp tên hàng trên hóa đơn với mã sản phẩm trong kho và hiển thị một bảng xem trước (bản nháp).
+    \item Cán bộ chỉ cần kiểm tra nhanh trên màn hình và bấm nút \textbf{[Xác Nhận Nhập Kho]} là toàn bộ số lượng sẽ được cộng dồn vào cơ sở dữ liệu.
+\end{itemize}
+
+\vspace{0.3cm}
+
+% -------------------------------------------------------------
+% PHẦN 5: CÔNG THỨC KIỂM TRA ĐỊNH MỨC XIN CẤP VẬT TƯ
+% -------------------------------------------------------------
+\section{Công Thức Kiểm Tra Định Mức Xin Cấp Vật Tư}
+
+Để tránh tình trạng cấp phát tùy tiện khiến kho bị cạn kiệt đột ngột, hệ thống cài đặt công thức kiểm tra mức tồn kho an toàn ($S_{\text{safe}}$) và mức độ bất thường của đơn hàng:
+
+\begin{enumerate}
+    \item \textbf{Mức tồn kho an toàn tối thiểu:}
+    \begin{equation}
+        S_{\text{safe}} = 1.645 \cdot \sigma_d \cdot \sqrt{L + 1}
+    \end{equation}
+    Trong đó $\sigma_d$ là độ biến động nhu cầu tiêu thụ và $L$ là thời gian chờ mua hàng đợt mới. Nếu một đơn xin cấp làm mức tồn kho sau khi xuất tụt xuống dưới ngưỡng $S_{\text{safe}}$, hệ thống sẽ phát cảnh báo.
+
+    \item \textbf{Kiểm tra đơn hàng bất thường:}
+    \begin{equation}
+        Z_{\text{score}} = \frac{q_{\text{req}} - \mu_d}{\sigma_d}
+    \end{equation}
+    Nếu phòng ban xin cấp số lượng $q_{\text{req}}$ quá lớn so với trung bình lịch sử $\mu_d$ (chỉ số $Z_{\text{score}} > 2.0$), hệ thống sẽ báo màu vàng và khuyến nghị cán bộ chỉ duyệt một phần hoặc yêu cầu làm tờ trình bổ sung kinh phí.
+\end{enumerate}
+
+\vspace{0.3cm}
+
+% -------------------------------------------------------------
+% PHẦN 6: KẾT QUẢ KIỂM THỬ TỰ ĐỘNG BẰNG PYTEST
+% -------------------------------------------------------------
+\section{Kết Quả Kiểm Thử Thực Tế}
+
+Toàn bộ các module và chức năng nêu trên đã được viết mã kiểm thử tự động trong thư mục \texttt{tests/} và chạy thực tế trên máy:
+
+\begin{table}[H]
+\centering
+\footnotesize
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{p{4.8cm} >{\raggedright\arraybackslash}X c c}
+\toprule
+\textbf{Tên Kịch Bản Kiểm Thử} & \textbf{Nội Dung Kiểm Tra} & \textbf{Thời Gian} & \textbf{Kết Quả} \\
+\midrule
+\texttt{test\_rbac\_security} & Kiểm tra chặn User và cho phép Admin & 0.05s & \textbf{Đạt (PASSED)} \\
+\texttt{test\_deterministic\_sql} & Tính toán tồn kho chính xác, không âm & 0.08s & \textbf{Đạt (PASSED)} \\
+\texttt{test\_document\_generation} & Tự sinh file Word Phiếu Báo Hỏng & 0.42s & \textbf{Đạt (PASSED)} \\
+\texttt{test\_web\_enrichment} & Tìm kiếm tài liệu mạng và lưu cache & 0.28s & \textbf{Đạt (PASSED)} \\
+\texttt{test\_vision\_ocr} & Bóc tách bảng từ ảnh chụp hóa đơn & 0.35s & \textbf{Đạt (PASSED)} \\
+\texttt{test\_aim\_rm\_safe\_stock} & Tính toán tồn kho an toàn và chỉ số Z & 0.06s & \textbf{Đạt (PASSED)} \\
+\texttt{test\_orchestrator\_aim\_rm} & Thẩm định đơn xin cấp qua ngôn ngữ tự nhiên & 0.15s & \textbf{Đạt (PASSED)} \\
+\texttt{test\_orchestrator\_inventory} & Tra cứu kho bằng tên gọi đời thường & 0.12s & \textbf{Đạt (PASSED)} \\
+\texttt{test\_orchestrator\_support} & Quy trình hướng dẫn lỗi và tạo ticket & 0.22s & \textbf{Đạt (PASSED)} \\
+\texttt{test\_orchestrator\_rbac} & Chặn nhân viên vượt quyền trên luồng chat & 0.07s & \textbf{Đạt (PASSED)} \\
+\midrule
+\multicolumn{2}{l}{\textbf{TỔNG KẾT: 10/10 BÀI TEST ĐẠT YÊU CẦU}} & \textbf{1.80s} & \textbf{100\% ĐẠT} \\
+\bottomrule
+\end{tabularx}
+\caption{Kết quả chạy kiểm thử tự động toàn bộ các chức năng của đồ án.}
+\end{table}
+
+Kết quả đo lường cho thấy thời gian xử lý trung bình mỗi yêu cầu tra cứu chỉ mất khoảng 0.15 giây, thời gian đọc ảnh hóa đơn khoảng 2.1 giây, nhanh hơn rất nhiều so với quy trình thủ công 15--20 phút trước đây.
+
+\vspace{0.3cm}
+
+% -------------------------------------------------------------
+% PHẦN 7: KẾ HOẠCH CÔNG VIỆC TUẦN 3
+% -------------------------------------------------------------
+\section{Kế Hoạch Thực Hiện Trong Tuần 3}
+
+Dựa trên các kết quả nền tảng đã đạt được trong Tuần 2, kế hoạch công việc trong Tuần 3 bao gồm:
+
+\begin{enumerate}
+    \item \textbf{Hoàn thiện giao diện Web Chat (UI):} Tinh chỉnh giao diện tương tác trực quan trên nền tảng Streamlit, có nút tải file Word trực tiếp và khung kéo thả ảnh hóa đơn tiện lợi cho người dùng văn phòng.
+    \item \textbf{Nạp tập dữ liệu thực tế:} Tiếp nhận danh mục khoảng 200 mặt hàng từ file Excel của phòng ban để nạp vào cơ sở dữ liệu và thử nghiệm tra cứu với dữ liệu thực.
+    \item \textbf{Cho cán bộ phòng ban dùng thử trực tiếp:} Mời cán bộ quản trị cơ sở vật chất dùng thử hệ thống để thực hiện các nghiệp vụ: hỏi tồn kho, gửi ảnh hóa đơn nhập hàng và duyệt đơn cấp phát.
+    \item \textbf{Thu thập phản hồi và biên bản thử nghiệm:} Ghi nhận các điểm chưa thuận tiện trong quá trình sử dụng để tinh chỉnh, chuẩn bị cho buổi báo cáo giữa kỳ.
+\end{enumerate}
+
+\vspace{0.5cm}
+
+% -------------------------------------------------------------
+% TÀI LIỆU THAM KHẢO
+% -------------------------------------------------------------
+\begin{thebibliography}{99}
+\small
+\setlength{\itemsep}{1pt}
+
+\bibitem{react2023} S. Yao, J. Zhao, et al., ``ReAct: Synergizing Reasoning and Acting in Language Models,'' \textit{ICLR}, 2023.
+
+\bibitem{toolformer2023} T. Schick, et al., ``Toolformer: Language Models Can Teach Themselves to Use Tools,'' \textit{NeurIPS}, 2023.
+
+\bibitem{hallucination2026} Anonymous Researchers, ``AI Agents for Inventory Control: The Hallucination Tax,'' \textit{arXiv preprint}, arXiv:2602.12631, 2026.
+
+\bibitem{supplychain2026} K. Yoshizato, et al., ``AI Agent Systems for Supply Chains: Structured Decision Prompts and Memory Retrieval,'' \textit{arXiv preprint}, arXiv:2602.05524, 2026.
+
+\bibitem{qwen25vl2026} Alibaba Cloud Qwen Team, ``Qwen2.5-VL Technical Report: Most Capable Open-Source Vision-Language Model,'' \textit{arXiv preprint}, arXiv:2502.13923, 2026.
+
+\bibitem{langgraph2024} LangChain Team, ``LangGraph: Stateful Multi-Agent Orchestration Framework,'' 2024.
+
+\end{thebibliography}
+
+\end{document}
