@@ -39,14 +39,14 @@ env/
 *.swo
 
 # LaTeX auxiliary files (keep .tex and .pdf)
-docs/*.aux
-docs/*.log
-docs/*.out
-docs/*.toc
-docs/*.synctex.gz
 *.aux
 *.log
 *.out
+*.toc
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+*.blg
 
 # Data & Cache
 *.sqlite3-journal

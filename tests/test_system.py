@@ -7,7 +7,7 @@ import os
 from pathlib import Path
 import pytest
 
-from src.core.config import ROLE_USER, ROLE_ADMIN
+from src.core.config import ROLE_USER, ROLE_ADMIN, TEMPLATES_DIR
 from src.core.security import has_permission, check_role_access, PERMISSION_OCR_RESTOCK, PERMISSION_VIEW_INVENTORY
 from src.core.init_db import init_database
 from src.core.database import SessionLocal
@@ -34,6 +34,13 @@ from src.agents.orchestrator import process_user_request
 def setup_database():
     """Khởi tạo database và dữ liệu mẫu trước khi chạy test."""
     init_database()
+    yield
+    # Tự động dọn dẹp các tệp docx sinh ra trong quá trình test
+    for f in TEMPLATES_DIR.glob("Phieu_Bao_Hong_*.docx"):
+        try:
+            f.unlink()
+        except Exception:
+            pass
 
 
 def test_rbac_security():
