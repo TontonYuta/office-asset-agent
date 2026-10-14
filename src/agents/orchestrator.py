@@ -4,11 +4,12 @@ Central Multi-Agent Orchestrator using LangGraph.
 """
 
 import re
+import sqlite3
 from typing import Dict, Any, TypedDict, Optional, List
 from langgraph.graph import StateGraph, START, END
 from langgraph.checkpoint.memory import MemorySaver
 
-from src.core.config import ROLE_USER, ROLE_ADMIN
+from src.core.config import ROLE_USER, ROLE_ADMIN, DATA_DIR
 from src.core.security import check_role_access, PERMISSION_OCR_RESTOCK
 from src.agents.support_agent import handle_support_query
 from src.agents.enrich_agent import handle_enrich_query
@@ -217,8 +218,17 @@ builder.add_edge("support_node", END)
 builder.add_edge("enrich_node", END)
 builder.add_edge("ocr_node", END)
 
-# Biên dịch Graph với bộ nhớ lưu vết phiên làm việc (LangGraph MemorySaver)
-checkpointer = MemorySaver()
+# Biên dịch Graph với bộ nhớ lưu vết phiên làm việc (Persistent LangGraph SqliteSaver)
+try:
+    from langgraph.checkpoint.sqlite import SqliteSaver
+    CHECKPOINT_DB_PATH = DATA_DIR / "agent_checkpoints.sqlite"
+    CHECKPOINT_DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+    _checkpoint_conn = sqlite3.connect(str(CHECKPOINT_DB_PATH), check_same_thread=False)
+    checkpointer = SqliteSaver(_checkpoint_conn)
+    checkpointer.setup()
+except Exception:
+    checkpointer = MemorySaver()
+
 orchestrator_graph = builder.compile(checkpointer=checkpointer)
 
 

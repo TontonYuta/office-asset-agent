@@ -50,7 +50,10 @@ env/
 
 # Data & Cache
 *.sqlite3-journal
+*.sqlite
+*.sqlite-*
 *.db
+data/*.sqlite*
 data/*.png
 data/templates/*.docx
 .pytest_cache/

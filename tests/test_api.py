@@ -204,3 +204,71 @@ def test_spa_serving():
     assert res.status_code == 200
     assert "text/html" in res.headers["content-type"]
     assert "Office Asset Agent" in res.text or "<!DOCTYPE html>" in res.text or "<!doctype html>" in res.text
+
+
+def test_auth_login_success():
+    # 1. Admin login
+    res = client.post("/api/auth/login", json={"username": "admin", "password": "admin123"})
+    assert res.status_code == 200
+    data = res.json()
+    assert data["success"] is True
+    assert "token" in data
+    assert data["user"]["role"] == "admin"
+    assert data["user"]["canAdjustStock"] is True
+
+    # 2. Staff user login
+    res_user = client.post("/api/auth/login", json={"username": "user", "password": "user123"})
+    assert res_user.status_code == 200
+    data_user = res_user.json()
+    assert data_user["success"] is True
+    assert data_user["user"]["role"] == "user"
+    assert data_user["user"]["canAdjustStock"] is False
+
+
+def test_auth_login_failure():
+    res = client.post("/api/auth/login", json={"username": "admin", "password": "wrongpassword"})
+    assert res.status_code == 401
+    assert "không chính xác" in res.json()["detail"]
+
+
+def test_auth_me_and_guard():
+    # Login as user
+    res_user = client.post("/api/auth/login", json={"username": "user", "password": "user123"})
+    user_token = res_user.json()["token"]
+
+    # Verify /api/auth/me
+    res_me = client.get("/api/auth/me", headers={"Authorization": f"Bearer {user_token}"})
+    assert res_me.status_code == 200
+    assert res_me.json()["user"]["username"] in ["user", "user1"]
+
+    # Role Guard check: Non-admin trying to adjust stock must receive 403 Forbidden
+    res_forbidden = client.post(
+        "/api/assets/adjust",
+        json={"asset_id": "VT-GIAY-A4", "type": "IN", "quantity": 1, "reason": "Test RBAC", "performer": "User"},
+        headers={"Authorization": f"Bearer {user_token}"}
+    )
+    assert res_forbidden.status_code == 403
+    assert "Quản trị viên" in res_forbidden.json()["detail"]
+
+
+def test_ocr_upload_real_image():
+    import io
+    from PIL import Image
+
+    # Create dummy PNG image bytes
+    img = Image.new("RGB", (800, 1000), color=(255, 255, 255))
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
+    buf.seek(0)
+
+    res = client.post(
+        "/api/ocr",
+        files={"file": ("invoice_test.png", buf.getvalue(), "image/png")}
+    )
+    assert res.status_code == 200
+    data = res.json()
+    assert data["status"] == "success"
+    assert len(data["items"]) > 0
+    assert "image_data" in data
+    assert data["image_data"].startswith("data:image/png;base64,")
+

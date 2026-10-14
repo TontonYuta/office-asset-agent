@@ -91,10 +91,10 @@ export function Header({ activeTab, onOpenCommand }: HeaderProps) {
         </button>
 
         {/* User Profile & Role Switcher */}
-        <div className="flex items-center gap-2 pl-3 border-l border-zinc-200 dark:border-zinc-800">
-          <div className="text-right">
+        <div className="flex items-center gap-2.5 pl-3 border-l border-zinc-200 dark:border-zinc-800">
+          <div className="text-right hidden sm:block">
             <div className="flex items-center justify-end gap-1.5">
-              <span className="text-xs font-medium text-zinc-900 dark:text-zinc-100">
+              <span className="text-xs font-semibold text-zinc-900 dark:text-zinc-100">
                 {profile.name}
               </span>
               <span
@@ -107,19 +107,21 @@ export function Header({ activeTab, onOpenCommand }: HeaderProps) {
                 {profile.roleLabel}
               </span>
             </div>
-            <div className="text-[10px] text-zinc-500 dark:text-zinc-400 truncate max-w-[170px]">
+            <div className="text-[10px] text-zinc-500 dark:text-zinc-400 truncate max-w-[180px]">
               {profile.department}
             </div>
           </div>
 
-          <button
-            onClick={toggleRole}
-            title={`Đang là vai trò ${profile.roleLabel}. Nhấn để chuyển sang ${isAdmin ? 'Nhân viên' : 'Quản trị viên'}`}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 transition-colors"
-          >
-            <ArrowRightLeft className="w-3.5 h-3.5 text-zinc-500" />
-            <span className="text-[11px]">Đổi vai trò</span>
-          </button>
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={openLoginModal}
+              title="Đổi tài khoản hoặc đăng nhập Quản trị viên"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 transition-colors"
+            >
+              <ArrowRightLeft className="w-3.5 h-3.5 text-zinc-500" />
+              <span className="text-[11px]">Đổi tài khoản</span>
+            </button>
+          </div>
         </div>
       </div>
     </header>

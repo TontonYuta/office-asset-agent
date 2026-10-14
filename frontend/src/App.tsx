@@ -11,6 +11,7 @@ import { TicketsProvider } from './hooks/useTickets';
 import { Header } from './components/layout/Header';
 import { Sidebar } from './components/layout/Sidebar';
 import { CommandMenu } from './components/layout/CommandMenu';
+import { LoginModal } from './components/auth/LoginModal';
 import { ChatTab } from './components/chat/ChatTab';
 import { InventoryTab } from './components/inventory/InventoryTab';
 import { AuditWorkbenchTab } from './components/audit/AuditWorkbenchTab';
@@ -82,6 +83,9 @@ export function AppContent() {
         setActiveTab={setActiveTab}
         onSelectAsset={(id) => setSelectedAssetId(id)}
       />
+
+      {/* Cửa sổ đăng nhập xác thực RBAC */}
+      <LoginModal />
     </div>
   );
 }

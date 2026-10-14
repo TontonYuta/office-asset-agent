@@ -5,12 +5,99 @@
 import { Asset, StockAdjustmentTransaction } from '../types/asset';
 import { MaintenanceTicket, TicketStatus } from '../types/ticket';
 import { AllocationRequest, HistoricalEpisode } from '../types/audit';
+import { UserProfile, LoginCredentials, AuthResponse } from '../types/auth';
 
 export const USE_LOCAL_BACKEND = true; // Connected directly to FastAPI backend
 
 export const BASE_URL = typeof window !== 'undefined' && window.location.port === '3000'
   ? 'http://localhost:8000/api'
   : '/api';
+
+// ------------------- AUTH TOKEN STORAGE & HELPERS -------------------
+const TOKEN_KEY = 'office_asset_jwt_token';
+
+export function getStoredToken(): string | null {
+  if (typeof window === 'undefined') return null;
+  return localStorage.getItem(TOKEN_KEY);
+}
+
+export function setStoredToken(token: string): void {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem(TOKEN_KEY, token);
+  }
+}
+
+export function clearStoredToken(): void {
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem(TOKEN_KEY);
+  }
+}
+
+export function getAuthHeaders(): Record<string, string> {
+  const token = getStoredToken();
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  return headers;
+}
+
+// ------------------- AUTH API CALLS -------------------
+export async function loginApi(credentials: LoginCredentials): Promise<AuthResponse> {
+  if (USE_LOCAL_BACKEND) {
+    try {
+      const res = await fetch(`${BASE_URL}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(credentials),
+      });
+      const data = await res.json();
+      if (res.ok && data.success && data.token) {
+        setStoredToken(data.token);
+        return data;
+      }
+      return { success: false, message: data.detail || 'Tên đăng nhập hoặc mật khẩu không chính xác' };
+    } catch (err: any) {
+      console.warn('Backend login error:', err);
+      return { success: false, message: 'Không thể kết nối đến máy chủ xác thực.' };
+    }
+  }
+  return { success: true };
+}
+
+export async function getMeApi(): Promise<UserProfile | null> {
+  const token = getStoredToken();
+  if (!token) return null;
+
+  if (USE_LOCAL_BACKEND) {
+    try {
+      const res = await fetch(`${BASE_URL}/auth/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        return data.user || null;
+      }
+      clearStoredToken();
+    } catch (err) {
+      console.warn('Backend getMe error:', err);
+    }
+  }
+  return null;
+}
+
+export async function logoutApi(): Promise<void> {
+  clearStoredToken();
+  if (USE_LOCAL_BACKEND) {
+    try {
+      await fetch(`${BASE_URL}/auth/logout`, { method: 'POST' });
+    } catch {
+      // Ignore network errors on logout
+    }
+  }
+}
 
 // Initial enterprise assets fallback
 export const INITIAL_ASSETS: Asset[] = [
@@ -266,7 +353,7 @@ export async function adjustStockApi(
     try {
       const res = await fetch(`${BASE_URL}/assets/adjust`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify({
           asset_id: assetId,
           type,
@@ -296,7 +383,7 @@ export async function batchAddStockApi(
     try {
       const res = await fetch(`${BASE_URL}/assets/batch-add`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify({
           items: items.map((i) => ({ asset_id: i.assetId, quantity: i.quantity })),
           reason,
@@ -420,7 +507,7 @@ export async function approveAuditApi(
     try {
       const res = await fetch(`${BASE_URL}/audit/approve`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify({
           asset_id: assetId,
           quantity,
@@ -504,3 +591,31 @@ export async function enrichKnowledgeApi(modelName: string): Promise<any> {
   }
   return null;
 }
+
+// ------------------- OCR RECEIPT API -------------------
+
+export async function uploadOcrReceiptApi(file: File): Promise<any> {
+  if (USE_LOCAL_BACKEND) {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const token = getStoredToken();
+      const headers: Record<string, string> = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      const res = await fetch(`${BASE_URL}/ocr`, {
+        method: 'POST',
+        headers,
+        body: formData,
+      });
+      if (res.ok) {
+        return await res.json();
+      }
+    } catch (err) {
+      console.warn('Backend OCR API failed:', err);
+    }
+  }
+  return null;
+}
+

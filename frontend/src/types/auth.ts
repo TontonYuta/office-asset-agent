@@ -2,6 +2,7 @@ export type UserRole = 'user' | 'admin';
 
 export interface UserProfile {
   id: string;
+  username?: string;
   name: string;
   role: UserRole;
   roleLabel: string;
@@ -12,6 +13,18 @@ export interface UserProfile {
   canAdjustStock: boolean;
   canApproveAIMRM: boolean;
   canApproveTickets: boolean;
+}
+
+export interface LoginCredentials {
+  username: string;
+  password: string;
+}
+
+export interface AuthResponse {
+  success: boolean;
+  token?: string;
+  user?: UserProfile;
+  message?: string;
 }
 
 export const USER_PROFILES: Record<UserRole, UserProfile> = {

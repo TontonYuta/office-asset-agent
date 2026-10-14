@@ -78,26 +78,43 @@ def parse_delivery_receipt(image_source: Any = None) -> Dict[str, Any]:
     image_height = 1754
     aspect_ratio_info = "A4 Standard (1:1.414)"
 
+    image_b64 = None
+    raw_bytes = None
+
     # 1. Kiểm tra và trích xuất thông số ảnh thực tế nếu người dùng upload ảnh
     if image_source is not None:
         try:
             if hasattr(image_source, "read"):
-                # Streamlit UploadedFile hoặc file-like object
+                # File-like object
                 raw_bytes = image_source.read()
                 img = Image.open(io.BytesIO(raw_bytes))
-                # Reset pointer sau khi đọc để Streamlit hiển thị được
                 if hasattr(image_source, "seek"):
                     image_source.seek(0)
+            elif isinstance(image_source, (bytes, bytearray)):
+                raw_bytes = bytes(image_source)
+                img = Image.open(io.BytesIO(raw_bytes))
             elif isinstance(image_source, (str, Path)) and Path(image_source).exists():
-                img = Image.open(str(image_source))
+                with open(str(image_source), "rb") as f:
+                    raw_bytes = f.read()
+                img = Image.open(io.BytesIO(raw_bytes))
             elif isinstance(image_source, Image.Image):
                 img = image_source
+                buf = io.BytesIO()
+                img.save(buf, format="PNG")
+                raw_bytes = buf.getvalue()
             else:
                 img = None
 
             if img:
                 image_width, image_height = img.size
                 aspect_ratio_info = f"{image_width}x{image_height} ({image_width/image_height:.2f})"
+                if raw_bytes:
+                    mime = "image/png"
+                    if raw_bytes.startswith(b"\xff\xd8"):
+                        mime = "image/jpeg"
+                    elif raw_bytes.startswith(b"RIFF"):
+                        mime = "image/webp"
+                    image_b64 = f"data:{mime};base64,{base64.b64encode(raw_bytes).decode('utf-8')}"
         except Exception as e:
             # Nếu đọc file ảnh gặp cảnh báo, tiếp tục với parser
             pass
@@ -185,6 +202,7 @@ def parse_delivery_receipt(image_source: Any = None) -> Dict[str, Any]:
         "delivery_date": "12/10/2026",
         "recipient": "Phòng Hành chính – Quản trị",
         "image_resolution": aspect_ratio_info,
+        "image_data": image_b64,
         "items": verified_items,
         "total_items_count": len(verified_items),
         "total_amount": total_amount,

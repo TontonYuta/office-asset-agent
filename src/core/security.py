@@ -54,6 +54,65 @@ def check_role_access(role: str, required_permission: str) -> Dict[str, Any]:
 
 
 import hashlib
+import hmac
+import base64
+import json
+import time
+import os
+
+
+JWT_SECRET = os.getenv("JWT_SECRET", "office-asset-agent-secret-key-2026-b2b-secure")
+JWT_EXPIRATION_SECONDS = 86400 * 7  # 7 days
+
+
+def base64url_encode(data: bytes) -> str:
+    return base64.urlsafe_b64encode(data).decode("utf-8").rstrip("=")
+
+
+def base64url_decode(data: str) -> bytes:
+    padding = "=" * (4 - (len(data) % 4))
+    return base64.urlsafe_b64decode(data + padding)
+
+
+def create_jwt_token(payload: Dict[str, Any], expires_in: int = JWT_EXPIRATION_SECONDS) -> str:
+    """Tạo JWT token bảo mật chuẩn RFC 7519 với HMAC-SHA256."""
+    header = {"alg": "HS256", "typ": "JWT"}
+    payload_copy = payload.copy()
+    now = int(time.time())
+    payload_copy["iat"] = now
+    payload_copy["exp"] = now + expires_in
+
+    header_b64 = base64url_encode(json.dumps(header, separators=(",", ":")).encode("utf-8"))
+    payload_b64 = base64url_encode(json.dumps(payload_copy, separators=(",", ":")).encode("utf-8"))
+
+    msg = f"{header_b64}.{payload_b64}".encode("utf-8")
+    sig = hmac.new(JWT_SECRET.encode("utf-8"), msg, hashlib.sha256).digest()
+    sig_b64 = base64url_encode(sig)
+
+    return f"{header_b64}.{payload_b64}.{sig_b64}"
+
+
+def verify_jwt_token(token: str) -> Optional[Dict[str, Any]]:
+    """Xác thực và giải mã JWT token."""
+    try:
+        parts = token.strip().split(".")
+        if len(parts) != 3:
+            return None
+        header_b64, payload_b64, sig_b64 = parts
+        msg = f"{header_b64}.{payload_b64}".encode("utf-8")
+        expected_sig = hmac.new(JWT_SECRET.encode("utf-8"), msg, hashlib.sha256).digest()
+        actual_sig = base64url_decode(sig_b64)
+
+        if not hmac.compare_digest(expected_sig, actual_sig):
+            return None
+
+        payload = json.loads(base64url_decode(payload_b64).decode("utf-8"))
+        if "exp" in payload and time.time() > payload["exp"]:
+            return None  # Expired
+
+        return payload
+    except Exception:
+        return None
 
 
 def hash_password(password: str, salt: str = "OfficeAssetSalt2026") -> str:
@@ -69,18 +128,43 @@ def verify_password(password: str, hashed_password: str, salt: str = "OfficeAsse
     return hash_password(password, salt=salt) == hashed_password
 
 
+def user_to_profile(user) -> Dict[str, Any]:
+    """Chuyển đổi User model thành format UserProfile frontend."""
+    is_admin = user.role == ROLE_ADMIN
+    return {
+        "id": f"NV-{user.id:03d}" if not is_admin else "CB-HCQT-001",
+        "username": user.username,
+        "name": user.full_name,
+        "role": user.role,
+        "roleLabel": "Quản trị viên" if is_admin else "Nhân viên",
+        "department": user.department,
+        "title": "Phó Trưởng phòng Quản trị CSVC" if is_admin else "Chuyên viên phòng ban",
+        "clearanceLabel": "Quản trị viên Toàn quyền" if is_admin else "Cán bộ phòng ban",
+        "canViewValuations": is_admin,
+        "canAdjustStock": is_admin,
+        "canApproveAIMRM": is_admin,
+        "canApproveTickets": is_admin,
+    }
+
+
 def authenticate_user(username: str, password: str) -> Optional[Any]:
     """
     Xác thực đăng nhập tài khoản. Trả về đối tượng User nếu hợp lệ, None nếu sai thông tin.
+    Hỗ trợ alias 'user' trỏ về 'user1'.
     """
     from src.core.database import SessionLocal
     from src.models.user import User
 
     db = SessionLocal()
     try:
-        user = db.query(User).filter(User.username == username.strip()).first()
+        uname = username.strip()
+        user = db.query(User).filter(User.username == uname).first()
+        if not user and uname == "user":
+            user = db.query(User).filter(User.username == "user1").first()
+
         if user and verify_password(password, user.password_hash or ""):
             return user
         return None
     finally:
         db.close()
+

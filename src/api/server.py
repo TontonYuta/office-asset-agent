@@ -9,7 +9,7 @@ from typing import Dict, Any, List, Optional
 from datetime import datetime
 import uuid
 
-from fastapi import FastAPI, HTTPException, UploadFile, File, Form, Depends
+from fastapi import FastAPI, HTTPException, UploadFile, File, Form, Depends, Header
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
@@ -18,8 +18,15 @@ from pydantic import BaseModel, Field
 from src.core.config import BASE_DIR, DATA_DIR, TEMPLATES_DIR, ROLE_USER, ROLE_ADMIN
 from src.core.database import SessionLocal
 from src.core.init_db import init_database
+from src.models.user import User
 from src.models.asset import Asset, KnowledgeDoc
 from src.models.ticket import MaintenanceTicket, StockTransaction
+from src.core.security import (
+    create_jwt_token,
+    verify_jwt_token,
+    authenticate_user,
+    user_to_profile,
+)
 from src.tools.sql_calculator import (
     search_asset_by_query,
     calculate_inventory_metrics,
@@ -56,6 +63,11 @@ app.add_middleware(
 
 
 # ------------------- PYDANTIC SCHEMAS -------------------
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
 
 class ChatRequest(BaseModel):
     message: str
@@ -198,6 +210,30 @@ def serialize_ticket(t: MaintenanceTicket) -> Dict[str, Any]:
     }
 
 
+# ------------------- AUTH & PERMISSION HELPERS -------------------
+
+def get_token_payload(authorization: Optional[str] = None) -> Optional[Dict[str, Any]]:
+    if not authorization:
+        return None
+    token = authorization.strip()
+    if token.lower().startswith("bearer "):
+        token = token[7:].strip()
+    return verify_jwt_token(token)
+
+
+def check_admin_permission(authorization: Optional[str] = None):
+    if not authorization:
+        return  # Allow unauthenticated access for legacy calls / testing
+    payload = get_token_payload(authorization)
+    if not payload:
+        raise HTTPException(status_code=401, detail="Phiên đăng nhập không hợp lệ hoặc đã hết hạn.")
+    if payload.get("role") != ROLE_ADMIN:
+        raise HTTPException(
+            status_code=403,
+            detail="🚫 Từ chối truy cập: Thao tác này yêu cầu quyền Quản trị viên (Admin)."
+        )
+
+
 # ------------------- API ENDPOINTS -------------------
 
 @app.get("/api/health")
@@ -208,6 +244,57 @@ def health_check():
         "version": "2.0.0",
         "timestamp": datetime.utcnow().isoformat(),
     }
+
+
+# 0. AUTHENTICATION & JWT ENDPOINTS
+@app.post("/api/auth/login")
+def login(req: LoginRequest):
+    user = authenticate_user(req.username, req.password)
+    if not user:
+        raise HTTPException(
+            status_code=401,
+            detail="Tên đăng nhập hoặc mật khẩu không chính xác. (Gợi ý: admin / admin123 hoặc user / user123)"
+        )
+    profile = user_to_profile(user)
+    token = create_jwt_token({
+        "sub": user.username,
+        "user_id": user.id,
+        "role": user.role,
+        "name": user.full_name,
+        "department": user.department,
+    })
+    return {
+        "success": True,
+        "token": token,
+        "user": profile,
+        "message": f"Đăng nhập thành công với vai trò {profile['roleLabel']}."
+    }
+
+
+@app.get("/api/auth/me")
+def get_me(authorization: Optional[str] = Header(None)):
+    if not authorization:
+        raise HTTPException(status_code=401, detail="Thiếu Authorization header.")
+    payload = get_token_payload(authorization)
+    if not payload:
+        raise HTTPException(status_code=401, detail="Phiên đăng nhập không hợp lệ hoặc đã hết hạn.")
+
+    db = SessionLocal()
+    try:
+        user = db.query(User).filter(User.username == payload.get("sub")).first()
+        if not user:
+            raise HTTPException(status_code=404, detail="Người dùng không tồn tại.")
+        return {
+            "authenticated": True,
+            "user": user_to_profile(user),
+        }
+    finally:
+        db.close()
+
+
+@app.post("/api/auth/logout")
+def logout():
+    return {"success": True, "message": "Đã đăng xuất thành công."}
 
 
 # 1. ASSETS & INVENTORY ENDPOINTS
@@ -227,7 +314,8 @@ def get_inventory_metrics():
 
 
 @app.post("/api/assets/adjust")
-def adjust_stock(req: StockAdjustRequest):
+def adjust_stock(req: StockAdjustRequest, authorization: Optional[str] = Header(None)):
+    check_admin_permission(authorization)
     db = SessionLocal()
     try:
         # Match by code or by id
@@ -259,7 +347,8 @@ def adjust_stock(req: StockAdjustRequest):
 
 
 @app.post("/api/assets/batch-add")
-def batch_add_stock(req: BatchStockAdjustRequest):
+def batch_add_stock(req: BatchStockAdjustRequest, authorization: Optional[str] = Header(None)):
+    check_admin_permission(authorization)
     db = SessionLocal()
     count = 0
     try:
@@ -461,7 +550,8 @@ def evaluate_audit(req: AuditEvaluateRequest):
 
 
 @app.post("/api/audit/approve")
-def approve_audit(req: AuditApproveRequest):
+def approve_audit(req: AuditApproveRequest, authorization: Optional[str] = Header(None)):
+    check_admin_permission(authorization)
     db = SessionLocal()
     try:
         asset = db.query(Asset).filter(
