@@ -32,7 +32,7 @@ const TAB_TITLES: Record<string, { title: string; subtitle: string }> = {
 };
 
 export function Header({ activeTab, onOpenCommand }: HeaderProps) {
-  const { role, profile, toggleRole, isAdmin } = useAuth();
+  const { role, profile, openLoginModal, isAdmin } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const current = TAB_TITLES[activeTab] || TAB_TITLES.chat;
 
