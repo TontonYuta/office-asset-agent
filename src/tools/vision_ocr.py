@@ -207,11 +207,11 @@ def parse_delivery_receipt(image_source: Any = None) -> Dict[str, Any]:
         "total_items_count": len(verified_items),
         "total_amount": total_amount,
         "total_amount_str": f"{total_amount:,.0f} VNĐ",
-        "model_architecture": "Qwen2.5-VL Native Dynamic Resolution ViT + Window Attention",
+        "model_architecture": "Hệ thống AI Vision bóc tách tài liệu hóa đơn tự động",
         "grounding_supported": True,
         "message": (
-            f"✅ [Qwen2.5-VL Layout Parser] Đã bóc tách thành công {len(verified_items)} mặt hàng "
-            f"kèm tọa độ Bounding Box và đối soát 100% với danh mục CSDL kho. "
-            f"Cán bộ vui lòng kiểm tra bảng bên dưới và bấm nút [Duyệt Nhập Kho] (Human-in-the-Loop)."
+            f"✅ Đã bóc tách thành công {len(verified_items)} mặt hàng "
+            f"kèm vị trí dòng hàng và đối soát chính xác với danh mục kho. "
+            f"Cán bộ vui lòng kiểm tra bảng bên dưới và bấm nút [Duyệt Nhập Kho] để hoàn tất."
         )
     }

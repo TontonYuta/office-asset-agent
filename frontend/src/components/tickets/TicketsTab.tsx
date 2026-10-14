@@ -24,6 +24,7 @@ export function TicketsTab() {
   const { profile, isAdmin } = useAuth();
 
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
+  const [scopeFilter, setScopeFilter] = useState<'ALL' | 'DEPT'>(isAdmin ? 'ALL' : 'DEPT');
   const [selectedTicket, setSelectedTicket] = useState<MaintenanceTicket | null>(null);
   const [isDocModalOpen, setIsDocModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -38,9 +39,21 @@ export function TicketsTab() {
   const [newUrgency, setNewUrgency] = useState<TicketUrgency>('HIGH');
   const [newLocation, setNewLocation] = useState<string>('Văn phòng Marketing - Tầng 3');
 
+  const myDeptTicketsCount = tickets.filter(
+    (t) =>
+      t.department.toLowerCase().includes(profile.department.toLowerCase()) ||
+      t.reporterName.toLowerCase() === profile.name.toLowerCase()
+  ).length;
+
   const filteredTickets = tickets.filter((t) => {
-    if (statusFilter === 'ALL') return true;
-    return t.status === statusFilter;
+    if (statusFilter !== 'ALL' && t.status !== statusFilter) return false;
+    if (scopeFilter === 'DEPT') {
+      return (
+        t.department.toLowerCase().includes(profile.department.toLowerCase()) ||
+        t.reporterName.toLowerCase() === profile.name.toLowerCase()
+      );
+    }
+    return true;
   });
 
   const handleOpenDoc = (ticket: MaintenanceTicket) => {
@@ -128,15 +141,25 @@ export function TicketsTab() {
       <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-5 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition-colors">
         <div>
           <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold px-2 py-0.5 rounded bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900">
-              Nghị Định 30/2020
+            <span
+              className={`text-xs font-semibold px-2 py-0.5 rounded ${
+                isAdmin
+                  ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900'
+                  : 'bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700'
+              }`}
+            >
+              {isAdmin ? 'Quản Lý CSVC: Tiếp Nhận & Duyệt Phương Án' : 'Nhân Viên: Báo Hỏng & Theo Dõi Tiến Độ'}
             </span>
             <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
-              Quản Lý Phiếu Báo Hỏng & Văn Bản Đề Xuất Bảo Trì
+              {isAdmin
+                ? 'Thẩm Định Sự Cố & Phê Duyệt Sửa Chữa Thiết Bị'
+                : 'Quản Lý Phiếu Báo Hỏng & Đề Nghị Bảo Trì'}
             </h2>
           </div>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
-            Mọi phiếu báo hỏng được chuẩn hóa theo đúng thể thức văn bản hành chính Việt Nam, hỗ trợ in ấn trực tiếp hoặc tải file về máy.
+          <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 max-w-3xl">
+            {isAdmin
+              ? 'Tiếp nhận phản ánh từ các phòng ban, thẩm định mức độ hư hại và duyệt xuất kinh phí/gọi đơn vị bảo dưỡng theo đúng thẩm quyền.'
+              : `Theo dõi tiến độ khắc phục thiết bị tại ${profile.department}. Mọi phiếu được tự động chuẩn hóa văn bản hành chính theo Nghị định 30/2020.`}
           </p>
         </div>
 
@@ -149,28 +172,54 @@ export function TicketsTab() {
         </button>
       </div>
 
-      {/* Bộ lọc tình trạng */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
-        <span className="text-zinc-400 text-[11px] font-medium uppercase mr-1">Bộ lọc:</span>
-        {[
-          { key: 'ALL', label: 'Tất cả phiếu' },
-          { key: 'PENDING_APPROVAL', label: 'Chờ duyệt' },
-          { key: 'APPROVED', label: 'Đã phê duyệt' },
-          { key: 'IN_PROGRESS', label: 'Đang khắc phục' },
-          { key: 'RESOLVED', label: 'Đã hoàn tất' },
-        ].map((tab) => (
+      {/* Thanh chuyển phạm vi phòng ban & Bộ lọc tình trạng */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        {/* Chuyển phạm vi: Phòng ban tôi vs Toàn công ty */}
+        <div className="flex items-center p-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700 text-xs">
           <button
-            key={tab.key}
-            onClick={() => setStatusFilter(tab.key)}
-            className={`px-3 py-1.5 rounded-md transition-colors whitespace-nowrap font-medium ${
-              statusFilter === tab.key
-                ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 shadow-xs'
-                : 'bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+            onClick={() => setScopeFilter('DEPT')}
+            className={`px-3 py-1.5 rounded font-medium transition-colors ${
+              scopeFilter === 'DEPT'
+                ? 'bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 shadow-xs'
+                : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100'
             }`}
           >
-            {tab.label}
+            Phòng Ban Tôi ({myDeptTicketsCount})
           </button>
-        ))}
+          <button
+            onClick={() => setScopeFilter('ALL')}
+            className={`px-3 py-1.5 rounded font-medium transition-colors ${
+              scopeFilter === 'ALL'
+                ? 'bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 shadow-xs'
+                : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100'
+            }`}
+          >
+            Toàn Công Ty ({tickets.length})
+          </button>
+        </div>
+
+        {/* Bộ lọc tình trạng */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
+          {[
+            { key: 'ALL', label: 'Tất cả trạng thái' },
+            { key: 'PENDING_APPROVAL', label: 'Chờ duyệt' },
+            { key: 'APPROVED', label: 'Đã duyệt' },
+            { key: 'IN_PROGRESS', label: 'Đang sửa' },
+            { key: 'RESOLVED', label: 'Đã xong' },
+          ].map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => setStatusFilter(tab.key)}
+              className={`px-2.5 py-1.5 rounded-md transition-colors whitespace-nowrap text-xs font-medium ${
+                statusFilter === tab.key
+                  ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 shadow-xs'
+                  : 'bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Danh sách thẻ phiếu báo hỏng */}
@@ -262,22 +311,32 @@ export function TicketsTab() {
                     <span>Xem Văn Bản A4</span>
                   </button>
 
-                  {isAdmin && ticket.status === 'PENDING_APPROVAL' && (
-                    <button
-                      onClick={() => handleApprove(ticket.id)}
-                      className="px-2.5 py-1 text-xs font-semibold bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 rounded-md hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors"
-                    >
-                      Duyệt
-                    </button>
-                  )}
+                  {isAdmin ? (
+                    <>
+                      {ticket.status === 'PENDING_APPROVAL' && (
+                        <button
+                          onClick={() => handleApprove(ticket.id)}
+                          className="px-2.5 py-1 text-xs font-semibold bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 rounded-md hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors shadow-xs"
+                        >
+                          Duyệt
+                        </button>
+                      )}
 
-                  {isAdmin && ticket.status === 'IN_PROGRESS' && (
-                    <button
-                      onClick={() => handleMarkResolved(ticket.id)}
-                      className="px-2.5 py-1 text-xs font-semibold bg-emerald-700 text-white rounded-md hover:bg-emerald-800 transition-colors"
-                    >
-                      Xong
-                    </button>
+                      {ticket.status === 'IN_PROGRESS' && (
+                        <button
+                          onClick={() => handleMarkResolved(ticket.id)}
+                          className="px-2.5 py-1 text-xs font-semibold bg-emerald-700 text-white rounded-md hover:bg-emerald-800 transition-colors shadow-xs"
+                        >
+                          Xong
+                        </button>
+                      )}
+                    </>
+                  ) : (
+                    ticket.status === 'PENDING_APPROVAL' && (
+                      <span className="text-[10px] text-zinc-400 italic">
+                        Chờ CSVC duyệt
+                      </span>
+                    )
                   )}
                 </div>
               </div>

@@ -29,7 +29,7 @@ interface InventoryTabProps {
 
 export function InventoryTab({ onSelectForAudit, selectedAssetId }: InventoryTabProps) {
   const { assets, kpi, transactions } = useInventory();
-  const { isAdmin } = useAuth();
+  const { isAdmin, profile, openLoginModal } = useAuth();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
@@ -110,6 +110,35 @@ export function InventoryTab({ onSelectForAudit, selectedAssetId }: InventoryTab
 
   return (
     <div className="space-y-6">
+      {/* Banner phân quyền vai trò */}
+      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-4 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs transition-colors">
+        <div className="flex items-center gap-2.5">
+          <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${isAdmin ? 'bg-emerald-500' : 'bg-blue-500'}`} />
+          <div>
+            <div className="font-semibold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
+              <span>{isAdmin ? 'Bàn Quản Lý & Kiểm Kê Kho CSVC' : 'Danh Mục Tra Cứu Vật Tư Khả Dụng'}</span>
+              <span className={`px-1.5 py-0.2 rounded text-[10px] font-medium ${isAdmin ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400'}`}>
+                {profile.roleLabel} · {profile.name}
+              </span>
+            </div>
+            <div className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5">
+              {isAdmin
+                ? 'Toàn quyền thực hiện nhập xuất kho, kiểm kê thẻ kho, điều chỉnh số lượng và xem định giá tài sản.'
+                : 'Đang ở chế độ Nhân viên: Tra cứu số lượng sẵn có trong kho để làm đề xuất cấp phát. Đơn giá và chức năng sửa kho đã khóa.'}
+            </div>
+          </div>
+        </div>
+
+        {!isAdmin && (
+          <button
+            onClick={openLoginModal}
+            className="px-3 py-1.5 border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-950 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 rounded text-xs font-semibold shrink-0 transition-colors"
+          >
+            Đăng nhập Quản lý CSVC
+          </button>
+        )}
+      </div>
+
       {/* 4 Thẻ thống kê tổng quan */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-4 shadow-xs transition-colors">
@@ -303,7 +332,9 @@ export function InventoryTab({ onSelectForAudit, selectedAssetId }: InventoryTab
                   <th className="py-3 px-4">Vị trí lưu kho</th>
                   <th className="py-3 px-4 text-right">Tồn kho / Mức an toàn</th>
                   <th className="py-3 px-4">Đơn vị</th>
-                  <th className="py-3 px-4 text-right">Đơn giá</th>
+                  <th className="py-3 px-4 text-right">
+                    {isAdmin ? 'Đơn giá' : 'Đơn giá (Bảo mật)'}
+                  </th>
                   <th className="py-3 px-4">Trạng thái</th>
                   <th className="py-3 px-4 text-right">Thao tác</th>
                 </tr>
@@ -366,20 +397,31 @@ export function InventoryTab({ onSelectForAudit, selectedAssetId }: InventoryTab
                         <td className="py-3 px-4 text-right">
                           <div className="flex items-center justify-end gap-1.5">
                             {isAdmin ? (
-                              <button
-                                onClick={() => handleOpenAdjust(asset)}
-                                className="px-2.5 py-1 rounded bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 text-[11px] font-medium hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors shadow-xs"
-                              >
-                                Nhập / Xuất
-                              </button>
-                            ) : null}
-                            {onSelectForAudit && (
-                              <button
-                                onClick={() => onSelectForAudit(asset.id)}
-                                className="px-2 py-1 rounded border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 text-[11px] hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
-                              >
-                                Thẩm định
-                              </button>
+                              <>
+                                <button
+                                  onClick={() => handleOpenAdjust(asset)}
+                                  className="px-2.5 py-1 rounded bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 text-[11px] font-medium hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors shadow-xs"
+                                >
+                                  Nhập / Xuất
+                                </button>
+                                {onSelectForAudit && (
+                                  <button
+                                    onClick={() => onSelectForAudit(asset.id)}
+                                    className="px-2 py-1 rounded border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 text-[11px] hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                                  >
+                                    Thẩm định
+                                  </button>
+                                )}
+                              </>
+                            ) : (
+                              onSelectForAudit && (
+                                <button
+                                  onClick={() => onSelectForAudit(asset.id)}
+                                  className="px-2.5 py-1 rounded bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 text-[11px] font-medium hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors shadow-xs"
+                                >
+                                  Xin cấp phát
+                                </button>
+                              )
                             )}
                           </div>
                         </td>

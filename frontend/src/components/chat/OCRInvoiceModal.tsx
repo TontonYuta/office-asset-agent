@@ -10,6 +10,7 @@ import {
   Loader2,
   RefreshCw,
   Eye,
+  Lock,
 } from 'lucide-react';
 import { useInventory } from '../../hooks/useInventory';
 import { useAuth } from '../../hooks/useAuth';
@@ -92,7 +93,7 @@ export function OCRInvoiceModal({ isOpen, onClose }: OCRInvoiceModalProps) {
     provider: 'Công ty Cổ phần Thương mại Thiết bị Văn phòng Hà Nội',
     invoiceNumber: 'HD-202610-889',
     deliveryDate: '12/10/2026',
-    modelArch: 'Qwen2.5-VL Native Dynamic Resolution ViT + Table Parser',
+    modelArch: 'Hệ thống AI Vision bóc tách tự động',
   });
 
   if (!isOpen) return null;
@@ -119,7 +120,7 @@ export function OCRInvoiceModal({ isOpen, onClose }: OCRInvoiceModalProps) {
           provider: data.provider || 'Công ty Cung ứng Văn phòng phẩm',
           invoiceNumber: data.invoice_number || `HD-${Date.now().toString().slice(-6)}`,
           deliveryDate: data.delivery_date || '14/10/2026',
-          modelArch: data.model_architecture || 'Qwen2.5-VL Native Dynamic ViT',
+          modelArch: data.model_architecture || 'Hệ thống AI Vision bóc tách tự động',
         });
 
         if (data.image_data) {
@@ -163,7 +164,7 @@ export function OCRInvoiceModal({ isOpen, onClose }: OCRInvoiceModalProps) {
       provider: 'Công ty Cổ phần Thương mại Thiết bị Văn phòng Hà Nội',
       invoiceNumber: 'HD-202610-889',
       deliveryDate: '12/10/2026',
-      modelArch: 'Qwen2.5-VL Native Dynamic Resolution ViT + Table Parser',
+      modelArch: 'Hệ thống AI Vision bóc tách tự động',
     });
     setSuccessMessage(null);
   };
@@ -212,9 +213,9 @@ export function OCRInvoiceModal({ isOpen, onClose }: OCRInvoiceModalProps) {
                 <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
                   Kiểm Tra & Bóc Tách Hóa Đơn / Biên Bản Giao Hàng
                 </h3>
-                <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 font-medium border border-emerald-300 dark:border-emerald-800 flex items-center gap-1">
-                  <Sparkles className="w-3 h-3" />
-                  Qwen2.5-VL OCR
+                <span className="text-[10px] px-2 py-0.5 rounded bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 font-semibold flex items-center gap-1 shadow-2xs">
+                  <Sparkles className="w-3 h-3 text-amber-400 dark:text-amber-600" />
+                  Bóc Tách Hóa Đơn Tự Động
                 </span>
               </div>
               <p className="text-[11px] text-zinc-500">
@@ -282,7 +283,7 @@ export function OCRInvoiceModal({ isOpen, onClose }: OCRInvoiceModalProps) {
               <div className="absolute inset-0 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-2xs z-20 flex flex-col items-center justify-center text-zinc-700 dark:text-zinc-300 space-y-2">
                 <Loader2 className="w-8 h-8 animate-spin text-zinc-900 dark:text-zinc-100" />
                 <span className="text-xs font-semibold">Đang bóc tách bảng biểu & đối soát CSDL...</span>
-                <span className="text-[10px] text-zinc-500 font-mono">Qwen2.5-VL Layout Engine</span>
+                <span className="text-[10px] text-zinc-500">Đối soát danh mục vật tư trong kho...</span>
               </div>
             )}
 
@@ -456,8 +457,8 @@ export function OCRInvoiceModal({ isOpen, onClose }: OCRInvoiceModalProps) {
                   <span className="text-zinc-600 dark:text-zinc-400 font-medium">
                     Tổng giá trị lô hàng nhập (đã gồm thuế VAT):
                   </span>
-                  <div className="text-[10px] text-zinc-400 font-mono mt-0.5">
-                    Kiến trúc: {invoiceMeta.modelArch}
+                  <div className="text-[10px] text-zinc-500 mt-0.5">
+                    Trạng thái: Bóc tách tự động hoàn tất (đã đối soát danh mục kho)
                   </div>
                 </div>
                 <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
@@ -474,8 +475,9 @@ export function OCRInvoiceModal({ isOpen, onClose }: OCRInvoiceModalProps) {
                     Bấm Duyệt sẽ tự động cộng số lượng vào CSDL SQLite và ghi nhật ký giao dịch.
                   </span>
                 ) : (
-                  <span className="italic text-amber-600 dark:text-amber-400">
-                    Chỉ Quản trị viên (Admin) mới có quyền Duyệt Nhập Kho.
+                  <span className="text-amber-700 dark:text-amber-400 font-medium flex items-center gap-1.5">
+                    <Lock className="w-3.5 h-3.5 shrink-0" />
+                    Chỉ Cán bộ Quản lý CSVC mới có quyền Duyệt Nhập Kho vào hệ thống.
                   </span>
                 )}
               </div>

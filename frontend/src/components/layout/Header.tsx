@@ -19,7 +19,7 @@ const TAB_TITLES: Record<string, { title: string; subtitle: string }> = {
   },
   audit: {
     title: 'Thẩm Định Định Mức Cấp Phát',
-    subtitle: 'Đánh giá số lượng yêu cầu bằng công thức toán học và dữ liệu quá khứ',
+    subtitle: 'Thẩm định nhu cầu cấp phát theo hạn mức tồn kho an toàn và dữ liệu lịch sử',
   },
   tickets: {
     title: 'Phiếu Báo Hỏng & Đề Nghị Bảo Trì',

@@ -566,7 +566,7 @@ def approve_audit(req: AuditApproveRequest, authorization: Optional[str] = Heade
             transaction_type="OUT",
             quantity=req.quantity,
             provider_or_dept=req.department,
-            notes=f"[AIM-RM Safe-Stock Duyệt] {req.notes or 'Cấp phát định mức'}",
+            notes=f"[Duyệt định mức an toàn] {req.notes or 'Cấp phát định mức'}",
         )
         if not res["success"]:
             raise HTTPException(status_code=400, detail=res["message"])

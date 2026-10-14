@@ -169,8 +169,8 @@ def test_orchestrator_aim_rm_allocation_query():
         department="Phòng Marketing"
     )
     assert res["intent"] == "inventory"
-    assert "AIM-RM" in res["response"]
-    assert "Định mức tồn kho an toàn" in res["response"]
+    assert "Thẩm Định Đề Xuất Cấp Phát" in res["response"]
+    assert "dự phòng an toàn" in res["response"].lower()
 
 
 def test_orchestrator_inventory_query():

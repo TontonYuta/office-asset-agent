@@ -174,7 +174,7 @@ def evaluate_allocation_request(
         decision_code = "APPROVE_OPTIMAL"
         recommendation = (
             f"✅ **Đề xuất Duyệt Cấp Phát:** Đơn yêu cầu `{requested_qty} {asset.unit}` nằm hoàn toàn "
-            f"trong giới hạn tiêu thụ bình thường (Z-score: {z_score_request:+.2f}). "
+            f"trong giới hạn tiêu thụ bình thường của phòng ban. "
             f"Tồn kho sau cấp ({projected_stock_after} {asset.unit}) vẫn cao hơn định mức an toàn ({safe_stock} {asset.unit})."
         )
 

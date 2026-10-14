@@ -64,7 +64,7 @@ def classify_and_auth(state: AgentState) -> AgentState:
             "Tôi có thể hỗ trợ bạn các nghiệp vụ chính sau:\n"
             "- 📦 **Tra cứu vật tư & thiết bị:** Kiểm tra tồn kho, vị trí đặt máy móc (giấy A4, bút viết, mực in, máy in, máy chiếu...)\n"
             "- 🛠️ **Hỗ trợ kỹ thuật:** Hướng dẫn khắc phục sự cố máy móc hoặc tự động lập Phiếu Báo Hỏng chuẩn mẫu Word\n"
-            "- 🧠 **Thẩm định cấp phát:** Kiểm tra định mức tồn kho an toàn theo mô hình AIM-RM\n"
+            "- 📋 **Thẩm định cấp phát:** Kiểm tra định mức tồn kho an toàn và đề xuất phân bổ vật tư\n"
             "- 🌐 **Làm giàu tri thức:** Tự động tra cứu cẩm nang kỹ thuật theo model máy trên mạng\n\n"
             "Bạn đang cần hỗ trợ vấn đề gì tại phòng ban?"
         )
@@ -84,7 +84,7 @@ def classify_and_auth(state: AgentState) -> AgentState:
             f"Tôi là trợ lý AI chuyên biệt cho các công việc:\n"
             f"- Tra cứu tồn kho và vị trí thiết bị phòng ban\n"
             f"- Hướng dẫn sửa chữa sự cố thiết bị hoặc lập Phiếu Báo Hỏng\n"
-            f"- Thẩm định định mức cấp phát vật tư (AIM-RM)\n\n"
+            f"- Thẩm định định mức cấp phát vật tư an toàn\n\n"
             f"Vui lòng gửi câu hỏi liên quan đến tài sản, vật tư hoặc thiết bị văn phòng!"
         )
         return state

@@ -47,19 +47,19 @@ def handle_inventory_query(
             for ep in eval_res["similar_episodes"]:
                 episodes_text += (
                     f"  * Kỳ {ep.get('notes', 'Giao dịch')}: đã cấp `{ep['quantity']}` "
-                    f"(Độ tương đồng kịch bản: {ep['similarity_score']*100:.1f}%)\n"
+                    f"(Mức độ tương đồng: {ep['similarity_score']*100:.0f}%)\n"
                 )
 
             response_text = (
-                f"🧠 **[AIM-RM Memory Retrieval & Safe-Stock Audit]**\n\n"
-                f"* **Vật tư thẩm định:** {eval_res['asset_name']} (`{eval_res['asset_code']}`)\n"
-                f"* **Đơn vị xin cấp:** {department} | **Số lượng yêu cầu:** `{eval_res['requested_qty']} {eval_res['unit']}`\n"
-                f"* **Tồn kho hiện tại:** `{eval_res['current_onhand']} {eval_res['unit']}` | **Dự kiến sau cấp:** `{eval_res['projected_stock_after']} {eval_res['unit']}`\n"
-                f"* **Định mức tồn kho an toàn ($S_{{safe}}$):** `{eval_res['safe_stock_benchmark']} {eval_res['unit']}`\n"
-                f"* **Mức tiêu thụ trung bình lịch sử ($\\\\mu \\\\pm \\\\sigma$):** `{eval_res['historical_mean']} \\\\pm {eval_res['historical_std']} {eval_res['unit']}`\n\n"
-                f"📜 **Kịch bản tương đồng trong bộ nhớ lịch sử (Top Similar Episodes):**\n"
+                f"📋 **Kết Quả Thẩm Định Đề Xuất Cấp Phát Vật Tư**\n\n"
+                f"- **Vật tư thẩm định:** {eval_res['asset_name']} (Mã: `{eval_res['asset_code']}`)\n"
+                f"- **Đơn vị xin cấp:** {department} | **Số lượng đề xuất:** `{eval_res['requested_qty']} {eval_res['unit']}`\n"
+                f"- **Tồn kho hiện tại:** `{eval_res['current_onhand']} {eval_res['unit']}` | **Dự kiến sau cấp:** `{eval_res['projected_stock_after']} {eval_res['unit']}`\n"
+                f"- **Hạn mức dự phòng an toàn của kho:** `{eval_res['safe_stock_benchmark']} {eval_res['unit']}`\n"
+                f"- **Mức tiêu thụ thông thường:** `{eval_res['historical_mean']} {eval_res['unit']}/kỳ`\n\n"
+                f"📑 **Các lần cấp phát tương tự trước đây:**\n"
                 f"{episodes_text}\n"
-                f"⚖️ **Khuyến nghị của Hệ thống:**\n"
+                f"⚖️ **Khuyến nghị quyết định:**\n"
                 f"{eval_res['recommendation']}"
             )
             return {
