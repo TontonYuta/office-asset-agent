@@ -1,0 +1,6 @@
+{
+  "name": "Office Asset Agent",
+  "description": "Hệ Thống Quản Trị Vật Tư & Thiết Bị Văn Phòng Đa Tác Tử - Enterprise Multi-Agent Office Asset & Supply Chain Management System",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -2,8 +2,10 @@
 ### Hệ Thống Agent AI Hỗ Trợ Tra Cứu Thống Kê và Tự Động Hóa Quản Lý Vật Tư - Thiết Bị tại Phòng Ban Doanh Nghiệp
 
 [![Python](https://img.shields.io/badge/Python-3.11%2B-blue.svg)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688.svg)](https://fastapi.tiangolo.com/)
+[![React](https://img.shields.io/badge/Frontend-React%2019%20%2B%20TypeScript-61DAFB.svg)](https://react.dev/)
 [![LangGraph](https://img.shields.io/badge/Orchestrator-LangGraph-orange.svg)](https://github.com/langchain-ai/langgraph)
-[![Tests](https://img.shields.io/badge/Tests-10%2F10%20PASSED-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/Tests-27%2F27%20PASSED-brightgreen.svg)]()
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen.svg)]()
 
@@ -76,7 +78,7 @@ Hệ thống được thiết kế và xây dựng dựa trên 9 công trình ng
 
 ```
        +--------------------------------------------------------------+
-       |               GIAO DIỆN NGƯỜI DÙNG (STREAMLIT UI)             |
+       |       GIAO DIỆN ENTERPRISE (REACT 19 + TYPESCRIPT + TAILWIND) |
        |  [Tab 1: Chatbot]  [Tab 2: Kho]  [Tab 3: AIM-RM]  [Tab 4/5]  |
        +------------------------------+-------------------------------+
                                       | (User Message / Image / Role)
@@ -184,10 +186,12 @@ source venv/bin/activate
 # 3. Cài đặt các thư viện phụ thuộc
 pip install -r requirements.txt
 
-# 4. Khởi chạy ứng dụng Streamlit
-streamlit run src/ui/app.py
+# 4. Khởi chạy ứng dụng Enterprise Web Server (FastAPI + React SPA)
+python run_app.py
 ```
-Ứng dụng sẽ tự động mở trên trình duyệt tại: `http://localhost:8501`.
+Ứng dụng sẽ tự động mở trên trình duyệt tại: `http://localhost:8000` (Tài liệu API Swagger tại `http://localhost:8000/docs`).
+
+*(Tùy chọn: Chạy chế độ cửa sổ phần mềm độc lập Desktop: `python run_app.py --desktop`)*
 
 ---
 
@@ -196,23 +200,15 @@ streamlit run src/ui/app.py
 Chạy bộ kiểm thử tự động để xác minh tính ổn định của toàn bộ hệ thống:
 
 ```bash
-python -m pytest tests/ -v
+pytest
 ```
 
-**Kết quả kiểm thử thực tế (10/10 Test Cases PASSED):**
+**Kết quả kiểm thử thực tế (27/27 Test Cases PASSED):**
 ```text
-tests/test_system.py::test_rbac_security PASSED                          [ 10%]
-tests/test_system.py::test_deterministic_sql_calculator PASSED           [ 20%]
-tests/test_system.py::test_document_and_chart_generation PASSED          [ 30%]
-tests/test_system.py::test_web_search_enrichment PASSED                  [ 40%]
-tests/test_system.py::test_vision_ocr PASSED                             [ 50%]
-tests/test_system.py::test_aim_rm_safe_stock_and_memory PASSED           [ 60%]
-tests/test_system.py::test_orchestrator_aim_rm_allocation_query PASSED   [ 70%]
-tests/test_system.py::test_orchestrator_inventory_query PASSED           [ 80%]
-tests/test_system.py::test_orchestrator_support_and_ticket_creation PASSED [ 90%]
-tests/test_system.py::test_orchestrator_rbac_blocking PASSED             [100%]
+tests/test_api.py .........                                              [ 33%]
+tests/test_system.py ..................                                  [100%]
 
-======================= 10 passed in 1.80s =======================
+============================== 27 passed in 3.43s ==============================
 ```
 
 ---

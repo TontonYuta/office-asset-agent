@@ -1,0 +1,9 @@
+node_modules/
+build/
+# dist/ is included for zero-setup Python server deployment
+!dist/
+coverage/
+.DS_Store
+*.log
+.env*
+!.env.example
